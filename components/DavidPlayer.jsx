@@ -19,7 +19,7 @@ export function DavidPlayer() {
   useEffect(() => {
     // Cambia el GIF por una imagen estática después de X milisegundos (duración aproximada del GIF)
     const timer = setTimeout(() => {
-      setGifSource(require('../assets/David.png')); // Imagen estática (último cuadro del GIF)
+      setGifSource(require('../assets/images/David.png')); // Imagen estática (último cuadro del GIF)
     }, 5500); // Ajusta el tiempo según la duración del GIF
     return () => clearTimeout(timer); // Limpia el temporizador al desmontar
   }, []);

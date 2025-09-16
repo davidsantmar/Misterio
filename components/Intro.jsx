@@ -2,7 +2,7 @@ import { StyleSheet, Text, View, ImageBackground, Pressable } from 'react-native
 import { useFonts } from 'expo-font';
 import { Audio } from "expo-av";
 import { useEffect, useState } from "react";
-import { useRouter, usePathname, Link} from "expo-router";
+import { useRouter, usePathname } from "expo-router";
 
 export function Intro () {
     const pathname = usePathname();
@@ -75,19 +75,19 @@ export function Intro () {
         console.error("Error al reproducir openDoor:", error);
       }
     }
-    const toSelectPlayer = () => {
+    const toLetter = () => {
         playOpenDoor();
         router.push({
-            pathname: '/womanPlayer',
+            pathname: '/letter',
         });
     }
     return (
         <ImageBackground style={styles.container} source={require ('../assets/gifs/Intro.gif')}>
             <View style={styles.header}>
-                <Text style={styles.header_text} onPress={toSelectPlayer}>Misterio</Text>
+                <Text style={styles.header_text}>Misterio</Text>
             </View>
-            <Pressable style={styles.button} onPress={toSelectPlayer}>
-                <Text style={styles.button_text}>Start</Text>
+            <Pressable style={styles.button} onPress={toLetter}>
+                <Text style={styles.button_text}>Comenzar</Text>
             </Pressable>
         </ImageBackground>
     );
@@ -114,12 +114,11 @@ const styles = StyleSheet.create({
   },
   button: {
     backgroundColor: 'lightblue',
-    height: 40,
-    width: 100,
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 10,
-    marginTop: 500
+    marginTop: 500,
+    padding: 10
   },
   button_text: {
     fontFamily: 'Creepster-Regular',
