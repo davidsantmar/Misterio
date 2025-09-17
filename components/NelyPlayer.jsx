@@ -83,6 +83,12 @@ export function NelyPlayer() {
         console.error("Error al reproducir openDoor:", error);
       }
     }
+    const toEntry = () => {
+      playOpenDoor();
+      router.push({
+          pathname: '/entry',
+        });
+    }
   const toAnotherPlayer = () => {
     playOpenDoor();
     router.push({
@@ -97,7 +103,7 @@ export function NelyPlayer() {
           style={styles.container}
         >
         <View style={styles.buttons_container}>
-          <Pressable style={styles.button_container}>
+          <Pressable style={styles.button_container} onPress={toEntry}>
             <Text style={styles.button_text}>Seleccionar</Text>
           </Pressable>
           <Pressable style={styles.other_player_container} onPress={toAnotherPlayer}>

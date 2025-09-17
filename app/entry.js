@@ -1,10 +1,19 @@
 import { View, Text, Pressable, ImageBackground, StyleSheet } from 'react-native';
 import { useRouter, usePathname, Link} from "expo-router";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function Entry() {
   const router = useRouter();
+  const storeInitialPosition = async (position) => {
+        try {
+            await AsyncStorage.setItem('position', position);
+        } catch (e) {
+            console.log('error saving data');
+        }
+    };
    const toDice = () => {
         //playOpenDoor();
+        storeInitialPosition('0');
         router.push({
             pathname: '/dice',
         });

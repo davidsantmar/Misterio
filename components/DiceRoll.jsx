@@ -7,6 +7,7 @@ import {
   ImageBackground,
 } from "react-native";
 import { useRouter } from "expo-router";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export function DiceRoll() {
   const [diceValue, setDiceValue] = useState(0);
@@ -26,18 +27,6 @@ export function DiceRoll() {
   useEffect(() => {
     rollDice();
   }, []);
-
-  // Cuando diceValue cambia y es válido, redirige
-  useEffect(() => {
-    if (diceValue === 0) return; // Ignora el valor inicial
-    const timer = setTimeout(() => {
-      router.push({
-        pathname: "/firstFloor",
-        params: { diceValue }, // ahora sí pasará el valor correcto
-      });
-    }, 2000); // 2 segundos para animación
-    return () => clearTimeout(timer);
-  }, [diceValue]);
 
   const rollDice = () => {
     const newValue = Math.floor(Math.random() * 6) + 1;

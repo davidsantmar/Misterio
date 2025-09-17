@@ -1,20 +1,19 @@
 import { ImageBackground, StyleSheet } from 'react-native';
 import { useEffect, useState } from "react";
+import { useRouter } from 'expo-router';
 
 export function FirstFloorAdvance ({ diceValue }){
-    const [playerPosition, setPlayerPosition] = useState(0);
+    const router = useRouter();
     const numericValue = parseInt(diceValue, 10) || 0; // Convierte a número, con 0 como valor por defecto
-
     const [gifSource, setGifSource] = useState(require('../assets/gifs/first-floor-advance.gif'));
-  
     useEffect(() => {
-        console.log(numericValue)
-        setPlayerPosition(numericValue)
-        // Cambia el GIF por una imagen estática después de X milisegundos (duración aproximada del GIF)
         const timer = setTimeout(() => {
-          setGifSource(require('../assets/images/David.png')); // Imagen estática (resultado de la tirada)
-        }, 5000); // Ajusta el tiempo según la duración del GIF
-            return () => clearTimeout(timer); // Limpia el temporizador al desmontar
+          router.push({
+            pathname: "/result",
+            params: { diceValue: numericValue}, 
+          });
+        }, numericValue * 1000); // Ajusta el tiempo según el número que da el dado
+        return () => clearTimeout(timer); // Limpia el temporizador al desmontar
     }, []);
     return(
          <ImageBackground
