@@ -104,7 +104,7 @@ export function NelyPlayer() {
         >
         <View style={styles.buttons_container}>
           <Pressable style={styles.button_container} onPress={toEntry}>
-            <Text style={styles.button_text}>Seleccionar</Text>
+            <Text style={styles.button_text}>Detective Nely</Text>
           </Pressable>
           <Pressable style={styles.other_player_container} onPress={toAnotherPlayer}>
             <Text style={styles.button_text}>Otro personaje</Text>
@@ -143,6 +143,6 @@ const styles = StyleSheet.create({
   },
   button_text: {
     fontFamily: 'Creepster-Regular',
-    fontSize: 25
+    fontSize: 20
   }
 });

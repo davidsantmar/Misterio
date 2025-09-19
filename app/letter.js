@@ -28,11 +28,9 @@ export default function Letter(){
                         La Talamasca
                     </Text>
                     <Text style={styles.signatureText}>
-                        Vigilamos
+                        Vigilamos y siempre estamos aquí
                     </Text>
-                    <Text style={styles.signatureText}>
-                        y siempre estamos aquí
-                    </Text>
+                   
                 </View>
             </View>
             <Pressable style={styles.button} onPress={toSelectPlayer}>
@@ -49,35 +47,37 @@ const styles = StyleSheet.create({
       width: '100%'
     },
     textContainer: {
-        marginTop: 200,
-        padding: 30
+        marginTop: 160,
+        padding: 10
     },
     letterText: {
         fontFamily: 'ShadowsIntoLightTwo',
-        fontSize: 20,
-        transform: [{ rotate: '2deg' }] 
+        fontSize: 16,
+        transform: [{ rotate: '3deg' }],
+        marginLeft: 20
     },
     signatureContainer: {
-        marginTop: 100,
-        marginLeft: 200,
-        transform: [{ rotate: '2deg' }] 
+        marginLeft: 130,
+        transform: [{ rotate: '3deg' }],
+        width: '90%',
+        marginTop: 25,
     },
     signatureTitle: {
         fontFamily: 'ShadowsIntoLightTwo',
-        fontSize: 24,
-        transform: [{ rotate: '2deg' }] 
+        fontSize: 12,
+        transform: [{ rotate: '1deg' }] 
     },
     signatureText: {
         fontFamily: 'ShadowsIntoLightTwo',
-        fontSize: 18,
-        transform: [{ rotate: '2deg' }] 
+        fontSize: 12,
+        transform: [{ rotate: '1deg' }] 
     },
   button: {
     backgroundColor: 'lightblue',
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 10,
-    marginTop: 100,
+    marginTop: 80,
     padding: 10
   },
   button_text: {

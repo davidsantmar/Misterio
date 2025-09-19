@@ -82,11 +82,11 @@ const styles = StyleSheet.create({
   },
   button_text_title: {
     fontFamily: 'Creepster-Regular',
-    fontSize: 25,
+    fontSize: 20,
     marginBottom: 10
   },
   button_text: {
     fontFamily: 'Creepster-Regular',
-    fontSize: 25
+    fontSize: 20
   }
 })

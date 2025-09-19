@@ -153,8 +153,8 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         borderRadius: 10,
         padding: 10,
-        marginTop: 200,
-        marginLeft: 140,
+        marginTop: 120,
+        marginLeft: 40,
         flexDirection: 'row'
     },
     backContainer : {
@@ -163,7 +163,7 @@ const styles = StyleSheet.create({
         borderRadius: 10,
         padding: 10,
         marginTop: 300,
-        marginLeft: 140,
+        marginLeft: 40,
         flexDirection: 'row'
     },
     info: {
