@@ -7,7 +7,6 @@ import {
   ImageBackground,
 } from "react-native";
 import { useRouter } from "expo-router";
-import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export function DiceRoll() {
   const [diceValue, setDiceValue] = useState(0);
@@ -17,7 +16,8 @@ export function DiceRoll() {
       if (diceValue === 0) return; // Ignora el valor inicial
       const timer = setTimeout(() => {
         router.push({
-          pathname: "/firstFloor",
+          //pathname: "/firstFloor",
+          pathname: "/board",
           params: { diceValue: diceValue.toString() }, // Convierte a string explícitamente
         });
       }, 2000);

@@ -88,7 +88,7 @@ export default function Result() {
         router.push("/dice");
     };
 
-    useEffect(() => {
+useEffect(() => {
     const initializePosition = async () => {
         try {
             const newPosition = isNaN(Number(diceValue)) ? 0 : Number(diceValue); // Valida diceValue

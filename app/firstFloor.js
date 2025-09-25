@@ -6,7 +6,7 @@ export default function FirstFloor(){
 const { diceValue = "0" } = useLocalSearchParams(); // Valor por defecto  
     return(
        <View style={styles.container}>
-        <FirstFloorAdvance diceValue={diceValue} />
+            <FirstFloorAdvance diceValue={diceValue} />
         </View>
     )
 }
