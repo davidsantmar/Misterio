@@ -10,9 +10,10 @@ export function BoardFloor({ diceValue }) {
     'Creepster-Regular': require('../assets/fonts/Creepster-Regular.ttf'),
   });
   const [position, setPosition] = useState(0); 
-  const [currentPosition, setCurrentPosition] = useState(0); 
   const [possibility, setPossibility] = useState(0);
+  //const [stored, setStored] = useState(0);
   const router = useRouter();
+  
 
   // Lista de casillas con sus contenidos para facilitar la gestión
   const board = [
@@ -47,25 +48,42 @@ export function BoardFloor({ diceValue }) {
     { content: null },
     { content: <><Text style={styles.stoneText}>Planta baja</Text><BackArrow size={24} /></> },
   ];
+  const [colors, setColors] = useState(board.map(() => '#4682B4')); // Color inicial para cada stone
+    const [borderColors, setBorderColors] = useState(board.map(() => 'black')); // Color inicial para cada stone
 
   // Mostrar posibilidades de movimiento
+  const showPossibilities = (index) => {
+    const newColors = [...colors];
+    // Cambiar el color del stone clicado (por ejemplo, alternar entre dos colores)
+    newColors[index] = newColors[index] === '#4682B4' ? '#FF6347' : '#4682B4';
+    setColors(newColors); // Actualizar el estado
+  }
  
   const toDiceRoll = () => {
     router.push('/dice');
-    //console.log('Valor dado:', diceValue);
-    //console.log('suma', position + Number(diceValue));
-    setPosition(position + Number(diceValue));
-    //console.log('position', position);
-    
-    storePlayerPosition((position + Number(diceValue)).toString()); //posicion + dado
+    //setPosition(position + Number(diceValue));    
+    //storePlayerPosition((position + Number(diceValue)).toString()); //posicion + dado
   };
   useEffect(() => { //la suma y guardado funciona bien
     const fetchPosition = async () => {
       const storedValue = await getPlayerPosition();
       console.log('Fetched stored value:', storedValue);
       setPosition(storedValue !== null ? Number(storedValue) : 0);
+      const newColors = [...colors];
+    // aqui se encuentra el jugador
+    newColors[storedValue] = newColors[storedValue] === '#4682B4' ? '#FF6347' : '#4682B4';
+    borderColors[Number(storedValue) + (Number(diceValue))] = borderColors[Number(storedValue) + (Number(diceValue))] === 'black' ? 'yellow' : 'black';
+
+    setColors(newColors); // Actualizar el estado
+    console.log(Number(storedValue) + (Number(diceValue)))
+      //return storedValue;
     }
     fetchPosition();
+    //position + dado debe iluminarse
+    console.log('position + diceValue', position + Number(diceValue)) 
+    //position vuelve a 0 tras pasar por dado :(
+    
+
   }, []);
   const getPlayerPosition = async () => {
     try {
@@ -83,29 +101,16 @@ export function BoardFloor({ diceValue }) {
         console.log('error saving data');
     }
   };
- /* useEffect(() => {
-    const initializePosition = async () => {
-        try {
-            const newPosition = isNaN(Number(diceValue)) ? 0 : Number(diceValue); // Valida diceValue
-            const oldStoredValue = await getPlayerPosition();
-            const oldPosition = Number(oldStoredValue) || 0; // Maneja null/no numérico
-            const sum = oldPosition + newPosition; // Suma numérica
-            await storePlayerPosition(sum.toString()); // Guarda como string
-            const currentStoredValue = await getPlayerPosition();
-            const positionNum = Number(currentStoredValue) || 0; // Convierte a número
-            console.log('Stored value:', currentStoredValue, 'Parsed position:', positionNum, 'Type:', typeof positionNum);
-            setPosition(positionNum);
-        } catch (e) {
-            console.log('Error en inicialización:', e);
-            setPosition(0); // Valor por defecto en error
-        }
-    };
-    initializePosition();
-}, [diceValue]);*/
-  const stoneClicked = (index) => {
-    setCurrentPosition(index);
-    console.log(typeof index) //number
-    storePlayerPosition(index.toString());
+
+
+   
+  const stoneClicked = (index) => { //se guarda la position al clickar
+    //setPosition(index)
+    console.log (index) //number
+
+    storePlayerPosition(index.toString()); 
+    //Tira dados a continuación
+   
   }
   return (
     <ScrollView>
@@ -119,13 +124,8 @@ export function BoardFloor({ diceValue }) {
           {board.map((stone, index) => (
             <Pressable
               key={index}
-              style={[
-                styles.stone,
-                index === possibility 
-                  ? { borderWidth: 3, borderStyle: 'solid', borderColor: '#FFD700' } // Resaltar casilla activa
-                  : { borderWidth: 0 }, // Sin borde para las demás
-              ]}
-              onPress={()=> stoneClicked(index)}
+              style={[styles.stone, {backgroundColor: colors[index], borderColor: borderColors[index]}]} 
+              onPress={() => stoneClicked(index)}
             >
               {stone.content}
             </Pressable>
