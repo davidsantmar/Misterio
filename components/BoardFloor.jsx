@@ -1,17 +1,17 @@
-import { View, Text, Pressable, StyleSheet, ScrollView, ImageBackground } from "react-native";
+import { View, Text, Pressable, StyleSheet, ScrollView, ImageBackground, Image, Animated, Easing } from "react-native";
 import { useRouter } from "expo-router";
 import { useFonts } from "expo-font";
 import { BackArrow, ForwardArrow, LeftArrow, RightArrow, SpiderIcon } from "./Icons";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, act } from "react";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export function BoardFloor({ diceValue }) {
+const bounceAnim = useRef(new Animated.Value(0)).current;
+const [activateLoop, setActivateLoop] = useState(false); // Add this state
   const [loaded, error] = useFonts({
     'Creepster-Regular': require('../assets/fonts/Creepster-Regular.ttf'),
   });
   const [position, setPosition] = useState(0); 
- 
-  const [buttonColor, setButtonColor] = useState('lightblue');
   const [room1Color, setRoom1Color] = useState('white');
   const [room2Color, setRoom2Color] = useState('white');
   const [room3Color, setRoom3Color] = useState('white');
@@ -51,14 +51,12 @@ export function BoardFloor({ diceValue }) {
     { content: <><Text style={styles.stoneText}>Planta baja</Text><BackArrow size={24} /></> },
   ];
   const [colors, setColors] = useState(board.map(() => '#808080')); // Color inicial para cada stone
-  const [borderColors, setBorderColors] = useState(board.map(() => 'black')); // Color inicial para cada stone
-
+  const [borderColors, setBorderColors] = useState(board.map(() => 'black')); 
   const updateBorderColors = (storedValue, diceValue) => {
     setBorderColors((prevColors) => {
       const newColors = [...prevColors]; // Crear una copia del arreglo
       const sumIndex = Number(storedValue) + Number(diceValue);
       const diffIndex = Number(storedValue) - Number(diceValue);
-
       // Validar que los índices sean válidos
       if (sumIndex >= 0 && sumIndex < newColors.length) {
         newColors[sumIndex] = newColors[sumIndex] === 'black' ? 'yellow' : 'black';
@@ -67,30 +65,43 @@ export function BoardFloor({ diceValue }) {
         // Usar la misma condición que en sumIndex, si es intencional
         newColors[diffIndex] = newColors[diffIndex] === 'black' ? 'yellow' : 'black';
       }
-
-      return newColors; // Devolver el nuevo arreglo para actualizar el estado
+      return newColors; 
     });
   };
- 
   const toDiceRoll = () => {
     router.push('/dice');
-  
   };
-  useEffect(() => { //la suma y guardado funciona bien
+ useEffect(() => {
+  if (!activateLoop) return; // Only start if activated
+  const loop = Animated.loop(
+    Animated.sequence([
+      Animated.timing(bounceAnim, {
+        toValue: -10, // Move up
+        duration: 400,
+        easing: Easing.out(Easing.quad),
+        useNativeDriver: true,
+      }),
+      Animated.timing(bounceAnim, {
+        toValue: 0, // Move back
+        duration: 400,
+        easing: Easing.in(Easing.quad),
+        useNativeDriver: true,
+      }),
+      Animated.delay(500), // Shorter delay for more frequent bouncing; adjust or remove
+    ])
+  );
+  loop.start();
+  return () => loop.stop(); // Cleanup
+}, [activateLoop, bounceAnim]); // Depend on activateLoop to re-run when it changes
+  useEffect(() => {
     const fetchPosition = async () => {
     const storedValue = await getPlayerPosition();
     console.log('Fetched stored value:', storedValue);
-    //setPosition(storedValue !== null ? Number(storedValue) : 0);
     const newColors = [...colors];
     // aqui se encuentra el jugador
     newColors[storedValue] = newColors[storedValue] === '#FF6347' ? '#808080' : '#FF6347';
-    
     updateBorderColors(storedValue, diceValue);
-    
     setColors(newColors); // Actualizar el estado
-    console.log('position:', storedValue)
-    console.log('possibilityUp:', Number(storedValue) + (Number(diceValue)))
-    console.log('possibilityDown:', Number(storedValue) - (Number(diceValue)))
     // Resaltar habitaciones si el jugador puede entrar en ellas
     if ((storedValue <= 4 && Number(storedValue) + (Number(diceValue)) > 4) || (storedValue >= 4 && Number(storedValue) - (Number(diceValue)) < 4)){
       setRoom1Color('yellow');
@@ -107,6 +118,13 @@ export function BoardFloor({ diceValue }) {
   }
   fetchPosition();
   }, []);
+  useEffect(() => {
+    const newColors = [...colors];
+    // aqui se encuentra el jugador
+    newColors[position] = newColors[position] === '#FF6347' ? '#808080' : '#9cf1a7ff';
+    setColors(newColors); // Actualizar el estado
+  }, [position]);
+  
   const getPlayerPosition = async () => {
     try {
         const value = await AsyncStorage.getItem('position');
@@ -123,24 +141,47 @@ export function BoardFloor({ diceValue }) {
         console.log('error saving data');
     }
   };
-  
-
-
-   
   const stoneClicked = (index) => { //se guarda la position al clickar
-    setPosition(index)
-    storePlayerPosition(index.toString()); 
-    setButtonColor('lightgreen');
-    //Tira dados a continuación
-   
+      setPosition(index)
+      storePlayerPosition(index.toString());   
+      setActivateLoop(true);  
+      
   }
   return (
+    <>
+    <Animated.View style={{
+      position: 'absolute',
+      bottom: 600,
+      alignSelf: 'center',
+      transform: [{ translateY: bounceAnim }],
+      zIndex: 1,
+      left: 300
+    }}>
+      <Pressable 
+        style={{
+          backgroundColor: '#6200ee',
+          padding: 16,
+          borderRadius: 50,
+          elevation: 5,
+        }}
+        onPress={toDiceRoll}
+      >
+        <Image 
+          style={{ width: 50, height: 50, borderRadius: 50 }} 
+          source={require('../assets/images/dice.png')} 
+          resizeMode="cover"
+        />
+      </Pressable>
+    </Animated.View>
     <ScrollView>
-      
       <View style={styles.container}>
         <View style={styles.leftRoomsContainer}>
-          <ImageBackground style={[styles.room1, { borderColor: room1Color}]} source={require('../assets/images/boardImages/Labo.png')} />
-          <ImageBackground style={[styles.room2, { borderColor: room2Color}]} source={require('../assets/images/boardImages/Library.png')} />
+          <Pressable>
+            <ImageBackground style={[styles.room1, { borderColor: room1Color}]} source={require('../assets/images/boardImages/Labo.png')} />
+          </Pressable>
+          <Pressable>
+            <ImageBackground style={[styles.room2, { borderColor: room2Color}]} source={require('../assets/images/boardImages/Library.png')} />
+          </Pressable>
         </View>
         <View style={styles.stonesContainer}>
           {board.map((stone, index) => (
@@ -154,14 +195,16 @@ export function BoardFloor({ diceValue }) {
           ))}
         </View>
         <View style={styles.rightRoomsContainer}>
-          <Pressable style={[styles.buttonContainer, { backgroundColor: buttonColor }]} onPress={toDiceRoll}>
-              <Text style={styles.buttonText}>Dados</Text>
-            </Pressable>
-          <ImageBackground style={[styles.room3, { borderColor: room3Color}]} source={require('../assets/images/boardImages/Lounge.png')} />
-          <ImageBackground style={[styles.room4, { borderColor: room4Color}]} source={require('../assets/images/boardImages/Bedroom.png')} />
+          <Pressable>
+            <ImageBackground style={[styles.room3, { borderColor: room3Color}]} source={require('../assets/images/boardImages/Lounge.png')} />
+          </Pressable>
+          <Pressable>
+            <ImageBackground style={[styles.room4, { borderColor: room4Color}]} source={require('../assets/images/boardImages/Bedroom.png')} />
+          </Pressable>
         </View>
       </View>
     </ScrollView>
+    </>
   );
 }
 
@@ -200,13 +243,13 @@ const styles = StyleSheet.create({
     height: 300,
     width: 150,
     marginBottom: 600,
-        borderWidth: 4,
+    borderWidth: 4,
   },
   room2: {
     height: 300,
     width: 150,
     marginBottom: 150,
-        borderWidth: 4,
+    borderWidth: 4,
   },
   rightRoomsContainer: {
     flexDirection: 'column',
@@ -216,24 +259,21 @@ const styles = StyleSheet.create({
     height: 300,
     width: 150,
     marginTop: 300,
-        borderWidth: 4,
-
+    borderWidth: 4,
   },
   room4: {
     height: 300,
     width: 150,
     marginTop: 400,
-        borderWidth: 4,
+    borderWidth: 4,
   },
-  buttonContainer: {
-    backgroundColor: 'lightblue',
+  diceContainer: {
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: 10,
-    padding: 10,
   },
-  buttonText: {
-    fontFamily: 'Creepster-Regular',
-    fontSize: 20
-  }
+  dice: {
+    width: 80,
+    height: 80,
+    borderRadius: 50,
+  },
 });
