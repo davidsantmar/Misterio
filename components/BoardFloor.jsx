@@ -16,6 +16,12 @@ const [activateLoop, setActivateLoop] = useState(false); // Add this state
   const [room2Color, setRoom2Color] = useState('white');
   const [room3Color, setRoom3Color] = useState('white');
   const [room4Color, setRoom4Color] = useState('white');
+  const [disabledDice, setDisabledDice] = useState(true); // Estado para activar/desactivar el botón
+  const [disabledRoom1, setDisabledRoom1] = useState(true);
+  const [disabledRoom2, setDisabledRoom2] = useState(true);
+  const [disabledRoom3, setDisabledRoom3] = useState(true);
+  const [disabledRoom4, setDisabledRoom4] = useState(true);
+  const [disabledSquare, setDisabledSquare] = useState(true);
   const router = useRouter();
   // Lista de casillas con sus contenidos para facilitar la gestión
   const board = [
@@ -60,10 +66,11 @@ const [activateLoop, setActivateLoop] = useState(false); // Add this state
       // Validar que los índices sean válidos
       if (sumIndex >= 0 && sumIndex < newColors.length) {
         newColors[sumIndex] = newColors[sumIndex] === 'black' ? 'yellow' : 'black';
+        //setDisabledSquare(false);
       }
       if (diffIndex >= 0 && diffIndex < newColors.length) {
-        // Usar la misma condición que en sumIndex, si es intencional
         newColors[diffIndex] = newColors[diffIndex] === 'black' ? 'yellow' : 'black';
+        //setDisabledSquare(false);
       }
       return newColors; 
     });
@@ -105,15 +112,19 @@ const [activateLoop, setActivateLoop] = useState(false); // Add this state
     // Resaltar habitaciones si el jugador puede entrar en ellas
     if ((storedValue <= 4 && Number(storedValue) + (Number(diceValue)) > 4) || (storedValue >= 4 && Number(storedValue) - (Number(diceValue)) < 4)){
       setRoom1Color('yellow');
+      setDisabledRoom1(false);
     }
     if ((storedValue <= 12 && Number(storedValue) + (Number(diceValue)) > 12) || (storedValue >= 12 && Number(storedValue) - (Number(diceValue)) < 12)){
       setRoom3Color('yellow');
+      setDisabledRoom3(false);
     }
     if ((storedValue <= 21 && Number(storedValue) + (Number(diceValue)) > 21) || (storedValue >= 21 && Number(storedValue) - (Number(diceValue)) < 21)){
       setRoom2Color('yellow');
+      setDisabledRoom2(false);
     }
     if ((storedValue <= 27 && Number(storedValue) + (Number(diceValue)) > 27) || (storedValue >= 27 && Number(storedValue) - (Number(diceValue)) < 27)){
       setRoom4Color('yellow');
+      setDisabledRoom4(false);
     }
   }
   fetchPosition();
@@ -145,7 +156,24 @@ const [activateLoop, setActivateLoop] = useState(false); // Add this state
       setPosition(index)
       storePlayerPosition(index.toString());   
       setActivateLoop(true);  
-      
+      setDisabledDice(false); // Enable the button
+      setDisabledSquare(true); // Disable squares after selection
+  }
+  const roomClicked = (room) => {
+    setDisabledRoom1(true);
+    setDisabledRoom2(true);
+    setDisabledRoom3(true);
+    setDisabledRoom4(true);
+    setRoom1Color('white');
+    setRoom2Color('white');
+    setRoom3Color('white');
+    setRoom4Color('white');
+    setDisabledDice(true);
+    setDisabledSquare(true); // Disable squares after selection
+    router.push({
+      pathname: "/room",
+      params: { room: room }
+    })
   }
   return (
     <>
@@ -158,6 +186,7 @@ const [activateLoop, setActivateLoop] = useState(false); // Add this state
       left: 300
     }}>
       <Pressable 
+        disabled={disabledDice} // Disable button if not activated
         style={{
           backgroundColor: '#6200ee',
           padding: 16,
@@ -176,16 +205,23 @@ const [activateLoop, setActivateLoop] = useState(false); // Add this state
     <ScrollView>
       <View style={styles.container}>
         <View style={styles.leftRoomsContainer}>
-          <Pressable>
+          <Pressable
+            disabled={disabledRoom1}
+            onPress={() => roomClicked('Laboratorio')}
+          >
             <ImageBackground style={[styles.room1, { borderColor: room1Color}]} source={require('../assets/images/boardImages/Labo.png')} />
           </Pressable>
-          <Pressable>
+          <Pressable
+            disabled={disabledRoom2}
+            onPress={() => roomClicked('Biblioteca')}
+          >
             <ImageBackground style={[styles.room2, { borderColor: room2Color}]} source={require('../assets/images/boardImages/Library.png')} />
           </Pressable>
         </View>
         <View style={styles.stonesContainer}>
           {board.map((stone, index) => (
             <Pressable
+              disabled={borderColors[index] !== 'yellow'}  // Disable if not highlighted
               key={index}
               style={[styles.stone, {backgroundColor: colors[index], borderColor: borderColors[index]}]} 
               onPress={() => stoneClicked(index)}
@@ -195,10 +231,16 @@ const [activateLoop, setActivateLoop] = useState(false); // Add this state
           ))}
         </View>
         <View style={styles.rightRoomsContainer}>
-          <Pressable>
+          <Pressable
+            disabled={disabledRoom3}
+            onPress={() => roomClicked('Salón')}
+          >
             <ImageBackground style={[styles.room3, { borderColor: room3Color}]} source={require('../assets/images/boardImages/Lounge.png')} />
           </Pressable>
-          <Pressable>
+          <Pressable
+            disabled={disabledRoom4}
+            onPress={() => roomClicked('Alcoba')}
+          >
             <ImageBackground style={[styles.room4, { borderColor: room4Color}]} source={require('../assets/images/boardImages/Bedroom.png')} />
           </Pressable>
         </View>
