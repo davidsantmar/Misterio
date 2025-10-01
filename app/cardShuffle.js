@@ -79,7 +79,7 @@ export default function CardShuffle() {
       }, 6000);
       const timer3 = setTimeout(() => {
         router.push({
-          pathname: "/entry",
+          //pathname: "/entry",
         });
       }, 8000);
   }, []);

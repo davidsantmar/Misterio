@@ -55,7 +55,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginTop: 80,
     width: '90%',
-    backgroundColor: 'lightblue',
+    backgroundColor: "rgba(255, 255, 255, 0.8)",
     alignItems: 'center',
     padding: 10,
     borderRadius: 10
@@ -67,14 +67,14 @@ const styles = StyleSheet.create({
     width: '90%'
   },
   first_floor_container: {
-    backgroundColor: 'lightblue',
+    backgroundColor: "rgba(255, 255, 255, 0.8)",
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 10,
     padding: 10
   },
   ground_container: {
-    backgroundColor: 'lightblue',
+    backgroundColor: "rgba(255, 255, 255, 0.8)",
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 10,

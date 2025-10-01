@@ -113,7 +113,7 @@ const styles = StyleSheet.create({
     fontSize: 55,
   },
   button: {
-    backgroundColor: 'lightblue',
+    backgroundColor: "rgba(255, 255, 255, 0.8)",
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 10,

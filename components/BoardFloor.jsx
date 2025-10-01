@@ -11,11 +11,12 @@ const [activateLoop, setActivateLoop] = useState(false); // Add this state
   const [loaded, error] = useFonts({
     'Creepster-Regular': require('../assets/fonts/Creepster-Regular.ttf'),
   });
+  const [instructionsText, setInstructionsText] = useState('Selecciona una casilla amarilla para moverte');
   const [position, setPosition] = useState(0); 
-  const [room1Color, setRoom1Color] = useState('white');
-  const [room2Color, setRoom2Color] = useState('white');
-  const [room3Color, setRoom3Color] = useState('white');
-  const [room4Color, setRoom4Color] = useState('white');
+  const [room1Color, setRoom1Color] = useState('');
+  const [room2Color, setRoom2Color] = useState('');
+  const [room3Color, setRoom3Color] = useState('');
+  const [room4Color, setRoom4Color] = useState('');
   const [disabledDice, setDisabledDice] = useState(true); // Estado para activar/desactivar el botón
   const [disabledRoom1, setDisabledRoom1] = useState(true);
   const [disabledRoom2, setDisabledRoom2] = useState(true);
@@ -153,6 +154,7 @@ const [activateLoop, setActivateLoop] = useState(false); // Add this state
     }
   };
   const stoneClicked = (index) => { //se guarda la position al clickar
+      setInstructionsText('Tira el dado para continuar');
       setPosition(index)
       storePlayerPosition(index.toString());   
       setActivateLoop(true);  
@@ -177,13 +179,17 @@ const [activateLoop, setActivateLoop] = useState(false); // Add this state
   }
   return (
     <>
+    <ImageBackground style={styles.superContainer} source={require('../assets/images/boardImages/boardBack.png')} resizeMode="cover">
+    <View style={styles.instructionsCloud}>
+      <Text style={styles.text}>{instructionsText}</Text>
+    </View>
     <Animated.View style={{
       position: 'absolute',
       bottom: 600,
       alignSelf: 'center',
       transform: [{ translateY: bounceAnim }],
       zIndex: 1,
-      left: 300
+      left: 320
     }}>
       <Pressable 
         disabled={disabledDice} // Disable button if not activated
@@ -203,19 +209,21 @@ const [activateLoop, setActivateLoop] = useState(false); // Add this state
       </Pressable>
     </Animated.View>
     <ScrollView>
-      <View style={styles.container}>
+      <View style={styles.container} >
         <View style={styles.leftRoomsContainer}>
           <Pressable
             disabled={disabledRoom1}
             onPress={() => roomClicked('Laboratorio')}
+            style={[styles.room1Container, { borderColor: room1Color}]}
           >
-            <ImageBackground style={[styles.room1, { borderColor: room1Color}]} source={require('../assets/images/boardImages/Labo.png')} />
+            <ImageBackground style={styles.room} source={require('../assets/images/boardImages/Labo.png')} />
           </Pressable>
           <Pressable
             disabled={disabledRoom2}
             onPress={() => roomClicked('Biblioteca')}
+            style={[styles.room2Container, { borderColor: room2Color}]}
           >
-            <ImageBackground style={[styles.room2, { borderColor: room2Color}]} source={require('../assets/images/boardImages/Library.png')} />
+            <ImageBackground style={styles.room} source={require('../assets/images/boardImages/Library.png')} />
           </Pressable>
         </View>
         <View style={styles.stonesContainer}>
@@ -234,32 +242,38 @@ const [activateLoop, setActivateLoop] = useState(false); // Add this state
           <Pressable
             disabled={disabledRoom3}
             onPress={() => roomClicked('Salón')}
+            style={[styles.room3Container, { borderColor: room3Color}]}
           >
-            <ImageBackground style={[styles.room3, { borderColor: room3Color}]} source={require('../assets/images/boardImages/Lounge.png')} />
+            <ImageBackground style={styles.room} source={require('../assets/images/boardImages/Lounge.png')} />
           </Pressable>
           <Pressable
             disabled={disabledRoom4}
             onPress={() => roomClicked('Alcoba')}
+            style={[styles.room4Container, { borderColor: room4Color}]}
           >
-            <ImageBackground style={[styles.room4, { borderColor: room4Color}]} source={require('../assets/images/boardImages/Bedroom.png')} />
+            <ImageBackground style={styles.room} source={require('../assets/images/boardImages/Bedroom.png')} />
           </Pressable>
         </View>
       </View>
     </ScrollView>
+    </ImageBackground>
     </>
   );
 }
 
 const styles = StyleSheet.create({
+  superContainer: {
+    flex: 1,
+    padding: 7,
+  },
   container: {
     alignItems: 'center',
     height: '100%',
     width: '100%',
     flexDirection: 'row',
-    padding: 15,
+    marginTop: 20,
   },
   stonesContainer: {
-    marginTop: 100,
     marginBottom: 100,
     padding: 10,
   },
@@ -279,35 +293,42 @@ const styles = StyleSheet.create({
   },
   leftRoomsContainer: {
     flexDirection: 'column',
-    justifyContent: 'center',
   },
-  room1: {
-    height: 300,
-    width: 150,
+  room1Container: {
+    borderWidth: 4,
+    borderColor: 'black',
+    height: 308,
     marginBottom: 600,
-    borderWidth: 4,
+    width: 158
   },
-  room2: {
-    height: 300,
-    width: 150,
-    marginBottom: 150,
+  room2Container: {
     borderWidth: 4,
+    borderColor: 'black',
+    height: 308,
+    width: 158,
+    marginBottom: 150,
   },
   rightRoomsContainer: {
     flexDirection: 'column',
     marginTop: 100,
   },
-  room3: {
-    height: 300,
-    width: 150,
+  room3Container: {
+    borderWidth: 4,
+    borderColor: 'black',
+    height: 308,
+    width: 158,
     marginTop: 300,
-    borderWidth: 4,
   },
-  room4: {
+  room4Container: {
+    borderWidth: 4,
+    borderColor: 'black',
+    height: 308,
+    width: 158,
+    marginTop: 400,
+  },
+  room: {
     height: 300,
     width: 150,
-    marginTop: 400,
-    borderWidth: 4,
   },
   diceContainer: {
     alignItems: 'center',
@@ -318,4 +339,15 @@ const styles = StyleSheet.create({
     height: 80,
     borderRadius: 50,
   },
+  instructionsCloud: {
+    backgroundColor: "rgba(255, 255, 255, 0.8)",
+    borderRadius: 10,
+    padding: 10,
+    marginTop: 100,
+  },
+  text: {
+    fontSize: 18, 
+    fontFamily: "Creepster-Regular",
+    textAlign: "center",  
+  }
 });

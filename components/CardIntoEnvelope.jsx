@@ -21,7 +21,24 @@ export function CardIntoEnvelope({ text }) {
         duration: 1000,
         useNativeDriver: true,
       }),
-      // 3️⃣ Se hace pequeña al entrar en el sobre
+      // 3️⃣ Entra en el sobre
+      Animated.timing(scaleAnim, {
+        toValue: 0.9,
+        duration: 500,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  }, []);
+  useEffect(() => {
+    Animated.sequence([
+      
+      // 2️⃣ Se mueve hacia abajo (posición del sobre)
+      Animated.timing(cardAnim, {
+        toValue: { x: 0, y: height * 0.22},
+        duration: 1000,
+        useNativeDriver: true,
+      }),
+      // 3️⃣ Entra en el sobre
       Animated.timing(scaleAnim, {
         toValue: 0.9,
         duration: 500,
@@ -29,7 +46,6 @@ export function CardIntoEnvelope({ text }) {
       }),
     ]).start();
   }, [text]);
-
   return (
     <View style={styles.container}>
       {/* Carta animada */}
@@ -83,17 +99,13 @@ const styles = StyleSheet.create({
     bottom: height * 0.2,
     width: 250,
     height: 150,
-    borderWidth: 2,
-    borderColor: '#333',
-    borderRadius: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#fafafa',
   },
   textEnvelope: {
     fontSize: 35,
     fontFamily: 'Creepster-Regular',
     color: 'black',
-    transform: [{ rotate: '-25deg' }],
+    transform: [{ rotate: '-35deg' }],
   }
 });

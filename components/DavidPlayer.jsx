@@ -128,14 +128,14 @@ const styles = StyleSheet.create({
     width: '90%'
   },
   other_player_container: {
-    backgroundColor: 'lightblue',
+    backgroundColor: "rgba(255, 255, 255, 0.8)",
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 10,
     padding: 10
   },
   button_container: {
-    backgroundColor: 'lightblue',
+    backgroundColor: "rgba(255, 255, 255, 0.8)",
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 10,

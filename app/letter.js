@@ -73,7 +73,7 @@ const styles = StyleSheet.create({
         transform: [{ rotate: '1deg' }] 
     },
   button: {
-    backgroundColor: 'lightblue',
+    backgroundColor: "rgba(255, 255, 255, 0.8)",
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 10,

@@ -194,6 +194,9 @@ export default function Room() {
             <Text style={styles.roomEnvelope}>{room}</Text>
           </Pressable>
         </View>
+        <View style={styles.instructionsCloud}>
+          <Text style={styles.text}>Selecciona un sospechoso y una víctima</Text>
+        </View>
         {charactersSection()} 
         {assumptionSection()}
       </ImageBackground>
@@ -214,7 +217,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   envelope: {
-    backgroundColor: "white",
+    backgroundColor: "rgba(255, 255, 255, 0.8)",
     borderRadius: 10,
     marginHorizontal: 5,
     padding: 10,
@@ -261,7 +264,7 @@ const styles = StyleSheet.create({
   title: {
     justifyContent: "center",
     width: "90%",
-    backgroundColor: "lightblue",
+    backgroundColor: "rgba(255, 255, 255, 0.8)",
     alignItems: "center",
     padding: 10,
     borderRadius: 10,
@@ -310,7 +313,7 @@ const styles = StyleSheet.create({
   assumptionContainer: {
     justifyContent: "center",
     width: "90%",
-    backgroundColor: "lightblue",
+    backgroundColor: "rgba(255, 255, 255, 0.8)",
     alignItems: "center",
     padding: 10,
     borderRadius: 10,
@@ -331,5 +334,11 @@ const styles = StyleSheet.create({
   buttonText: {
     color: "white",
     fontFamily: "Creepster-Regular",
+  },
+  instructionsCloud: {
+    backgroundColor: "rgba(255, 255, 255, 0.8)",
+    borderRadius: 10,
+    padding: 10,
+    marginBottom: 10,
   },
 });
