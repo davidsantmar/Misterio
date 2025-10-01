@@ -67,11 +67,11 @@ export default function Room() {
     }
   };
   const showKiller = (killer) => {    
-    setassumptionOpacity(1);
+    setAssumptionOpacity(1);
     setKiller(killer);
   }
   const showVictim = (victim) => {    
-    setassumptionOpacity(1);
+    setAssumptionOpacity(1);
     setVictim(victim);
   }
 
@@ -156,25 +156,25 @@ export default function Room() {
       <View style={[styles.assumptionContainer, { opacity: assumptionOpacity }]}>
         <Text style={styles.text}>Supones que {killer} ha asesinado {victim} en el {room}</Text>
         <View style={styles.buttonsContainer}>
-          <Pressable style={styles.button} onPress={manageAssumption}>
-            <Text style={styles.buttonText}>Confirmar suposición</Text>
-          </Pressable>
-          <Pressable style={styles.button} onPress={() => setAssumptionOpacity(0)}>
-            <Text style={styles.buttonText}>Cancelar</Text>
-          </Pressable>
+          {victim !== "" && killer !== "" ? (
+            <>
+              <Pressable style={styles.button} onPress={manageAssumption}>
+                <Text style={styles.buttonText}>Confirmar suposición</Text>
+              </Pressable>
+              <Pressable style={styles.button} onPress={() => setAssumptionOpacity(0)}>
+                <Text style={styles.buttonText}>Cancelar</Text>
+              </Pressable>
+            </>
+          ) : null}
         </View>
       </View>
     )
   }
   const manageAssumption = () => {
-    // Aquí puedes manejar la lógica para confirmar la suposición
-    console.log(`Sospechoso: ${killer}, Víctima: ${victim}, Lugar: ${room}`);
-    // Después de confirmar, puedes ocultar la sección de suposición
     setAssumptionOpacity(0);
     // También podrías resetear los estados si es necesario
     setKiller("");
     setVictim("");
-   
     setKillersOpacity(0);
     setCharactersOpacity(0);
   } 

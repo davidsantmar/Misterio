@@ -92,7 +92,7 @@ export function DavidPlayer() {
   const toEntry = () => {
     playOpenDoor();
     router.push({
-        pathname: '/entry',
+        pathname: '/cardShuffle',
       });
   }
     return (

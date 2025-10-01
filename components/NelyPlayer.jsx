@@ -86,7 +86,7 @@ export function NelyPlayer() {
     const toEntry = () => {
       playOpenDoor();
       router.push({
-          pathname: '/entry',
+          pathname: '/cardShuffle',
         });
     }
   const toAnotherPlayer = () => {
