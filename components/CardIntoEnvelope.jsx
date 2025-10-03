@@ -28,24 +28,8 @@ export function CardIntoEnvelope({ text }) {
         useNativeDriver: true,
       }),
     ]).start();
-  }, []);
-  useEffect(() => {
-    Animated.sequence([
-      
-      // 2️⃣ Se mueve hacia abajo (posición del sobre)
-      Animated.timing(cardAnim, {
-        toValue: { x: 0, y: height * 0.22},
-        duration: 1000,
-        useNativeDriver: true,
-      }),
-      // 3️⃣ Entra en el sobre
-      Animated.timing(scaleAnim, {
-        toValue: 0.9,
-        duration: 500,
-        useNativeDriver: true,
-      }),
-    ]).start();
   }, [text]);
+ 
   return (
     <View style={styles.container}>
       {/* Carta animada */}

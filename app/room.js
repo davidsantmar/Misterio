@@ -1,8 +1,35 @@
 import { useLocalSearchParams } from "expo-router";
-import { ImageBackground, StyleSheet, Text, View, Image, ScrollView, Pressable } from "react-native";
+import { ImageBackground, StyleSheet, Text, View, Image, Pressable } from "react-native";
 import { useEffect, useState } from "react";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // Mapa de recursos estáticos con require
+const killers = {
+  MrHyde: require('../assets/images/mis/MrHyde.png'),
+  Dracula: require('../assets/images/mis/Dracula.png'),
+  Frankenstein: require('../assets/images/mis/Frankenstein.png'),
+  HombreLobo : require('../assets/images/mis/Werewolf.png'),
+  Fantasma: require('../assets/images/mis/Ghost.png'),
+  Momia: require('../assets/images/mis/Mummy.png'),
+};
+const victims = {
+  Conde: require('../assets/images/te/Count.png'),
+  Condesa: require('../assets/images/te/Countess.png'),
+  Jardinero: require('../assets/images/te/Gardener.png'),
+  AmaDeLlaves: require('../assets/images/te/Housekeeper.png'),
+  Mayordomo: require('../assets/images/te/Butler.png'),
+  Doncella: require('../assets/images/te/Maid.png'),
+};
+const rooms = {
+  Laboratorio: require('../assets/images/boardImages/Labo.png'),
+  Salon: require('../assets/images/boardImages/Lounge.png'),
+  Biblioteca: require('../assets/images/boardImages/Library.png'),
+  Alcoba: require('../assets/images/boardImages/Bedroom.png'),
+  /*Cocheras: require('../assets/images/boardImages/Garage.png'),
+  Vestibulo: require('../assets/images/boardImages/Lobby.png'),
+  Panteon: require('../assets/images/boardImages/Pantheon.png'),
+  Bodega: require('../assets/images/boardImages/Store.png'),*/
+};
 const gifMap = {
   Laboratorio: require("../assets/gifs/Laboratorio.gif"),
   /*Salon: require("../assets/gifs/Salon.gif"),
@@ -16,6 +43,22 @@ const imageMap = {
   Biblioteca: require("../assets/images/Biblioteca.png"),
   Alcoba: require("../assets/images/Alcoba.png"),*/
 };
+const getData = async (data) => {
+  try {
+    const stringArray = await AsyncStorage.getItem(data); // Obtener la cadena
+    if (stringArray !== null) {
+      const array = JSON.parse(stringArray); // Convertir la cadena a array
+      console.log('Array recuperado:', array);
+      return array;
+    } else {
+      console.log('No se encontró el array');
+      return null;
+    }
+  } catch (error) {
+    console.error('Error al recuperar el array:', error);
+    return null;
+  }
+};
 
 export default function Room() {
   const { room } = useLocalSearchParams();
@@ -26,8 +69,33 @@ export default function Room() {
   const [selectedSection, setSelectedSection] = useState(null); // New state to track selected section
   const [killer, setKiller] = useState(""); 
   const [victim, setVictim] = useState("");
+  const [instructionText, setInstructionText] = useState("Selecciona un sospechoso y una víctima con los botones MIS y TE");
+  const [position, setPosition] = useState('absolute'); // Estado inicial: absolute
+  const [rotation1, setRotation1] = useState('25deg');
+  const [rotation2, setRotation2] = useState('45deg');
+  const [cardBorderColor, setCardBorderColor] = useState('red');
+  const [misText, setMisText] = useState('MIS');
+  const [cardBorderWidth, setCardBorderWidth] = useState(2);
+  const [card1, setCard1] = useState('');
+  const [card2, setCard2] = useState('');
+  const [card3, setCard3] = useState('');
+  const [card4, setCard4] = useState('');
+  const [card5, setCard5] = useState('');
+  const [card6, setCard6] = useState('');
+  const [card7, setCard7] = useState('');
+  const [card8, setCard8] = useState('');
+  const [playerCards, setPlayerCards] = useState([]);
+  useEffect(() => {
+    console.log('playerCards desde Room', playerCards);
+    
+    
+  }, [playerCards]);
   useEffect(() => {
     console.log("Room parameter:", room);
+    getData('playerCards').then((retrievedPlayerCards) => {
+      setPlayerCards(retrievedPlayerCards);
+      
+    });
     if (gifMap[room] && imageMap[room]) {
       setGifSource(gifMap[room]); // Establecer el GIF inicialmente
 
@@ -43,6 +111,7 @@ export default function Room() {
       setGifSource(null);
       console.warn(`No se encontraron recursos para la sala: ${room}`);
     }
+   
   }, [room]);
 
   // Mostrar un componente de fallback si no hay recurso válido
@@ -58,9 +127,11 @@ export default function Room() {
     if (section === "killers") {
       setKillersOpacity(1); // Show killers
       setCharactersOpacity(0); // Hide characters
+      setInstructionText("Selecciona un sospechoso");
     } else if (section === "characters") {
       setCharactersOpacity(1); // Show characters
       setKillersOpacity(0); // Hide killers
+      setInstructionText("Selecciona una víctima");
     }else if (section === "") {
       setCharactersOpacity(0); // Hide characters
       setKillersOpacity(0); // Hide killers
@@ -79,12 +150,9 @@ export default function Room() {
     if (selectedSection === "killers") {
       return (
         <View style={[styles.killersContainer, { opacity: killersOpacity }]}>
-          <View style={styles.title}>
-            <Text style={styles.text}>Elige un sospechoso</Text>
-          </View>
           <Pressable style={styles.characterContainer} onPress={() => showKiller("Mr Hyde")}>
             <Text style={styles.characterName}>Dr Jekyll/Mr Hyde</Text>
-            <Image style={styles.character} source={require("../assets/images/mis/Dr_Jekyll.png")} />
+            <Image style={styles.character} source={require("../assets/images/mis/MrHyde.png")} />
           </Pressable>
           <Pressable style={styles.characterContainer} onPress={() => showKiller("Drácula")}>
             <Text style={styles.characterName}>Drácula</Text>
@@ -92,7 +160,7 @@ export default function Room() {
           </Pressable>
           <Pressable style={styles.characterContainer} onPress={() => showKiller("Frankenstein")}>
             <Text style={styles.characterName}>Frankenstein</Text>
-            <Image style={styles.character} source={require("../assets/images/mis/Frank.png")} />
+            <Image style={styles.character} source={require("../assets/images/mis/Frankenstein.png")} />
           </Pressable>
           <Pressable style={styles.characterContainer} onPress={() => showKiller("El hombre lobo")}>
             <Text style={styles.characterName}>Hombre lobo</Text>
@@ -111,9 +179,6 @@ export default function Room() {
     } else if (selectedSection === "characters") {
       return (
         <View style={[styles.charactersContainer, { opacity: charactersOpacity }]}>
-          <View style={styles.title}>
-            <Text style={styles.text}>Elige una víctima</Text>
-          </View>
           <Pressable style={styles.characterContainer} onPress={() => showVictim("al Conde")}>
             <Text style={styles.characterName}>Conde</Text>
             <Image style={styles.character} source={require("../assets/images/te/Count.png")} />
@@ -170,6 +235,34 @@ export default function Room() {
       </View>
     )
   }
+  const showCards = () => {
+    setPosition(prevPosition => 
+      prevPosition === 'absolute' ? 'relative' : 'absolute'
+    );
+    setRotation1(prevRotation =>
+      prevRotation === '25deg' ? '0deg' : '25deg'
+    )
+    setRotation2(prevRotation =>
+      prevRotation === '45deg' ? '0deg' : '45deg'
+    )
+    setCardBorderColor(prevColor => 
+      prevColor === 'red' ? 'white' : 'red'
+    )
+     setMisText(prevText => 
+      prevText === 'MIS' ? '' : 'MIS'
+    )
+    setCardBorderWidth(prevBorder => 
+      prevBorder === 2 ? 1 : 2
+    )
+    setCard1(prevCard => prevCard === '' ? killers[playerCards[0]] : '');
+    setCard2(prevCard => prevCard === '' ? killers[playerCards[1]] : '');
+    setCard3(prevCard => prevCard === '' ? victims[playerCards[2]] : '');
+    setCard4(prevCard => prevCard === '' ? victims[playerCards[3]] : '');
+    setCard5(prevCard => prevCard === '' ? victims[playerCards[4]] : '');
+    setCard6(prevCard => prevCard === '' ? rooms[playerCards[5]] : '');
+    setCard7(prevCard => prevCard === '' ? rooms[playerCards[6]] : '');
+    setCard8(prevCard => prevCard === '' ? rooms[playerCards[7]] : '');
+  }
   const manageAssumption = () => {
     setAssumptionOpacity(0);
     // También podrías resetear los estados si es necesario
@@ -177,8 +270,46 @@ export default function Room() {
     setVictim("");
     setKillersOpacity(0);
     setCharactersOpacity(0);
+    getData('envelope').then((retrievedEnvelope) => {
+      if (retrievedEnvelope) {
+        console.log('Sobre guardado:', retrievedEnvelope);
+      }
+    });
   } 
   return (
+    <>
+    <View style={{
+          position: 'absolute',
+          bottom: 750,
+          alignSelf: 'center',
+          zIndex: 1,
+          left: 335
+        }}>
+          <Pressable 
+            style={styles.yourCardsContainer}
+            onPress={showCards}
+          >
+            <Text style={styles.yourCardsText}>Tus cartas</Text>
+              <Text style={styles.miniTitle}>{playerCards[0]}</Text>
+              <ImageBackground style={[styles.card, { borderWidth: cardBorderWidth, borderColor: cardBorderColor, position: position }]}  source={card1} resizeMode="contain">
+              </ImageBackground>
+            <ImageBackground style={[styles.card, { borderWidth: cardBorderWidth, borderColor: cardBorderColor, position: position }]} source={card2} resizeMode="contain">
+            </ImageBackground>
+            <ImageBackground style={[styles.card, { borderWidth: cardBorderWidth, borderColor: cardBorderColor, position: position }]} source={card3} resizeMode="contain">
+            </ImageBackground>
+            <ImageBackground style={[styles.card, { borderWidth: cardBorderWidth, borderColor: cardBorderColor, position: position }]} source={card4} resizeMode="contain">
+            </ImageBackground>
+            <ImageBackground style={[styles.card, { borderWidth: cardBorderWidth, borderColor: cardBorderColor, position: position }]} source={card5} resizeMode="contain">
+            </ImageBackground>
+            <ImageBackground style={[styles.card, { borderWidth: cardBorderWidth, borderColor: cardBorderColor, position: position }]} source={card6} resizeMode="contain">
+            </ImageBackground>
+            <ImageBackground style={[styles.card, { borderWidth: cardBorderWidth, borderColor: cardBorderColor, position: position, transform: [{rotate: (rotation1)}]} ]} source={card7} resizeMode="contain">
+            </ImageBackground>
+            <ImageBackground style={[styles.card, { borderWidth: cardBorderWidth, borderColor: cardBorderColor, position: position, transform: [{rotate: (rotation2)}]} ]} source={card8} resizeMode="contain">
+                <Text style={styles.cardText}>{misText}</Text>
+            </ImageBackground>
+          </Pressable>
+        </View>
       <ImageBackground style={styles.container} source={gifSource} resizeMode="cover">
         <View style={styles.envelopeContainer}>
           <Pressable style={styles.envelope} onPress={() => showSection("killers")}>
@@ -194,12 +325,15 @@ export default function Room() {
             <Text style={styles.roomEnvelope}>{room}</Text>
           </Pressable>
         </View>
-        <View style={styles.instructionsCloud}>
-          <Text style={styles.text}>Selecciona un sospechoso y una víctima</Text>
+        <View style={styles.instructionsContainer}>
+          <View style={styles.instructionsCloud}>
+            <Text style={styles.text}>{instructionText}</Text>
+          </View>
         </View>
         {charactersSection()} 
         {assumptionSection()}
       </ImageBackground>
+      </>
   );
 }
 
@@ -214,7 +348,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     marginTop: 100,
-    marginBottom: 20,
+    marginBottom: 20
   },
   envelope: {
     backgroundColor: "rgba(255, 255, 255, 0.8)",
@@ -272,6 +406,19 @@ const styles = StyleSheet.create({
   text: {
     fontFamily: "Creepster-Regular",
     fontSize: 20,
+  },
+  yourCardsContainer: {
+    backgroundColor: '#6200ee',
+    borderRadius: 5,
+    width: 70,
+    height: 100,
+    flexDirection: 'column',
+    alignItems: 'center',
+  },
+  yourCardsText: {
+    color: 'white',
+    padding: 2,
+    fontSize: 10
   },
   killersContainer: {
     flexDirection: "row",
@@ -335,10 +482,36 @@ const styles = StyleSheet.create({
     color: "white",
     fontFamily: "Creepster-Regular",
   },
+  instructionsContainer: {
+    padding: 15,
+  },
   instructionsCloud: {
     backgroundColor: "rgba(255, 255, 255, 0.8)",
     borderRadius: 10,
     padding: 10,
     marginBottom: 10,
   },
+  card: {
+    width: 40,
+    height: 60,
+    backgroundColor: 'black',
+    borderRadius: 8,
+    //borderWidth: 2,
+    //borderColor: 'red',
+    //position: 'absolute',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 25
+  },
+  cardText: {
+    color: 'white',
+    fontFamily: 'Creepster-Regular'
+  },
+  miniCard: {
+    
+  },
+  miniTitle: {
+    fontFamily: 'Creepster-Regular',
+    marginBottom: 45
+  }
 });

@@ -59,6 +59,7 @@ const [activateLoop, setActivateLoop] = useState(false); // Add this state
   ];
   const [colors, setColors] = useState(board.map(() => '#808080')); // Color inicial para cada stone
   const [borderColors, setBorderColors] = useState(board.map(() => 'black')); 
+  
   const updateBorderColors = (storedValue, diceValue) => {
     setBorderColors((prevColors) => {
       const newColors = [...prevColors]; // Crear una copia del arreglo
@@ -99,6 +100,8 @@ const [activateLoop, setActivateLoop] = useState(false); // Add this state
     ])
   );
   loop.start();
+  
+ 
   return () => loop.stop(); // Cleanup
 }, [activateLoop, bounceAnim]); // Depend on activateLoop to re-run when it changes
   useEffect(() => {
