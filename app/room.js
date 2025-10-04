@@ -8,7 +8,7 @@ const killers = {
   MrHyde: require('../assets/images/mis/MrHyde.png'),
   Dracula: require('../assets/images/mis/Dracula.png'),
   Frankenstein: require('../assets/images/mis/Frankenstein.png'),
-  HombreLobo : require('../assets/images/mis/Werewolf.png'),
+  Hombrelobo : require('../assets/images/mis/Werewolf.png'),
   Fantasma: require('../assets/images/mis/Ghost.png'),
   Momia: require('../assets/images/mis/Mummy.png'),
 };
@@ -16,7 +16,7 @@ const victims = {
   Conde: require('../assets/images/te/Count.png'),
   Condesa: require('../assets/images/te/Countess.png'),
   Jardinero: require('../assets/images/te/Gardener.png'),
-  AmaDeLlaves: require('../assets/images/te/Housekeeper.png'),
+  Amadellaves: require('../assets/images/te/Housekeeper.png'),
   Mayordomo: require('../assets/images/te/Butler.png'),
   Doncella: require('../assets/images/te/Maid.png'),
 };
@@ -76,6 +76,8 @@ export default function Room() {
   const [cardBorderColor, setCardBorderColor] = useState('red');
   const [misText, setMisText] = useState('MIS');
   const [cardBorderWidth, setCardBorderWidth] = useState(2);
+  const [cardMarginTop, setCardMarginTop] = useState(20);
+  const [cardTextFontSize, setCardTextFontSize] = useState(15);
   const [card1, setCard1] = useState('');
   const [card2, setCard2] = useState('');
   const [card3, setCard3] = useState('');
@@ -85,20 +87,21 @@ export default function Room() {
   const [card7, setCard7] = useState('');
   const [card8, setCard8] = useState('');
   const [playerCards, setPlayerCards] = useState([]);
+  const [cardNames, setCardNames] = useState([]);
+  const [backgroundOpacity, setBackgroundOpacity] = useState(1);
   useEffect(() => {
-    console.log('playerCards desde Room', playerCards);
-    
-    
+    console.log('playerCards desde Room', playerCards);    
   }, [playerCards]);
   useEffect(() => {
     console.log("Room parameter:", room);
     getData('playerCards').then((retrievedPlayerCards) => {
-      setPlayerCards(retrievedPlayerCards);
-      
+      const playerCardsWithoutSpaces = retrievedPlayerCards.map(string => string.replace(/\s/g, '')); //remove spaces in array elements
+      const playerCardsWithSpaces = retrievedPlayerCards;
+      setPlayerCards(playerCardsWithoutSpaces);
+      setCardNames(playerCardsWithSpaces);
     });
     if (gifMap[room] && imageMap[room]) {
       setGifSource(gifMap[room]); // Establecer el GIF inicialmente
-
       // Cambiar al PNG después de 5500ms
       const timer = setTimeout(() => {
         setGifSource(imageMap[room]);
@@ -111,9 +114,7 @@ export default function Room() {
       setGifSource(null);
       console.warn(`No se encontraron recursos para la sala: ${room}`);
     }
-   
   }, [room]);
-
   // Mostrar un componente de fallback si no hay recurso válido
   if (!gifSource) {
     return (
@@ -145,7 +146,6 @@ export default function Room() {
     setAssumptionOpacity(1);
     setVictim(victim);
   }
-
   const charactersSection = () => {
     if (selectedSection === "killers") {
       return (
@@ -246,13 +246,19 @@ export default function Room() {
       prevRotation === '45deg' ? '0deg' : '45deg'
     )
     setCardBorderColor(prevColor => 
-      prevColor === 'red' ? 'white' : 'red'
-    )
-     setMisText(prevText => 
-      prevText === 'MIS' ? '' : 'MIS'
+      prevColor === 'red' ? '' : 'red'
     )
     setCardBorderWidth(prevBorder => 
-      prevBorder === 2 ? 1 : 2
+      prevBorder === 2 ? 0 : 2
+    )
+    setMisText(prevText => 
+      prevText === 'MIS' ? playerCards[7] : 'MIS'
+    )
+    setCardMarginTop(prevTop => 
+      prevTop === 20 ? 10 : 20
+    )
+    setCardTextFontSize(prevFontSize =>
+      prevFontSize === 15 ? 10 : 15
     )
     setCard1(prevCard => prevCard === '' ? killers[playerCards[0]] : '');
     setCard2(prevCard => prevCard === '' ? killers[playerCards[1]] : '');
@@ -262,6 +268,9 @@ export default function Room() {
     setCard6(prevCard => prevCard === '' ? rooms[playerCards[5]] : '');
     setCard7(prevCard => prevCard === '' ? rooms[playerCards[6]] : '');
     setCard8(prevCard => prevCard === '' ? rooms[playerCards[7]] : '');
+    setBackgroundOpacity(prevOpacity =>
+      prevOpacity === 1 ? 0.5 : 1
+    )
   }
   const manageAssumption = () => {
     setAssumptionOpacity(0);
@@ -283,34 +292,41 @@ export default function Room() {
           bottom: 750,
           alignSelf: 'center',
           zIndex: 1,
-          left: 335
+          left: 335,
         }}>
           <Pressable 
             style={styles.yourCardsContainer}
             onPress={showCards}
           >
             <Text style={styles.yourCardsText}>Tus cartas</Text>
-              <Text style={styles.miniTitle}>{playerCards[0]}</Text>
-              <ImageBackground style={[styles.card, { borderWidth: cardBorderWidth, borderColor: cardBorderColor, position: position }]}  source={card1} resizeMode="contain">
-              </ImageBackground>
-            <ImageBackground style={[styles.card, { borderWidth: cardBorderWidth, borderColor: cardBorderColor, position: position }]} source={card2} resizeMode="contain">
+              <ImageBackground style={[styles.card, { borderWidth: cardBorderWidth, borderColor: cardBorderColor, position: position, borderRadius: 8, marginTop: cardMarginTop }]} source={card1} resizeMode="cover">
+                <Text style={styles.cardName}>{cardNames[0]}</Text>
             </ImageBackground>
-            <ImageBackground style={[styles.card, { borderWidth: cardBorderWidth, borderColor: cardBorderColor, position: position }]} source={card3} resizeMode="contain">
+            
+            <ImageBackground style={[styles.card, { borderWidth: cardBorderWidth, borderColor: cardBorderColor, position: position, marginTop: cardMarginTop }]} source={card2} resizeMode="contain">
+                <Text style={styles.cardName}>{cardNames[1]}</Text>
             </ImageBackground>
-            <ImageBackground style={[styles.card, { borderWidth: cardBorderWidth, borderColor: cardBorderColor, position: position }]} source={card4} resizeMode="contain">
+            <ImageBackground style={[styles.card, { borderWidth: cardBorderWidth, borderColor: cardBorderColor, position: position, marginTop: cardMarginTop }]} source={card3} resizeMode="contain">
+              <Text style={styles.cardName}>{cardNames[2]}</Text>
             </ImageBackground>
-            <ImageBackground style={[styles.card, { borderWidth: cardBorderWidth, borderColor: cardBorderColor, position: position }]} source={card5} resizeMode="contain">
+            <ImageBackground style={[styles.card, { borderWidth: cardBorderWidth, borderColor: cardBorderColor, position: position, marginTop: cardMarginTop }]} source={card4} resizeMode="contain">
+              <Text style={styles.cardName}>{cardNames[3]}</Text>
             </ImageBackground>
-            <ImageBackground style={[styles.card, { borderWidth: cardBorderWidth, borderColor: cardBorderColor, position: position }]} source={card6} resizeMode="contain">
+            <ImageBackground style={[styles.card, { borderWidth: cardBorderWidth, borderColor: cardBorderColor, position: position, marginTop: cardMarginTop }]} source={card5} resizeMode="contain">
+              <Text style={styles.cardName}>{cardNames[4]}</Text>
             </ImageBackground>
-            <ImageBackground style={[styles.card, { borderWidth: cardBorderWidth, borderColor: cardBorderColor, position: position, transform: [{rotate: (rotation1)}]} ]} source={card7} resizeMode="contain">
+            <ImageBackground style={[styles.card, { borderWidth: cardBorderWidth, borderColor: cardBorderColor, position: position, marginTop: cardMarginTop }]} source={card6} resizeMode="contain">
+              <Text style={styles.cardName}>{cardNames[5]}</Text>
             </ImageBackground>
-            <ImageBackground style={[styles.card, { borderWidth: cardBorderWidth, borderColor: cardBorderColor, position: position, transform: [{rotate: (rotation2)}]} ]} source={card8} resizeMode="contain">
-                <Text style={styles.cardText}>{misText}</Text>
+            <ImageBackground style={[styles.card, { borderWidth: cardBorderWidth, borderColor: cardBorderColor, position: position, marginTop: cardMarginTop, transform: [{rotate: (rotation1)}]} ]} source={card7} resizeMode="contain">
+              <Text style={styles.cardName}>{cardNames[6]}</Text>
+            </ImageBackground>
+            <ImageBackground style={[styles.card, { borderWidth: cardBorderWidth, borderColor: cardBorderColor, position: position, marginTop: cardMarginTop, transform: [{rotate: (rotation2)}]} ]} source={card8} resizeMode="contain">
+                <Text style={[styles.cardText, { fontSize: cardTextFontSize  }]}>{misText}</Text>
             </ImageBackground>
           </Pressable>
         </View>
-      <ImageBackground style={styles.container} source={gifSource} resizeMode="cover">
+      <ImageBackground style={[styles.container, { opacity: backgroundOpacity }]} source={gifSource} resizeMode="cover">
         <View style={styles.envelopeContainer}>
           <Pressable style={styles.envelope} onPress={() => showSection("killers")}>
             <Text style={styles.textEnvelope}>MIS</Text>
@@ -342,6 +358,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     height: "100%",
     marginBottom: 60,
+    //opacity: 0.6
   },
   envelopeContainer: {
     flexDirection: "row",
@@ -411,9 +428,10 @@ const styles = StyleSheet.create({
     backgroundColor: '#6200ee',
     borderRadius: 5,
     width: 70,
-    height: 100,
+    height: 120,
     flexDirection: 'column',
     alignItems: 'center',
+    
   },
   yourCardsText: {
     color: 'white',
@@ -492,26 +510,23 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   card: {
-    width: 40,
-    height: 60,
+    width: 60,
+    height: 90,
     backgroundColor: 'black',
     borderRadius: 8,
-    //borderWidth: 2,
-    //borderColor: 'red',
-    //position: 'absolute',
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 25
+  },
+  cardName: {
+    color: 'white',
+    backgroundColor: 'black',
+    fontFamily: 'Creepster-Regular',
+    fontSize: 10,
+    padding: 2
   },
   cardText: {
     color: 'white',
-    fontFamily: 'Creepster-Regular'
-  },
-  miniCard: {
-    
-  },
-  miniTitle: {
     fontFamily: 'Creepster-Regular',
-    marginBottom: 45
+    fontSize: 15,
   }
 });
