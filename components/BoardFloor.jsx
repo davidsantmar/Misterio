@@ -2,12 +2,17 @@ import { View, Text, Pressable, StyleSheet, ScrollView, ImageBackground, Image, 
 import { useRouter } from "expo-router";
 import { useFonts } from "expo-font";
 import { BackArrow, ForwardArrow, LeftArrow, RightArrow, SpiderIcon } from "./Icons";
-import { useState, useEffect, useRef, act } from "react";
+import { useState, useEffect, useRef } from "react";
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { ShowCardsButton } from "./ShowCardsButton";
 
 export function BoardFloor({ diceValue }) {
 const bounceAnim = useRef(new Animated.Value(0)).current;
+const [opacityBack, setOpacityBack] = useState(1);
 const [activateLoop, setActivateLoop] = useState(false); // Add this state
+const handleShowCardsPress = () => {
+  setOpacityBack(opacityBack === 1 ? 0.5 : 1);
+};
   const [loaded, error] = useFonts({
     'Creepster-Regular': require('../assets/fonts/Creepster-Regular.ttf'),
   });
@@ -99,9 +104,7 @@ const [activateLoop, setActivateLoop] = useState(false); // Add this state
       Animated.delay(500), // Shorter delay for more frequent bouncing; adjust or remove
     ])
   );
-  loop.start();
-  
- 
+  loop.start(); 
   return () => loop.stop(); // Cleanup
 }, [activateLoop, bounceAnim]); // Depend on activateLoop to re-run when it changes
   useEffect(() => {
@@ -182,17 +185,18 @@ const [activateLoop, setActivateLoop] = useState(false); // Add this state
   }
   return (
     <>
-    <ImageBackground style={styles.superContainer} source={require('../assets/images/boardImages/boardBack.png')} resizeMode="cover">
+    <ShowCardsButton onPress={handleShowCardsPress} />
+    <ImageBackground style={[styles.superContainer, { opacity: opacityBack }]} source={require('../assets/images/boardImages/boardBack.png')} resizeMode="cover">
     <View style={styles.instructionsCloud}>
       <Text style={styles.text}>{instructionsText}</Text>
     </View>
     <Animated.View style={{
       position: 'absolute',
-      bottom: 600,
+      bottom: 720,
       alignSelf: 'center',
       transform: [{ translateY: bounceAnim }],
       zIndex: 1,
-      left: 320
+      left: 20
     }}>
       <Pressable 
         disabled={disabledDice} // Disable button if not activated
@@ -336,6 +340,7 @@ const styles = StyleSheet.create({
   diceContainer: {
     alignItems: 'center',
     justifyContent: 'center',
+    zIndex: -1,
   },
   dice: {
     width: 80,
@@ -346,7 +351,7 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(255, 255, 255, 0.8)",
     borderRadius: 10,
     padding: 10,
-    marginTop: 100,
+    marginTop: 50,
   },
   text: {
     fontSize: 18, 
