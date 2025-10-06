@@ -101,7 +101,7 @@ const showCards = () => {
       prevTop === 10 ? 20 : 10
     )
     setCardTextFontSize(prevFontSize =>
-      prevFontSize === 10 ? 15 : 10
+      prevFontSize === 7 ? 15 : 7
     )
     setCard1(prevCard => prevCard === killers[playerCards[0]] ? '' : killers[playerCards[0]]);
     setCard2(prevCard => prevCard === killers[playerCards[1]] ? '' : killers[playerCards[1]]);
@@ -118,10 +118,10 @@ const showCards = () => {
       <>
       <View style={{
             position: 'absolute',
-            bottom: 750,
+            bottom: 680,
             alignSelf: 'center',
             zIndex: 1,
-            left: 335,
+            left: 300,
           }}>
             <Pressable 
               style={styles.yourCardsContainer}
@@ -187,7 +187,7 @@ const styles = StyleSheet.create({
     color: 'white',
     backgroundColor: 'black',
     fontFamily: 'Creepster-Regular',
-    fontSize: 10,
+    fontSize: 7,
     padding: 2
   },
   cardText: {

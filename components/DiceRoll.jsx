@@ -125,7 +125,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     marginTop: 300,
   },
-  header_text: { fontFamily: "Creepster-Regular", fontSize: 55 },
+  header_text: { fontFamily: "Creepster-Regular", fontSize: 40 },
   dice: {
     width: 100,
     height: 100,

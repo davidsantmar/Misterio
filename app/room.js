@@ -224,8 +224,8 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
-    marginTop: 100,
-    marginBottom: 20
+    marginTop: 90,
+    marginBottom: 5
   },
   envelope: {
     backgroundColor: "rgba(255, 255, 255, 0.8)",
@@ -241,10 +241,11 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 3,
     elevation: 5,
+    right: 20
   },
   textEnvelope: {
     fontFamily: "Creepster-Regular",
-    fontSize: 24,
+    fontSize: 20,
   },
   plusEnvelope: {
     position: "absolute",
@@ -256,9 +257,9 @@ const styles = StyleSheet.create({
     width: 20,
     height: 20,
     textAlign: "center",
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: "bold",
-    lineHeight: 20,
+    lineHeight: 15,
   },
   roomEnvelope: {
     position: "absolute",
@@ -268,7 +269,7 @@ const styles = StyleSheet.create({
     color: "white",
     borderRadius: 10,
     textAlign: "center",
-    fontSize: 10,
+    fontSize: 8,
     fontWeight: "bold",
     width: 70, // Fixed width to avoid overflow
   },
@@ -282,7 +283,7 @@ const styles = StyleSheet.create({
   },
   text: {
     fontFamily: "Creepster-Regular",
-    fontSize: 20,
+    fontSize: 15,
   },
   killersContainer: {
     flexDirection: "row",
@@ -302,7 +303,7 @@ const styles = StyleSheet.create({
     backgroundColor: "white",
     borderRadius: 10,
     padding: 5,
-    marginTop: 20,
+    marginTop: 10,
     alignItems: "center",
     justifyContent: "center",
   },
@@ -353,7 +354,6 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(255, 255, 255, 0.8)",
     borderRadius: 10,
     padding: 10,
-    marginBottom: 10,
   },
 
 });

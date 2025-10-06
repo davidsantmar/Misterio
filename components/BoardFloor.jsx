@@ -192,7 +192,7 @@ const handleShowCardsPress = () => {
     </View>
     <Animated.View style={{
       position: 'absolute',
-      bottom: 720,
+      bottom: 690,
       alignSelf: 'center',
       transform: [{ translateY: bounceAnim }],
       zIndex: 1,
@@ -285,8 +285,8 @@ const styles = StyleSheet.create({
     padding: 10,
   },
   stone: {
-    width: 80,
-    height: 50,
+    width: 85,
+    height: 60,
     backgroundColor: 'grey',
     marginBottom: 1,
     borderRadius: 5,
@@ -297,6 +297,7 @@ const styles = StyleSheet.create({
   },
   stoneText: {
     fontFamily: 'Creepster-Regular',
+    fontSize: 11
   },
   leftRoomsContainer: {
     flexDirection: 'column',
@@ -304,16 +305,16 @@ const styles = StyleSheet.create({
   room1Container: {
     borderWidth: 4,
     borderColor: 'black',
-    height: 308,
-    marginBottom: 600,
-    width: 158
+    height: 258,
+    marginBottom: 860,
+    width: 133
   },
   room2Container: {
     borderWidth: 4,
     borderColor: 'black',
-    height: 308,
-    width: 158,
-    marginBottom: 150,
+    height: 258,
+    width: 133,
+    marginBottom: 290,
   },
   rightRoomsContainer: {
     flexDirection: 'column',
@@ -322,20 +323,20 @@ const styles = StyleSheet.create({
   room3Container: {
     borderWidth: 4,
     borderColor: 'black',
-    height: 308,
-    width: 158,
-    marginTop: 300,
+    height: 258,
+    width: 133,
+    marginTop: 400,
   },
   room4Container: {
     borderWidth: 4,
     borderColor: 'black',
-    height: 308,
-    width: 158,
-    marginTop: 400,
+    height: 258,
+    width: 133,
+    marginTop: 550,
   },
   room: {
-    height: 300,
-    width: 150,
+    height: 250,
+    width: 125,
   },
   diceContainer: {
     alignItems: 'center',
@@ -351,7 +352,7 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(255, 255, 255, 0.8)",
     borderRadius: 10,
     padding: 10,
-    marginTop: 50,
+    marginTop: 170,
   },
   text: {
     fontSize: 18, 

@@ -11,7 +11,7 @@ export default function Letter(){
     const toSelectPlayer = () => {
         //playOpenDoor();
         router.push({
-            pathname: '/womanPlayer',
+            pathname: '/player',
         });
     }
     return(

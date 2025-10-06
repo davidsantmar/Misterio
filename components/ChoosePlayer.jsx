@@ -4,13 +4,15 @@ import { Audio } from "expo-av";
 import { useEffect, useState, useRef } from "react";
 import { useRouter } from "expo-router";
 
-export function NelyPlayer() {
+export function ChoosePlayer() {
   const [gifSource, setGifSource] = useState(require('../assets/gifs/Intro_Nely.gif'));
   const [openDoor, setOpenDoor] = useState(null);
   const [start, setStart] = useState(null);
+  const [playerCharge, setPlayerCharge] = useState('Detective Nely')
   const [loaded, error] = useFonts({  //to load and use font
         'Creepster-Regular': require('../assets/fonts/Creepster-Regular.ttf'), 
     });
+  const [playerChoose, setPlayerChoose] = useState('Nely');
   const router = useRouter();
   const videoRef = useRef(null); // Referencia para el componente Video
   useEffect(() => {
@@ -19,10 +21,14 @@ export function NelyPlayer() {
   useEffect(() => {
     // Cambia el GIF por una imagen estática después de X milisegundos (duración aproximada del GIF)
     const timer = setTimeout(() => {
-      setGifSource(require('../assets/images/Nely.png')); // Imagen estática (último cuadro del GIF)
+      if (playerChoose === 'Nely'){
+        setGifSource(require('../assets/images/Nely.png')); // Imagen estática (último cuadro del GIF)
+      }else if (playerChoose === 'David'){
+        setGifSource(require('../assets/images/David.png'));
+      }
     }, 5500); // Ajusta el tiempo según la duración del GIF
     return () => clearTimeout(timer); // Limpia el temporizador al desmontar
-  }, []);
+  }, [playerChoose]);
   useEffect(() => {
       Audio.setAudioModeAsync({
         allowsRecordingIOS: false,
@@ -84,16 +90,20 @@ export function NelyPlayer() {
       }
     }
     const toEntry = () => {
-      playOpenDoor();
       router.push({
           pathname: '/cardShuffle',
         });
     }
   const toAnotherPlayer = () => {
-    playOpenDoor();
-    router.push({
-        pathname: '/manPlayer',
-      });
+   setPlayerChoose(prevPlayer => 
+    prevPlayer === 'Nely' ? 'David' : 'Nely'
+   )
+   setGifSource(prevGifSource =>
+    prevGifSource === require('../assets/gifs/Intro_Nely.gif') ? require('../assets/gifs/Intro_David.gif') : require('../assets/gifs/Intro_Nely.gif')
+   )
+   setPlayerCharge(prevCharge => 
+    prevCharge === 'Detective Nely' ? 'Inspector David' : 'Detective Nely' 
+   )
   }
     return (
       <>
@@ -104,7 +114,7 @@ export function NelyPlayer() {
         >
         <View style={styles.buttons_container}>
           <Pressable style={styles.button_container} onPress={toEntry}>
-            <Text style={styles.button_text}>Detective Nely</Text>
+            <Text style={styles.button_text}>{playerCharge}</Text>
           </Pressable>
           <Pressable style={styles.other_player_container} onPress={toAnotherPlayer}>
             <Text style={styles.button_text}>Otro personaje</Text>
@@ -143,6 +153,6 @@ const styles = StyleSheet.create({
   },
   button_text: {
     fontFamily: 'Creepster-Regular',
-    fontSize: 20
+    fontSize: 16
   }
 });

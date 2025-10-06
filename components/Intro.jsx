@@ -105,12 +105,11 @@ const styles = StyleSheet.create({
     opacity: 0.9,
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: 10,
     marginTop: 100
   },
   header_text: {
     fontFamily: 'Creepster-Regular',
-    fontSize: 55,
+    fontSize: 40,
   },
   button: {
     backgroundColor: "rgba(255, 255, 255, 0.8)",

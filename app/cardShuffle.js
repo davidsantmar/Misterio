@@ -283,6 +283,7 @@ const styles = StyleSheet.create({
     elevation: 5,
     alignItems: 'center',
     justifyContent: 'center',
+    marginBottom: 180
   }
 });
 
