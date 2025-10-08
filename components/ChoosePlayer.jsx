@@ -3,6 +3,7 @@ import { useFonts } from 'expo-font';
 import { Audio } from "expo-av";
 import { useEffect, useState, useRef } from "react";
 import { useRouter } from "expo-router";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export function ChoosePlayer() {
   const [gifSource, setGifSource] = useState(require('../assets/gifs/Intro_Nely.gif'));
@@ -69,6 +70,14 @@ export function ChoosePlayer() {
         console.error("Error al reproducir start:", error);
       }
     }
+  const storePlayer = async (player) => {
+    try {
+      await AsyncStorage.setItem('player', player); // Guardar en AsyncStorage
+      console.log('Player guardado exitosamente');
+    } catch (error) {
+      console.error('Error al guardar el player:', error);
+    }
+  };
   async function playOpenDoor() {
       console.log("Cargando openDoor");
       try {
@@ -90,6 +99,7 @@ export function ChoosePlayer() {
       }
     }
     const toEntry = () => {
+      storePlayer(playerChoose);
       router.push({
           pathname: '/cardShuffle',
         });

@@ -1,8 +1,9 @@
 import { useLocalSearchParams } from "expo-router";
-import { ImageBackground, StyleSheet, Text, View, Image, Pressable } from "react-native";
-import { useEffect, useState } from "react";
+import { ImageBackground, StyleSheet, Text, View, Image, Pressable, Animated } from "react-native";
+import { useEffect, useState, useRef } from "react";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ShowCardsButton } from "../components/ShowCardsButton";
+import { TouchIcon } from "../components/Icons";
 
 const gifMap = {
   Laboratorio: require("../assets/gifs/Laboratorio.gif"),
@@ -18,6 +19,7 @@ const imageMap = {
   Alcoba: require("../assets/images/Alcoba.png"),*/
 };
 
+
 export default function Room() {
   const { room } = useLocalSearchParams();
   const [killersOpacity, setKillersOpacity] = useState(0);
@@ -25,13 +27,125 @@ export default function Room() {
   const [assumptionOpacity, setAssumptionOpacity] = useState(0);
   const [gifSource, setGifSource] = useState(null);
   const [selectedSection, setSelectedSection] = useState(null); // New state to track selected section
-  const [killer, setKiller] = useState(""); 
-  const [victim, setVictim] = useState("");
+  const [killer, setKiller] = useState(null); 
+  const [victim, setVictim] = useState(null);
   const [instructionText, setInstructionText] = useState("Selecciona un sospechoso y una víctima con los botones MIS y TE (ten en cuenta tus cartas)");
   const [opacityBack, setOpacityBack] = useState(1);
+  const [player, setPlayer] = useState(null);
+  const [computerCards, setComputerCards] = useState([]);
+  const [playerCards, setPlayerCards] = useState([]);
+  const [assumption, setAssumption] = useState([]);
+  const [killerPrefix, setKillerPrefix] = useState(null);
+  const [victimPrefix, setVictimPrefix] = useState(null);
+  const [roomPrefix, setRoomPrefix] = useState(null);
+  const rotacionAnimada = useRef(new Animated.Value(0)).current; // Valor animado para la rotación
+  const floatAnim = useRef(new Animated.Value(0)).current;
+  const [showComputerCard, setShowComputerCard] = useState(false);
+  const [assumptionComputerCards, setAssumptionComputerCards] = useState([]);
+  const [bigCardText, setBigCardText] = useState(null);
+  const [killers, setKillers] = useState(['Mr Hyde', 'Drácula', 'Frankenstein', 'Hombre lobo', ' Fantasma' , 'Momia']);
+  const [victims, setVictims] = useState(['Conde', 'Condesa', 'Jardinero', 'Ama de llaves', 'Mayordomo', 'Doncella']);
+  const [rooms, setRooms] = useState(['Laboratorio', 'Salón', 'Biblioteca', 'Alcoba', 'Cocheras', 'Vestíbulo', 'Panteón', 'Bodega']);
   const handleShowCardsPress = () => {
     setOpacityBack(opacityBack === 1 ? 0.5 : 1);
   };
+  const getData = async (data) => {
+    try {
+      const stringArray = await AsyncStorage.getItem(data); // Obtener la cadena
+      if (stringArray !== null) {
+        const array = JSON.parse(stringArray); // Convertir la cadena a array
+        console.log('Array recuperado:', array);
+        return array;
+      } else {
+        console.log('No se encontró el array');
+        return null;
+      }
+    } catch (error) {
+      console.error('Error al recuperar el array:', error);
+      return null;
+    }
+  };
+  const getPlayer = async () => {
+    try {
+      const currentPlayer = await AsyncStorage.getItem('player'); // Obtener la cadena
+      return currentPlayer;
+    } catch (error) {
+      console.error('Error al recuperar el player:', error);
+      return null;
+    }
+  };
+  useEffect(()=> {
+    const misComputerCards = assumptionComputerCards.filter(elemento => killers.includes(elemento));
+    const teComputerCards = assumptionComputerCards.filter(elemento => victims.includes(elemento));
+    const rioComputerCards = assumptionComputerCards.filter(elemento => rooms.includes(elemento));
+    if (misComputerCards.length > 0) {
+      setBigCardText('MIS');
+    } else if (teComputerCards.length > 0) {
+      setBigCardText('TE');
+    } else if (rioComputerCards.length > 0) {
+      setBigCardText('RIO');
+    }
+  }, [assumptionComputerCards, killers, victims, rooms]);
+  useEffect(() => {
+    getPlayer().then((player) => {
+      setPlayer(player); // Actualizar el estado con el valor obtenido
+    });
+    if (room === 'Laboratorio'){
+      setRoomPrefix('el')
+    }
+    if (room === 'Alcoba'){
+      setRoomPrefix('la')
+    }
+    if (room === 'Cocheras'){
+      setRoomPrefix('las')
+    }
+    if (room === 'Panteón'){
+      setRoomPrefix('el')
+    }
+    if (room === 'Bodega'){
+      setRoomPrefix('la')
+    }
+    if (room === 'Salón'){
+      setRoomPrefix('el')
+    }
+    if (room === 'Vestíbulo'){
+      setRoomPrefix('el')
+    }
+    if (room === 'Biblioteca'){
+      setRoomPrefix('la')
+    }
+  }, []);
+
+  useEffect(() => {
+    getData('computerCards').then((computerCards) => {
+      setComputerCards(computerCards); // Actualizar el estado con el valor obtenido
+    });
+    getData('playerCards').then((playerCards) => {
+      setPlayerCards(playerCards); 
+    });
+  }, []);
+  
+  useEffect(() => {
+      // Define la animación de flotación
+      const animation = Animated.loop(
+        Animated.sequence([
+          Animated.timing(floatAnim, {
+            toValue: -20, // Equivalente a translateY(-20px)
+            duration: 1000, // 50% del ciclo (mitad de 2 segundos)
+            useNativeDriver: true, // Mejora el rendimiento
+          }),
+          Animated.timing(floatAnim, {
+            toValue: 0, // Vuelve a translateY(0)
+            duration: 1000, // Otra mitad del ciclo
+            useNativeDriver: true,
+          }),
+        ])
+      );
+      // Inicia la animación
+      animation.start();
+      // Limpia la animación al desmontar el componente
+      return () => animation.stop();
+    }, [floatAnim]);
   useEffect(() => {
     console.log("Room parameter:", room);
     if (gifMap[room] && imageMap[room]) {
@@ -57,6 +171,18 @@ export default function Room() {
       </View>
     );
   }
+  const rotacion = rotacionAnimada.interpolate({
+    inputRange: [0, 180],
+    outputRange: ['0deg', '180deg'],
+  });
+  const opacidadFrente = rotacionAnimada.interpolate({
+    inputRange: [90, 180],
+    outputRange: [1, 0],
+  });
+  const opacidadTrasera = rotacionAnimada.interpolate({
+    inputRange: [0, 90],
+    outputRange: [0, 1],
+  });
   const showSection = (section) => {
     setSelectedSection(section); // Update the selected section
     if (section === "killers") {
@@ -74,11 +200,49 @@ export default function Room() {
   };
   const showKiller = (killer) => {    
     setAssumptionOpacity(1);
+    showSection("characters")
     setKiller(killer);
+    if (killer === 'Mr Hyde'){
+      setKillerPrefix(null)
+    }
+    if (killer === 'Drácula'){
+      setKillerPrefix(null)
+    }
+    if (killer === 'Frankenstein'){
+      setKillerPrefix(null)
+    }
+    if (killer === 'Hombre lobo'){
+      setKillerPrefix('el')
+    }
+    if (killer === 'Fantasma'){
+      setKillerPrefix('el')
+    }
+    if (killer === 'Momia'){
+      setKillerPrefix('la')
+    }
   }
   const showVictim = (victim) => {    
     setAssumptionOpacity(1);
     setVictim(victim);
+    showSection("killers")
+    if (victim === 'Conde'){
+      setVictimPrefix('al')
+    }
+    if (victim === 'Condesa'){
+      setVictimPrefix('a la')
+    }
+    if (victim === 'Jardinero'){
+      setVictimPrefix('al')
+    }
+    if (victim === 'Ama de llaves'){
+      setVictimPrefix('al')
+    }
+    if (victim === 'Mayordomo'){
+      setVictimPrefix('al')
+    }
+    if (victim === 'Doncella'){
+      setVictimPrefix('a la')
+    }
   }
   const charactersSection = () => {
     if (selectedSection === "killers") {
@@ -96,15 +260,15 @@ export default function Room() {
             <Text style={styles.characterName}>Frankenstein</Text>
             <Image style={styles.character} source={require("../assets/images/mis/Frankenstein.png")} />
           </Pressable>
-          <Pressable style={styles.characterContainer} onPress={() => showKiller("El hombre lobo")}>
+          <Pressable style={styles.characterContainer} onPress={() => showKiller("Hombre lobo")}>
             <Text style={styles.characterName}>Hombre lobo</Text>
             <Image style={styles.character} source={require("../assets/images/mis/Werewolf.png")} />
           </Pressable>
-          <Pressable style={styles.characterContainer} onPress={() => showKiller("El fantasma")}>
+          <Pressable style={styles.characterContainer} onPress={() => showKiller("Fantasma")}>
             <Text style={styles.characterName}>Fantasma</Text>
             <Image style={styles.character} source={require("../assets/images/mis/Ghost.png")} />
           </Pressable>
-          <Pressable style={styles.characterContainer} onPress={() => showKiller("La momia")}>
+          <Pressable style={styles.characterContainer} onPress={() => showKiller("Momia")}>
             <Text style={styles.characterName}>Momia</Text>
             <Image style={styles.character} source={require("../assets/images/mis/Mummy.png")} />
           </Pressable>
@@ -113,32 +277,32 @@ export default function Room() {
     } else if (selectedSection === "characters") {
       return (
         <View style={[styles.charactersContainer, { opacity: charactersOpacity }]}>
-          <Pressable style={styles.characterContainer} onPress={() => showVictim("al Conde")}>
+          <Pressable style={styles.characterContainer} onPress={() => showVictim("Conde")}>
             <Text style={styles.characterName}>Conde</Text>
             <Image style={styles.character} source={require("../assets/images/te/Count.png")} />
           </Pressable>
-          <Pressable style={styles.characterContainer} onPress={() => showVictim("a la condesa")}>
+          <Pressable style={styles.characterContainer} onPress={() => showVictim("Condesa")}>
             <Text style={styles.characterName}>Condesa</Text>
             <Image style={styles.character} source={require("../assets/images/te/Countess.png")} />
           </Pressable>
-          <Pressable style={styles.characterContainer} onPress={() => showVictim("al jardinero")}>
+          <Pressable style={styles.characterContainer} onPress={() => showVictim("Jardinero")}>
             <Text style={styles.characterName}>Jardinero</Text>
             <Image style={styles.character} source={require("../assets/images/te/Gardener.png")} />
           </Pressable>
-          <Pressable style={styles.characterContainer} onPress={() => showVictim("al ama de llaves")}>
+          <Pressable style={styles.characterContainer} onPress={() => showVictim("Ama de llaves")}>
             <Text style={styles.characterName}>Ama de llaves</Text>
             <Image style={styles.character} source={require("../assets/images/te/Housekeeper.png")} />
           </Pressable>
-          <Pressable style={styles.characterContainer} onPress={() => showVictim("al mayordomo")}>
+          <Pressable style={styles.characterContainer} onPress={() => showVictim("Mayordomo")}>
             <Text style={styles.characterName}>Mayordomo</Text>
             <Image style={styles.character} source={require("../assets/images/te/Butler.png")} />
           </Pressable>
-          <Pressable style={styles.characterContainer} onPress={() => showVictim("a la doncella")}>
+          <Pressable style={styles.characterContainer} onPress={() => showVictim("Doncella")}>
             <Text style={styles.characterName}>Doncella</Text>
             <Image style={styles.character} source={require("../assets/images/te/Maid.png")} />
           </Pressable>
         </View>
-      );
+      )
     }else if (selectedSection === "") {
       return (
         <View style={styles.roomTitleContainer}>
@@ -150,12 +314,111 @@ export default function Room() {
     }
     return null; // Return nothing if no section is selected
   };
+  const manejarPresionInicio = () => {
+    Animated.timing(rotacionAnimada, {
+      toValue: 180, // Rotar a 180 grados
+      duration: 600, // Duración de la animación (como en el CSS)
+      useNativeDriver: true,
+    }).start();
+  };
+
+  // Maneja el fin del toque (equivalente a salir del hover)
+  const manejarPresionFin = () => {
+    Animated.timing(rotacionAnimada, {
+      toValue: 0, // Volver a 0 grados
+      duration: 600,
+      useNativeDriver: true,
+    }).start();
+  };
+  const manageAssumption = () => {
+    setAssumptionOpacity(0);
+    // También podrías resetear los estados si es necesario
+    /*setKiller("");
+    setVictim("");*/
+    setKillersOpacity(0);
+    setCharactersOpacity(0);
+    setShowComputerCard(true);
+    //Mostrar alguna carta de otro jugador si existen
+    assumption.push(killer);
+    assumption.push(victim);
+    assumption.push(room);
+    console.log('assumption', assumption)
+    const ocurrences = assumption.filter(elemento => computerCards.includes(elemento));
+      setAssumptionComputerCards(ocurrences);
+      console.log('ocurrences', ocurrences);
+
+      if (ocurrences.length > 0){
+        
+        if (player === 'Nely'){
+          setInstructionText('El inspector David te muestra la siguiente carta')
+        }else if (player === 'David'){
+          setInstructionText('La detective Nely te muestra la siguiente carta')
+        }
+      }else if (ocurrences <= 0){
+        if (player === 'Nely'){
+          setInstructionText('El inspector David no tiene cartas que mostrarte')
+        }else if (player === 'David'){
+          setInstructionText('La detective Nely no tiene cartas que mostrarte')
+        }
+      }
+    
+
+
+
+    //contenido de sobre para comparar al acusar definitivo
+    getData('envelope').then((retrievedEnvelope) => {
+      if (retrievedEnvelope) {
+        console.log('Sobre guardado:', retrievedEnvelope);
+      }
+    });
+  } 
+ 
+    const showOcurrences = () => {
+      if (assumptionComputerCards.length > 0) {
+        
+        console.log(bigCardText)
+        return(  
+          <View style={styles.containerOcurrence}>
+              <Pressable onPressIn={manejarPresionInicio} onPressOut={manejarPresionFin}>
+              <Animated.View style={{ transform: [{ rotateY: rotacion }] }}>
+                <Animated.View style={{ opacity: opacidadFrente }}>
+                  <ImageBackground style={styles.flipCardBack}>
+                    <Text style={styles.bigCardText}>{bigCardText}</Text>
+                  </ImageBackground>
+                </Animated.View>
+                <Animated.View style={[styles.flipCardFront, { opacity: opacidadTrasera, transform: [{ rotateY: '180deg' }] }]}>
+                  <View style={styles.computerCharacterContainer}>
+                    <Text style={styles.computerCharacterName}>{assumptionComputerCards[0]}</Text>
+                    <ImageBackground style={styles.computerCharacter} source={require("../assets/images/mis/MrHyde.png")} /> {/*falta esto*/}
+                  </View>
+                </Animated.View>
+              </Animated.View>
+            </Pressable>
+            <View style={styles.pressCardContainer}>
+              <Animated.View style={[
+                styles.iconContainer,
+                { transform: [{ translateY: floatAnim }] }, // Aplica la animación
+              ]}>
+                <View style={styles.iconContainer}>
+                  <TouchIcon style={styles.iconStyles} />
+                  <Text style={styles.pressText} >Presiona la carta para descubrirla</Text>
+                </View>
+              </Animated.View>
+            </View>        
+        </View>
+        )
+      }
+
+
+
+       
+  }
   const assumptionSection = () => {
     return(
       <View style={[styles.assumptionContainer, { opacity: assumptionOpacity }]}>
-        <Text style={styles.text}>Supones que {killer} ha asesinado {victim} en el {room}</Text>
+        <Text style={styles.text}>Supones que {killerPrefix} {killer} ha asesinado {victimPrefix} {victim} en {roomPrefix} {room}</Text>
         <View style={styles.buttonsContainer}>
-          {victim !== "" && killer !== "" ? (
+          {(victim !== null && killer !== null) ? (
             <>
               <Pressable style={styles.button} onPress={manageAssumption}>
                 <Text style={styles.buttonText}>Confirmar suposición</Text>
@@ -169,20 +432,6 @@ export default function Room() {
       </View>
     )
   }
- 
-  const manageAssumption = () => {
-    setAssumptionOpacity(0);
-    // También podrías resetear los estados si es necesario
-    setKiller("");
-    setVictim("");
-    setKillersOpacity(0);
-    setCharactersOpacity(0);
-    getData('envelope').then((retrievedEnvelope) => {
-      if (retrievedEnvelope) {
-        console.log('Sobre guardado:', retrievedEnvelope);
-      }
-    });
-  } 
   return (
     <>
       <ShowCardsButton onPress={handleShowCardsPress} />
@@ -206,7 +455,7 @@ export default function Room() {
             <Text style={styles.text}>{instructionText}</Text>
           </View>
         </View>
-        {charactersSection()} 
+        {!showComputerCard ? charactersSection() : showOcurrences()} 
         {assumptionSection()}
       </ImageBackground>
       </>
@@ -355,5 +604,74 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     padding: 10,
   },
-
+  containerOcurrence: {
+    flex: 1,
+    alignItems: "center", 
+  },
+  flipCardFront: {
+    position: 'absolute',
+    width: 100,
+    height: 175,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 10,
+    marginTop: 20
+  },
+  flipCardBack: {
+    width: 110, 
+    height: 205, 
+    resizeMode: "cover", 
+    borderRadius: 10, 
+    backgroundColor: 'black', 
+    borderWidth: 2, 
+    borderColor: 'red', 
+    marginTop: 5, 
+    alignItems: 'center',
+    justifyContent: 'center' 
+  },
+  iconContainer: {
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  bigCardText: {
+    fontFamily: 'Creepster-Regular',
+    fontSize: 50,
+    color: 'white',
+    alignItems: 'center'
+  },
+  computerCharacterContainer: {
+    backgroundColor: "white",
+    borderRadius: 10,
+    padding: 5,
+    alignItems: "center",
+  },
+  computerCharacterName: {
+    fontFamily: "Creepster-Regular",
+    fontSize: 12,
+    marginTop: 10
+  },
+  computerCharacter: {
+    height: 170,
+    width: 100,
+  },
+  pressCardContainer: {
+    flexDirection: 'row', 
+    alignItems: 'center'
+  },
+  iconContainer: {
+    flexDirection: "column", 
+    alignItems: "center"
+  },
+  pressText: { 
+    color: "white", 
+    marginTop: "10", 
+    marginRight: 20, 
+    fontFamily: 'Creepster-Regular', 
+    fontSize: 20
+  },
+  iconStyles: {
+    fontSize: 48, 
+    marginTop: "20" 
+    }
+  
 });

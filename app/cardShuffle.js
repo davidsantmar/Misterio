@@ -1,10 +1,9 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { View, Animated, StyleSheet, Dimensions, Text, ImageBackground } from 'react-native';
+import { Animated, StyleSheet, Dimensions, Text, ImageBackground } from 'react-native';
 import { useFonts } from 'expo-font';
 import { CardIntoEnvelope } from '../components/CardIntoEnvelope';
 import { useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { store } from 'expo-router/build/global-state/router-store';
 
 const { width } = Dimensions.get('window');
 
@@ -23,7 +22,7 @@ export default function CardShuffle() {
   const rotation2 = useRef(new Animated.Value(0)).current;
   const rotation3 = useRef(new Animated.Value(0)).current;
   const [envelope, setEnvelope] = useState([]);
-  const [misCards, setMisCards] = useState(['Mr Hyde', 'Dracula', 'Frankenstein', 'Hombre lobo', 'Fantasma', 'Momia']);
+  const [misCards, setMisCards] = useState(['Mr Hyde', 'Drácula', 'Frankenstein', 'Hombre lobo', 'Fantasma', 'Momia']);
   const [teCards, setTeCards] = useState(['Conde', 'Condesa', 'Jardinero', 'Ama de llaves', 'Mayordomo', 'Doncella']);
   const [rioCards, setRioCards] = useState(['Laboratorio', 'Salón', 'Biblioteca', 'Alcoba', 'Cocheras', 'Vestíbulo', 'Panteón', 'Bodega']);
     const [loaded, error] = useFonts({  //to load and use font
@@ -173,7 +172,6 @@ const playersShuffle = async () => {
       const timer3 = setTimeout(() => {
         router.push({
           pathname: "/entry",
-          //params: { envelope: JSON.stringify(envelope) }
         });
         storeEnvelope(envelope);
         playersShuffle();
@@ -202,8 +200,7 @@ const playersShuffle = async () => {
 
   return (
     <ImageBackground style={styles.container} source={require("../assets/images/table-back.png")}>
-        <CardIntoEnvelope text={cardReverseText} />
-        
+      <CardIntoEnvelope text={cardReverseText} />
       <Animated.View
         style={[
           styles.card,
