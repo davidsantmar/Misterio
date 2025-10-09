@@ -1,9 +1,16 @@
 import { View, Text, Pressable, ImageBackground, StyleSheet } from 'react-native';
 import { useRouter } from "expo-router";
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { ShowCardsButton } from '../components/ShowCardsButton';
+import { useState } from 'react';
 
 export default function Entry() {
   const router = useRouter();
+  const [opacityBack, setOpacityBack] = useState(1);
+  const handleShowCardsPress = () => {
+    setOpacityBack(opacityBack === 1 ? 0.5 : 1);
+  };
+  
   const storeInitialPosition = async (position) => {
     try {
         await AsyncStorage.setItem('position', position);
@@ -19,9 +26,9 @@ export default function Entry() {
       });
     }
     return (
-        <ImageBackground source={require ('../assets/images/entrance.png')} 
-          resizeMode="cover" 
-          style={styles.container}>
+      <>
+        <ShowCardsButton onPress={handleShowCardsPress} />
+        <ImageBackground style={[styles.container, { opacity: opacityBack }]} source={require ('../assets/images/entrance.png')} resizeMode="cover">
           <View style={styles.instructions}>
               <Text style={styles.button_text}>A dónde te diriges?</Text>
           </View>
@@ -42,6 +49,7 @@ export default function Entry() {
             </Pressable>
           </View> 
         </ImageBackground>
+      </>
     );
 };
 
@@ -61,10 +69,10 @@ const styles = StyleSheet.create({
     borderRadius: 10
   },
   buttons_container: {
-    justifyContent: 'space-around',
+    justifyContent: 'space-evenly',
     flexDirection: 'row',
-    marginTop: 80,
-    width: '90%'
+    marginTop: 160,
+    width: '100%'
   },
   first_floor_container: {
     backgroundColor: "rgba(255, 255, 255, 0.8)",

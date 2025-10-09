@@ -1,10 +1,35 @@
-import { useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams, useRouter} from "expo-router";
 import { ImageBackground, StyleSheet, Text, View, Image, Pressable, Animated } from "react-native";
 import { useEffect, useState, useRef } from "react";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ShowCardsButton } from "../components/ShowCardsButton";
 import { TouchIcon } from "../components/Icons";
-
+const killersMap = {
+  MrHyde: require('../assets/images/mis/MrHyde.png'),
+  Dracula: require('../assets/images/mis/Dracula.png'),
+  Frankenstein: require('../assets/images/mis/Frankenstein.png'),
+  Hombrelobo : require('../assets/images/mis/Werewolf.png'),
+  Fantasma: require('../assets/images/mis/Ghost.png'),
+  Momia: require('../assets/images/mis/Mummy.png'),
+};
+const victimsMap = {
+  Conde: require('../assets/images/te/Count.png'),
+  Condesa: require('../assets/images/te/Countess.png'),
+  Jardinero: require('../assets/images/te/Gardener.png'),
+  Amadellaves: require('../assets/images/te/Housekeeper.png'),
+  Mayordomo: require('../assets/images/te/Butler.png'),
+  Doncella: require('../assets/images/te/Maid.png'),
+};
+const roomsMap = {
+  Laboratorio: require('../assets/images/boardImages/Labo.png'),
+  Salon: require('../assets/images/boardImages/Lounge.png'),
+  Biblioteca: require('../assets/images/boardImages/Library.png'),
+  Alcoba: require('../assets/images/boardImages/Bedroom.png'),
+  /*Cocheras: require('../assets/images/boardImages/Garage.png'),
+  Vestibulo: require('../assets/images/boardImages/Lobby.png'),
+  Panteon: require('../assets/images/boardImages/Pantheon.png'),
+  Bodega: require('../assets/images/boardImages/Store.png'),*/
+};
 const gifMap = {
   Laboratorio: require("../assets/gifs/Laboratorio.gif"),
   /*Salon: require("../assets/gifs/Salon.gif"),
@@ -12,16 +37,11 @@ const gifMap = {
   Alcoba: require("../assets/gifs/Alcoba.gif"),*/
 };
 
-const imageMap = {
-  Laboratorio: require("../assets/images/Laboratorio.png"),
-  /*Salon: require("../assets/images/Salon.png"),
-  Biblioteca: require("../assets/images/Biblioteca.png"),
-  Alcoba: require("../assets/images/Alcoba.png"),*/
-};
 
 
 export default function Room() {
   const { room } = useLocalSearchParams();
+  const router = useRouter();
   const [killersOpacity, setKillersOpacity] = useState(0);
   const [charactersOpacity, setCharactersOpacity] = useState(0);
   const [assumptionOpacity, setAssumptionOpacity] = useState(0);
@@ -46,6 +66,9 @@ export default function Room() {
   const [killers, setKillers] = useState(['Mr Hyde', 'Drácula', 'Frankenstein', 'Hombre lobo', ' Fantasma' , 'Momia']);
   const [victims, setVictims] = useState(['Conde', 'Condesa', 'Jardinero', 'Ama de llaves', 'Mayordomo', 'Doncella']);
   const [rooms, setRooms] = useState(['Laboratorio', 'Salón', 'Biblioteca', 'Alcoba', 'Cocheras', 'Vestíbulo', 'Panteón', 'Bodega']);
+  const [computerCardCharacter, setComputerCardCharacter] = useState(null);
+  const [computerCardNameToShow, setComputerCardNameToShow] = useState(null);
+  const [showAccuseButtons, setShowAccuseButtons] = useState(false);
   const handleShowCardsPress = () => {
     setOpacityBack(opacityBack === 1 ? 0.5 : 1);
   };
@@ -78,13 +101,31 @@ export default function Room() {
     const misComputerCards = assumptionComputerCards.filter(elemento => killers.includes(elemento));
     const teComputerCards = assumptionComputerCards.filter(elemento => victims.includes(elemento));
     const rioComputerCards = assumptionComputerCards.filter(elemento => rooms.includes(elemento));
+    setComputerCardNameToShow(assumptionComputerCards[0]);
     if (misComputerCards.length > 0) {
       setBigCardText('MIS');
+      if (assumptionComputerCards[0] === 'Mr Hyde'){
+        assumptionComputerCards.splice(0, 1);
+        assumptionComputerCards.splice(0, 1, 'MrHyde');
+      }
+      if (assumptionComputerCards[0] === 'Hombre lobo'){
+        assumptionComputerCards.splice(0, 1);
+        assumptionComputerCards.splice(0, 1, 'Hombrelobo');
+      }
+      setComputerCardCharacter(killersMap[assumptionComputerCards[0]])
     } else if (teComputerCards.length > 0) {
       setBigCardText('TE');
+      if (assumptionComputerCards[0] === 'Ama de llaves'){
+        assumptionComputerCards.splice(0, 1);
+        assumptionComputerCards.splice(0, 1, 'Amadellaves');
+      }
+      setComputerCardCharacter(victimsMap[assumptionComputerCards[0]])
     } else if (rioComputerCards.length > 0) {
       setBigCardText('RIO');
+      setComputerCardCharacter(roomsMap[assumptionComputerCards[0]])
     }
+          console.log('assumptionComputerCards', assumptionComputerCards);
+
   }, [assumptionComputerCards, killers, victims, rooms]);
   useEffect(() => {
     getPlayer().then((player) => {
@@ -148,11 +189,11 @@ export default function Room() {
     }, [floatAnim]);
   useEffect(() => {
     console.log("Room parameter:", room);
-    if (gifMap[room] && imageMap[room]) {
+    if (gifMap[room] && roomsMap[room]) {
       setGifSource(gifMap[room]); // Establecer el GIF inicialmente
       // Cambiar al PNG después de 5500ms
       const timer = setTimeout(() => {
-        setGifSource(imageMap[room]);
+        setGifSource(roomsMap[room]);
       }, 5500);
 
       // Limpiar el temporizador al desmontar o cuando cambie `room`
@@ -346,7 +387,6 @@ export default function Room() {
     const ocurrences = assumption.filter(elemento => computerCards.includes(elemento));
       setAssumptionComputerCards(ocurrences);
       console.log('ocurrences', ocurrences);
-
       if (ocurrences.length > 0){
         
         if (player === 'Nely'){
@@ -355,13 +395,20 @@ export default function Room() {
           setInstructionText('La detective Nely te muestra la siguiente carta')
         }
       }else if (ocurrences <= 0){
+        setShowAccuseButtons(true);
         if (player === 'Nely'){
-          setInstructionText('El inspector David no tiene cartas que mostrarte')
+          //es necesaria esta tabulación en los setters para mostrar el texto en la forma correcta
+          setInstructionText(`El inspector David no tiene cartas que mostrarte. 
+Tu hipótesis es que ${killerPrefix === null ? "" : killerPrefix} ${killer} ha asesinado ${victimPrefix} ${victim} en ${roomPrefix} ${room}. 
+Cuidado! Si acusas y no estás en lo cierto habrás perdido la partida. 
+Revisa bien tus cartas.`);
         }else if (player === 'David'){
-          setInstructionText('La detective Nely no tiene cartas que mostrarte')
+          setInstructionText(`La detective Nely no tiene cartas que mostrarte. 
+Tu hipótesis es que ${killerPrefix === null ? "" : killerPrefix} ${killer} ha asesinado ${victimPrefix} ${victim} en ${roomPrefix} ${room}. 
+Cuidado! Si acusas y no estás en lo cierto habrás perdido la partida. 
+Revisa bien tus cartas`)
         }
       }
-    
 
 
 
@@ -375,8 +422,6 @@ export default function Room() {
  
     const showOcurrences = () => {
       if (assumptionComputerCards.length > 0) {
-        
-        console.log(bigCardText)
         return(  
           <View style={styles.containerOcurrence}>
               <Pressable onPressIn={manejarPresionInicio} onPressOut={manejarPresionFin}>
@@ -388,8 +433,8 @@ export default function Room() {
                 </Animated.View>
                 <Animated.View style={[styles.flipCardFront, { opacity: opacidadTrasera, transform: [{ rotateY: '180deg' }] }]}>
                   <View style={styles.computerCharacterContainer}>
-                    <Text style={styles.computerCharacterName}>{assumptionComputerCards[0]}</Text>
-                    <ImageBackground style={styles.computerCharacter} source={require("../assets/images/mis/MrHyde.png")} /> {/*falta esto*/}
+                    <Text style={styles.computerCharacterName}>{computerCardNameToShow}</Text> 
+                    <ImageBackground style={styles.computerCharacter} source={computerCardCharacter} /> 
                   </View>
                 </Animated.View>
               </Animated.View>
@@ -408,30 +453,35 @@ export default function Room() {
         </View>
         )
       }
-
-
-
-       
-  }
+    }
   const assumptionSection = () => {
     return(
-      <View style={[styles.assumptionContainer, { opacity: assumptionOpacity }]}>
-        <Text style={styles.text}>Supones que {killerPrefix} {killer} ha asesinado {victimPrefix} {victim} en {roomPrefix} {room}</Text>
-        <View style={styles.buttonsContainer}>
-          {(victim !== null && killer !== null) ? (
-            <>
-              <Pressable style={styles.button} onPress={manageAssumption}>
-                <Text style={styles.buttonText}>Confirmar suposición</Text>
-              </Pressable>
-              <Pressable style={styles.button} onPress={() => setAssumptionOpacity(0)}>
-                <Text style={styles.buttonText}>Cancelar</Text>
-              </Pressable>
-            </>
-          ) : null}
+        <View style={[styles.assumptionContainer, { opacity: assumptionOpacity }]}>
+          <Text style={styles.text}>Supones que {killerPrefix} {killer} ha asesinado {victimPrefix} {victim} en {roomPrefix} {room}</Text>
+          <View style={styles.buttonsContainer}>
+            {(victim !== null && killer !== null) ? (
+              <>
+                <Pressable style={styles.button} onPress={manageAssumption}>
+                  <Text style={styles.buttonText}>Confirmar suposición</Text>
+                </Pressable>
+                <Pressable style={styles.button} onPress={() => setAssumptionOpacity(0)}>
+                  <Text style={styles.buttonText}>Cancelar</Text>
+                </Pressable>
+              </>
+            ) : null}
+          </View>
         </View>
-      </View>
-    )
+      )
   }
+  const cancelAccuse = () => {
+    setInstructionText("Selecciona un sospechoso y una víctima con los botones MIS y TE (ten en cuenta tus cartas)");
+    setShowAccuseButtons(false);
+    setShowComputerCard(false);
+  }
+  const toAccuse = () => {
+        router.push('/accuse');
+  }
+
   return (
     <>
       <ShowCardsButton onPress={handleShowCardsPress} />
@@ -453,6 +503,18 @@ export default function Room() {
         <View style={styles.instructionsContainer}>
           <View style={styles.instructionsCloud}>
             <Text style={styles.text}>{instructionText}</Text>
+            {showAccuseButtons ? 
+              <View style={styles.buttonsContainer}>
+                  <>
+                    <Pressable style={styles.button} onPress={toAccuse}>
+                      <Text style={styles.accuseText}>Acuso</Text>
+                    </Pressable>
+                    <Pressable style={styles.button} onPress={cancelAccuse}>
+                      <Text style={styles.buttonText}>Cancelar</Text>
+                    </Pressable>
+                  </>
+              </View> : null
+            }
           </View>
         </View>
         {!showComputerCard ? charactersSection() : showOcurrences()} 
@@ -584,7 +646,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     marginTop: 10,
     justifyContent: "space-between",
-    width: "90%",
+    width: "100%",
   },
   button: {
     backgroundColor: "green",
@@ -610,16 +672,16 @@ const styles = StyleSheet.create({
   },
   flipCardFront: {
     position: 'absolute',
-    width: 100,
-    height: 175,
+    width: 160,
+    height: 320,
     justifyContent: 'center',
     alignItems: 'center',
     borderRadius: 10,
     marginTop: 20
   },
   flipCardBack: {
-    width: 110, 
-    height: 205, 
+    width: 170, 
+    height: 340, 
     resizeMode: "cover", 
     borderRadius: 10, 
     backgroundColor: 'black', 
@@ -628,10 +690,6 @@ const styles = StyleSheet.create({
     marginTop: 5, 
     alignItems: 'center',
     justifyContent: 'center' 
-  },
-  iconContainer: {
-    justifyContent: 'center',
-    alignItems: 'center',
   },
   bigCardText: {
     fontFamily: 'Creepster-Regular',
@@ -647,12 +705,12 @@ const styles = StyleSheet.create({
   },
   computerCharacterName: {
     fontFamily: "Creepster-Regular",
-    fontSize: 12,
+    fontSize: 15,
     marginTop: 10
   },
   computerCharacter: {
-    height: 170,
-    width: 100,
+    height: 300,
+    width: 160,
   },
   pressCardContainer: {
     flexDirection: 'row', 
@@ -660,18 +718,24 @@ const styles = StyleSheet.create({
   },
   iconContainer: {
     flexDirection: "column", 
-    alignItems: "center"
+    alignItems: "center",
+    justifyContent: 'center',
+    width: '70%'
   },
   pressText: { 
     color: "white", 
-    marginTop: "10", 
-    marginRight: 20, 
+    marginTop: 10, 
     fontFamily: 'Creepster-Regular', 
     fontSize: 20
   },
   iconStyles: {
     fontSize: 48, 
-    marginTop: "20" 
-    }
+    marginTop: 20
+  },
+  accuseText: {
+    fontSize: 15,
+    fontFamily: 'Creepster-Regular',
+    color: 'white'
+  }
   
 });

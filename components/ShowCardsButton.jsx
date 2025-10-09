@@ -75,7 +75,6 @@ export function ShowCardsButton({ onPress }){
       setPlayerCards(playerCardsWithoutSpaces);
       setCardNames(playerCardsWithSpaces);
     });
-    
   }, []);
 const showCards = () => {
     onPress();
