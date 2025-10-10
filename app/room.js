@@ -383,7 +383,6 @@ export default function Room() {
     assumption.push(killer);
     assumption.push(victim);
     assumption.push(room);
-    console.log('assumption', assumption)
     const ocurrences = assumption.filter(elemento => computerCards.includes(elemento));
       setAssumptionComputerCards(ocurrences);
       console.log('ocurrences', ocurrences);
@@ -409,6 +408,7 @@ Cuidado! Si acusas y no estás en lo cierto habrás perdido la partida.
 Revisa bien tus cartas`)
         }
       }
+    console.log('assumption', assumption)
 
 
 
@@ -479,7 +479,11 @@ Revisa bien tus cartas`)
     setShowComputerCard(false);
   }
   const toAccuse = () => {
-        router.push('/accuse');
+    console.log(typeof assumption)
+        router.push({
+          pathname: "/accuse",
+          params:  assumption , 
+        });
   }
 
   return (
