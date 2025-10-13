@@ -127,7 +127,7 @@ const showCards = () => {
               onPress={showCards}
             >
               <Text style={styles.yourCardsText}>Tus cartas</Text>
-                <ImageBackground style={[styles.card, { borderWidth: cardBorderWidth, borderColor: cardBorderColor, position: position, borderRadius: 8, marginTop: cardMarginTop }]} source={card1} resizeMode="cover">
+                <ImageBackground style={[styles.card, { borderWidth: cardBorderWidth, borderColor: cardBorderColor, position: position, marginTop: cardMarginTop, borderRadius: 10 }]} source={card1} resizeMode="cover">
                   <Text style={styles.cardName}>{cardNames[0]}</Text>
               </ImageBackground>
               

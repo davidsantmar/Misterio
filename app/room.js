@@ -112,20 +112,34 @@ export default function Room() {
         assumptionComputerCards.splice(0, 1);
         assumptionComputerCards.splice(0, 1, 'Hombrelobo');
       }
+       if (assumptionComputerCards[0] === 'Drácula'){
+        assumptionComputerCards.splice(0, 1);
+        assumptionComputerCards.splice(0, 1, 'Dracula');
+      }
       setComputerCardCharacter(killersMap[assumptionComputerCards[0]])
     } else if (teComputerCards.length > 0) {
       setBigCardText('TE');
-      if (assumptionComputerCards[0] === 'Ama de llaves'){
+      if (assumptionComputerCards[1] === 'Ama de llaves'){
         assumptionComputerCards.splice(0, 1);
         assumptionComputerCards.splice(0, 1, 'Amadellaves');
       }
       setComputerCardCharacter(victimsMap[assumptionComputerCards[0]])
     } else if (rioComputerCards.length > 0) {
       setBigCardText('RIO');
+      if (assumptionComputerCards[2] === 'Panteón'){
+        assumptionComputerCards.splice(0, 1);
+        assumptionComputerCards.splice(0, 1, 'Panteon');
+      }
+      if (assumptionComputerCards[2] === 'Salón'){
+        assumptionComputerCards.splice(0, 1);
+        assumptionComputerCards.splice(0, 1, 'Salon');
+      }
+      if (assumptionComputerCards[2] === 'Vestíbulo'){
+        assumptionComputerCards.splice(0, 1);
+        assumptionComputerCards.splice(0, 1, 'Vestibulo');
+      }
       setComputerCardCharacter(roomsMap[assumptionComputerCards[0]])
     }
-          console.log('assumptionComputerCards', assumptionComputerCards);
-
   }, [assumptionComputerCards, killers, victims, rooms]);
   useEffect(() => {
     getPlayer().then((player) => {
@@ -676,16 +690,12 @@ const styles = StyleSheet.create({
   },
   flipCardFront: {
     position: 'absolute',
-    width: 160,
-    height: 320,
     justifyContent: 'center',
-    alignItems: 'center',
-    borderRadius: 10,
-    marginTop: 20
+    alignItems: 'center'  
   },
   flipCardBack: {
-    width: 170, 
-    height: 340, 
+    width: 200, 
+    height: 350, 
     resizeMode: "cover", 
     borderRadius: 10, 
     backgroundColor: 'black', 
@@ -713,8 +723,8 @@ const styles = StyleSheet.create({
     marginTop: 10
   },
   computerCharacter: {
-    height: 300,
-    width: 160,
+    height: 310,
+    width: 190,
   },
   pressCardContainer: {
     flexDirection: 'row', 
