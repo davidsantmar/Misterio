@@ -7,7 +7,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export function ChoosePlayer() {
   const [gifSource, setGifSource] = useState(require('../assets/gifs/Intro_Nely.gif'));
-  const [openDoor, setOpenDoor] = useState(null);
+  const [buttonPress, setButtonPress] = useState(null);
   const [start, setStart] = useState(null);
   const [playerCharge, setPlayerCharge] = useState('Detective Nely')
   const [loaded, error] = useFonts({  //to load and use font
@@ -44,12 +44,12 @@ export function ChoosePlayer() {
           console.log("Liberando start");
           start.unloadAsync();
         }
-        if (openDoor) {
-          console.log("Liberando openDoor");
-          openDoor.unloadAsync();
+        if (buttonPress) {
+          console.log("Liberando buttonPress");
+          buttonPress.unloadAsync();
         }
       };
-    },[openDoor, start]);
+    },[buttonPress, start]);
     async function playStart() {
       console.log("Cargando start");
       try {
@@ -78,33 +78,35 @@ export function ChoosePlayer() {
       console.error('Error al guardar el player:', error);
     }
   };
-  async function playOpenDoor() {
-      console.log("Cargando openDoor");
+  async function playButtonPress() {
+      console.log("Cargando buttonPress");
       try {
-        if (openDoor) {
+        if (buttonPress) {
           // Si el sonido ya está cargado, reutilízalo
-          console.log("Reproduciendo openDoor existente");
-          await openDoor.replayAsync();
+          console.log("Reproduciendo buttonPress existente");
+          await buttonPress.replayAsync();
           return;
         }
   
         const { sound } = await Audio.Sound.createAsync(
-          require("../assets/sounds/open-door.mp3")
+          require("../assets/sounds/button-press.mp3")
         );
-        setOpenDoor(sound);
-        console.log("Reproduciendo openDoor");
+        setButtonPress(sound);
+        console.log("Reproduciendo buttonPress");
         await sound.playAsync();
       } catch (error) {
-        console.error("Error al reproducir openDoor:", error);
+        console.error("Error al reproducir buttonPress:", error);
       }
     }
     const toEntry = () => {
       storePlayer(playerChoose);
+      playButtonPress();
       router.push({
           pathname: '/cardShuffle',
         });
     }
   const toAnotherPlayer = () => {
+    playButtonPress();
    setPlayerChoose(prevPlayer => 
     prevPlayer === 'Nely' ? 'David' : 'Nely'
    )

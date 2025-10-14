@@ -7,10 +7,12 @@ import {
   ImageBackground,
 } from "react-native";
 import { useRouter } from "expo-router";
+import { Audio } from "expo-av";
 
 export function DiceRoll() {
   const [diceValue, setDiceValue] = useState(0);
   const [rotation] = useState(new Animated.Value(0));
+  const [diceRoll, setDiceRoll] = useState(null);
   const router = useRouter();
   useEffect(() => {
       if (diceValue === 0) return; // Ignora el valor inicial
@@ -26,8 +28,44 @@ export function DiceRoll() {
   // Genera el dado al montar
   useEffect(() => {
     rollDice();
+    diceRollSound();
   }, []);
-
+  useEffect(() => {
+      Audio.setAudioModeAsync({
+        allowsRecordingIOS: false,
+        playsInSilentModeIOS: true,
+        staysActiveInBackground: false,
+        shouldDuckAndroid: true,
+      });
+  
+      // Liberación de sonidos al desmontar el componente
+      return () => {
+        if (diceRoll) {
+          console.log("Liberando diceRoll");  
+          diceRoll.unloadAsync();
+        }
+      };
+    },[diceRoll]);
+    async function diceRollSound() {
+      console.log("Cargando diceRoll");
+      try {
+        if (diceRoll) {
+          // Si el sonido ya está cargado, reutilízalo
+          console.log("Reproduciendo diceRoll existente");
+          await diceRoll.replayAsync();
+          return;
+        }
+  
+        const { sound } = await Audio.Sound.createAsync(
+          require("../assets/sounds/diceRoll.mp3")
+        );
+        setDiceRoll(sound);
+        console.log("Reproduciendo diceRoll");
+        await sound.playAsync();
+      } catch (error) {
+        console.error("Error al reproducir diceRoll:", error);
+      }
+    }
   const rollDice = () => {
     const newValue = Math.floor(Math.random() * 6) + 1;
     setDiceValue(newValue);

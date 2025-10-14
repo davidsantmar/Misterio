@@ -1,11 +1,13 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { View, Animated, StyleSheet, Dimensions, Text, Image, ImageBackground } from 'react-native';
+import { Audio } from "expo-av";
 
 const { width, height } = Dimensions.get('window');
 
 export function CardIntoEnvelope({ text }) {
   const cardAnim = useRef(new Animated.ValueXY({ x: 0, y: 0 })).current;
   const scaleAnim = useRef(new Animated.Value(1)).current;
+  const [shuffling, setShuffling] = useState(null);
 
   useEffect(() => {
     Animated.sequence([
@@ -28,8 +30,44 @@ export function CardIntoEnvelope({ text }) {
         useNativeDriver: true,
       }),
     ]).start();
+    shufflingSound();
   }, [text]);
- 
+  useEffect(() => {
+      Audio.setAudioModeAsync({
+        allowsRecordingIOS: false,
+        playsInSilentModeIOS: true,
+        staysActiveInBackground: false,
+        shouldDuckAndroid: true,
+      });
+  
+      // Liberación de sonidos al desmontar el componente
+      return () => {
+        if (shuffling) {
+          console.log("Liberando shuffling");
+          shuffling.unloadAsync();
+        }
+      };
+    },[shuffling]);
+  async function shufflingSound() {
+        console.log("Cargando shuffling");
+        try {
+          if (shuffling) {
+            // Si el sonido ya está cargado, reutilízalo
+            console.log("Reproduciendo shuffling existente");
+            await shuffling.replayAsync();
+            return;
+          }
+    
+          const { sound } = await Audio.Sound.createAsync(
+            require("../assets/sounds/shuffling-cards.mp3")
+          );
+          setShuffling(sound);
+          console.log("Reproduciendo shuffling");
+          await sound.playAsync();
+        } catch (error) {
+          console.error("Error al reproducir shuffling:", error);
+        }
+      }
   return (
     <View style={styles.container}>
       {/* Carta animada */}

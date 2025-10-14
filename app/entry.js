@@ -2,11 +2,78 @@ import { View, Text, Pressable, ImageBackground, StyleSheet } from 'react-native
 import { useRouter } from "expo-router";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ShowCardsButton } from '../components/ShowCardsButton';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { Audio } from "expo-av";
 
 export default function Entry() {
   const router = useRouter();
   const [opacityBack, setOpacityBack] = useState(1);
+  const [leak, setLeak] = useState(null);
+  const [rats, setRats] = useState(null);
+  useEffect(() => {
+    playLeak();
+    playRats();
+  }, [])
+   useEffect(() => {
+        Audio.setAudioModeAsync({
+          allowsRecordingIOS: false,
+          playsInSilentModeIOS: true,
+          staysActiveInBackground: false,
+          shouldDuckAndroid: true,
+        });
+    
+        // Liberación de sonidos al desmontar el componente
+        return () => {
+          if (leak) {
+            console.log("Liberando leak");
+            leak.unloadAsync();
+          }
+          if (rats) {
+            console.log("Liberando rats");
+            rats.unloadAsync();
+          }
+        };
+      }, [leak, rats]);
+    async function playLeak() {
+        console.log("Cargando leak");
+        try {
+          if (leak) {
+            // Si el sonido ya está cargado, reutilízalo
+            console.log("Reproduciendo leak existente");
+            await leak.replayAsync();
+            return;
+          }
+
+          const { sound } = await Audio.Sound.createAsync(
+            require("../assets/sounds/leak.mp3")
+          );
+          setLeak(sound);
+          console.log("Reproduciendo leak");
+          await sound.playAsync();
+        } catch (error) {
+          console.error("Error al reproducir leak:", error);
+        }
+    }
+    async function playRats() {
+        console.log("Cargando rats");
+        try {
+          if (rats) {
+            // Si el sonido ya está cargado, reutilízalo
+            console.log("Reproduciendo rats existente");
+            await rats.replayAsync();
+            return;
+          }
+
+          const { sound } = await Audio.Sound.createAsync(
+            require("../assets/sounds/rats.mp3")
+          );
+          setRats(sound);
+          console.log("Reproduciendo rats");
+          await sound.playAsync();
+        } catch (error) {
+          console.error("Error al reproducir rats:", error);
+        }
+    }
   const handleShowCardsPress = () => {
     setOpacityBack(opacityBack === 1 ? 0.5 : 1);
   };

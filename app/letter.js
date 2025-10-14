@@ -1,15 +1,81 @@
 import { ImageBackground, Text, StyleSheet, Pressable, View } from "react-native";
 import { useFonts } from 'expo-font';
 import { useRouter } from "expo-router";
+import { useEffect, useState } from "react";
+import { Audio } from "expo-av";
 
 export default function Letter(){
     const [loaded, error] = useFonts({  //to load and use font
         'ShadowsIntoLightTwo': require('../assets/fonts/ShadowsIntoLightTwo.ttf'), 
     });
+    const [letterSound, setLetterSound] = useState(null);
+    const [buttonPress, setButtonPress] = useState(null);
     const router = useRouter();
-
+    useEffect(() => {
+        playLetterSound();
+    }, [])
+    useEffect(() => {
+      Audio.setAudioModeAsync({
+        allowsRecordingIOS: false,
+        playsInSilentModeIOS: true,
+        staysActiveInBackground: false,
+        shouldDuckAndroid: true,
+      });
+  
+      // Liberación de sonidos al desmontar el componente
+      return () => {
+        if (letterSound) {
+          console.log("Liberando letterSound");
+          letterSound.unloadAsync();
+        }
+       if (buttonPress) {
+          console.log("Liberando buttonPress");
+          buttonPress.unloadAsync();
+        }
+      };
+    }, [letterSound, buttonPress]);
+    async function playLetterSound() {
+        console.log("Cargando letterSound");
+        try {
+        if (letterSound) {
+            // Si el sonido ya está cargado, reutilízalo
+            console.log("Reproduciendo letterSound existente");
+            await letterSound.replayAsync();
+            return;
+        }
+    
+        const { sound } = await Audio.Sound.createAsync(
+            require("../assets/sounds/letter.mp3")
+        );
+        setLetterSound(sound);
+        console.log("Reproduciendo letterSound");
+        await sound.playAsync();
+        } catch (error) {
+        console.error("Error al reproducir letterSound:", error);
+        }
+    }
+    async function playButtonPress() {
+        console.log("Cargando buttonPress");
+        try {
+        if (buttonPress) {
+            // Si el sonido ya está cargado, reutilízalo
+            console.log("Reproduciendo buttonPress existente");
+            await buttonPress.replayAsync();
+            return;
+        }
+    
+        const { sound } = await Audio.Sound.createAsync(
+            require("../assets/sounds/button-press.mp3")
+        );
+        setButtonPress(sound);
+        console.log("Reproduciendo buttonPress");
+        await sound.playAsync();
+        } catch (error) {
+        console.error("Error al reproducir buttonPress:", error);
+        }
+    }
     const toSelectPlayer = () => {
-        //playOpenDoor();
+        playButtonPress();
         router.push({
             pathname: '/player',
         });

@@ -10,11 +10,11 @@ export function Intro () {
         'Creepster-Regular': require('../assets/fonts/Creepster-Regular.ttf'), 
     });
     const [start, setStart] = useState(null);
-    const [openDoor, setOpenDoor] = useState(null);
+    const [buttonPress, setButtonPress] = useState(null);
     const router = useRouter();
     useEffect(() => {
-        playStart();
-    }, [])
+       playStart();
+    }, []) 
     useEffect(() => {
       Audio.setAudioModeAsync({
         allowsRecordingIOS: false,
@@ -29,12 +29,12 @@ export function Intro () {
           console.log("Liberando start");
           start.unloadAsync();
         }
-        if (openDoor) {
-          console.log("Liberando openDoor");
-          openDoor.unloadAsync();
+        if (buttonPress) {
+          console.log("Liberando buttonPress");
+          buttonPress.unloadAsync();
         }
       };
-    }, [start, openDoor]);
+    }, [start, buttonPress]);
     async function playStart() {
       console.log("Cargando start");
       try {
@@ -55,28 +55,28 @@ export function Intro () {
         console.error("Error al reproducir start:", error);
       }
     }
-    async function playOpenDoor() {
-      console.log("Cargando openDoor");
+    async function playButtonPress() {
+      console.log("Cargando buttonPress");
       try {
-        if (openDoor) {
+        if (buttonPress) {
           // Si el sonido ya está cargado, reutilízalo
-          console.log("Reproduciendo openDoor existente");
-          await openDoor.replayAsync();
+          console.log("Reproduciendo buttonPress existente");
+          await buttonPress.replayAsync();
           return;
         }
   
         const { sound } = await Audio.Sound.createAsync(
-          require("../assets/sounds/open-door.mp3")
+          require("../assets/sounds/button-press.mp3")
         );
-        setOpenDoor(sound);
-        console.log("Reproduciendo openDoor");
+        setButtonPress(sound);
+        console.log("Reproduciendo buttonPress");
         await sound.playAsync();
       } catch (error) {
-        console.error("Error al reproducir openDoor:", error);
+        console.error("Error al reproducir buttonPress:", error);
       }
     }
     const toLetter = () => {
-        playOpenDoor();
+        playButtonPress();
         router.push({
             pathname: '/letter',
         });
