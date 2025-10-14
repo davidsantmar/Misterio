@@ -30,6 +30,7 @@ export default function Accuse() {
   const assumption = useLocalSearchParams();
   const [assumptionManaged, setAssumptionManaged] = useState([]);
   const [envelopeCards, setEnvelopeCards] = useState([]);
+  const [backFlip, setBackFlip] = useState(false);
   const [result, setResult] = useState(null);
   const router = useRouter();
 
@@ -122,8 +123,8 @@ export default function Accuse() {
       });
 
       setEnvelopeCards(mapped);
-      setEnveloped(envelope)
-
+      setEnveloped(envelope);
+      setBackFlip(true);
       // Comparar arrays
       if (assumptionManaged.length && mapped.length &&
           assumptionManaged.every((v, i) => v === mapped[i])) {
@@ -185,8 +186,16 @@ export default function Accuse() {
           },
         ]}
       >
-        <Text style={styles.characterName}>{enveloped[0]}</Text>
-        <Image style={styles.character} source={killersMap[envelopeCards[0]]} />
+        { backFlip ? ( 
+          <>
+            <Text style={styles.characterName}>{enveloped[0]}</Text>
+            <Image style={styles.character} source={killersMap[envelopeCards[0]]} />
+          </>
+        ) : ( 
+            <View style={styles.backColorCard}>
+            <Text style={styles.cardAnimatedText}>MIS</Text>
+          </View>
+        )}
       </Animated.View>
 
       <Animated.View
@@ -198,8 +207,16 @@ export default function Accuse() {
           },
         ]}
       >
-        <Text style={styles.characterName}>{enveloped[1]}</Text>
-        <Image style={styles.character} source={victimsMap[envelopeCards[1]]} />
+        { backFlip ? ( 
+          <>
+          <Text style={styles.characterName}>{enveloped[1]}</Text>
+          <Image style={styles.character} source={victimsMap[envelopeCards[1]]} />
+        </>
+        ) : (
+          <View style={styles.backColorCard}>
+            <Text style={styles.cardAnimatedText}>TE</Text>
+          </View>
+        )}
       </Animated.View>
 
       <Animated.View
@@ -211,8 +228,16 @@ export default function Accuse() {
           },
         ]}
       >
-        <Text style={styles.characterName}>{enveloped[2]}</Text>
-        <Image style={styles.character} source={roomsMap[envelopeCards[2]]} />
+        { backFlip ? ( 
+          <>
+          <Text style={styles.characterName}>{enveloped[2]}</Text>
+          <Image style={styles.character} source={roomsMap[envelopeCards[2]]} />
+        </>
+        ) : ( 
+          <View style={styles.backColorCard}>
+            <Text style={styles.cardAnimatedText}>RIO</Text>
+          </View>
+        )}
       </Animated.View>
 
       <ImageBackground
@@ -302,7 +327,6 @@ const styles = StyleSheet.create({
     bottom: 140,
     width: 105,
     height: 170,
-    backgroundColor: "white",
     borderRadius: 10,
     alignItems: "center",
     justifyContent: "center",
@@ -330,7 +354,7 @@ const styles = StyleSheet.create({
   winText: {
     color: "limegreen",
   },
-    button : {
+  button : {
     backgroundColor: 'green',
     alignItems: 'center',
     justifyContent: 'center',
@@ -341,5 +365,20 @@ const styles = StyleSheet.create({
   button_text: {
     fontFamily: 'Creepster-Regular',
     fontSize: 20
+  },
+  backColorCard: {
+    height: 190,
+    width: 105,
+    backgroundColor: 'black',
+    borderRadius: 10,
+    borderWidth: 2,
+    borderColor: 'red',
+    alignItems: 'center',
+    justifyContent: 'center'
+  },
+  cardAnimatedText: {
+    fontSize:40,
+    color: 'white',
+    fontFamily: 'Creepster-Regular'
   }
 });
