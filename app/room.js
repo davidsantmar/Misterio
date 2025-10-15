@@ -4,6 +4,8 @@ import { useEffect, useState, useRef } from "react";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ShowCardsButton } from "../components/ShowCardsButton";
 import { TouchIcon } from "../components/Icons";
+import { Audio } from "expo-av";
+
 const killersMap = {
   MrHyde: require('../assets/images/mis/MrHyde.png'),
   Dracula: require('../assets/images/mis/Dracula.png'),
@@ -69,9 +71,126 @@ export default function Room() {
   const [computerCardCharacter, setComputerCardCharacter] = useState(null);
   const [computerCardNameToShow, setComputerCardNameToShow] = useState(null);
   const [showAccuseButtons, setShowAccuseButtons] = useState(false);
+  const [buttonPress, setButtonPress] = useState(null);
+  const [cardsDeployed, setCardsDeployed] = useState(null);
+  const [showcards, setShowcards] = useState(null);
+  const [hidecards, setHidecards] = useState(null);
+  const [shine, setShine] = useState(null);
+  useEffect(() => {
+      Audio.setAudioModeAsync({
+        allowsRecordingIOS: false,
+        playsInSilentModeIOS: true,
+        staysActiveInBackground: false,
+        shouldDuckAndroid: true,
+      });
+  
+      // Liberación de sonidos al desmontar el componente
+      return () => {
+       
+        if (buttonPress) {
+          console.log("Liberando buttonPress");
+          buttonPress.unloadAsync();
+        }
+         if (hidecards) {
+          console.log("Liberando hidecards");
+          hidecards.unloadAsync();
+        }
+        if (showcards) {
+          console.log("Liberando showcards");
+          showcards.unloadAsync();
+        }
+        if (shine) {
+          console.log("Liberando shine");
+          shine.unloadAsync();
+        }
+      };
+    },[buttonPress, hidecards, showcards, shine]);
   const handleShowCardsPress = () => {
+    !cardsDeployed ? playShowcards() : playHidecards();
     setOpacityBack(opacityBack === 1 ? 0.5 : 1);
   };
+  async function playShowcards() {
+          setCardsDeployed(true);
+          console.log("Cargando showcards");
+          try {
+            if (showcards) {
+              // Si el sonido ya está cargado, reutilízalo
+              console.log("Reproduciendo showcards existente");
+              await showcards.replayAsync();
+              return;
+            }
+      
+            const { sound } = await Audio.Sound.createAsync(
+              require("../assets/sounds/showcards.mp3")
+            );
+            setShowcards(sound);
+            console.log("Reproduciendo showcards");
+            await sound.playAsync();
+          } catch (error) {
+            console.error("Error al reproducir showcards:", error);
+          }
+        }
+        async function playHidecards() {
+          setCardsDeployed(false);
+          console.log("Cargando hidecards");
+          try {
+            if (hidecards) {
+              // Si el sonido ya está cargado, reutilízalo
+              console.log("Reproduciendo hidecards existente");
+              await hidecards.replayAsync();
+              return;
+            }
+      
+            const { sound } = await Audio.Sound.createAsync(
+              require("../assets/sounds/hidecards.mp3")
+            );
+            setHidecards(sound);
+            console.log("Reproduciendo hidecards");
+            await sound.playAsync();
+          } catch (error) {
+            console.error("Error al reproducir hidecards:", error);
+          }
+        }
+   async function playButtonPress() {
+        console.log("Cargando buttonPress");
+        try {
+          if (buttonPress) {
+            // Si el sonido ya está cargado, reutilízalo
+            console.log("Reproduciendo buttonPress existente");
+            await buttonPress.replayAsync();
+            return;
+          }
+    
+          const { sound } = await Audio.Sound.createAsync(
+            require("../assets/sounds/button-press.mp3")
+          );
+          setButtonPress(sound);
+          console.log("Reproduciendo buttonPress");
+          await sound.playAsync();
+        } catch (error) {
+          console.error("Error al reproducir buttonPress:", error);
+        }
+      }
+      async function playShine() {
+        console.log("Cargando shine");
+        try {
+          if (shine) {
+            // Si el sonido ya está cargado, reutilízalo
+            console.log("Reproduciendo shine existente");
+            await shine.replayAsync();
+            return;
+          }
+    
+          const { sound } = await Audio.Sound.createAsync(
+            require("../assets/sounds/card-appears.mp3")
+          );
+          setShine(sound);
+          console.log("Reproduciendo shine");
+          await sound.playAsync();
+        } catch (error) {
+          console.error("Error al reproducir shine:", error);
+        }
+      }
   const getData = async (data) => {
     try {
       const stringArray = await AsyncStorage.getItem(data); // Obtener la cadena
@@ -239,6 +358,7 @@ export default function Room() {
     outputRange: [0, 1],
   });
   const showSection = (section) => {
+    playButtonPress();
     setSelectedSection(section); // Update the selected section
     if (section === "killers") {
       setKillersOpacity(1); // Show killers
@@ -370,6 +490,7 @@ export default function Room() {
     return null; // Return nothing if no section is selected
   };
   const manejarPresionInicio = () => {
+    playShine();
     Animated.timing(rotacionAnimada, {
       toValue: 180, // Rotar a 180 grados
       duration: 600, // Duración de la animación (como en el CSS)
@@ -386,6 +507,7 @@ export default function Room() {
     }).start();
   };
   const manageAssumption = () => {
+    playButtonPress();
     setAssumptionOpacity(0);
     // También podrías resetear los estados si es necesario
     /*setKiller("");
@@ -423,15 +545,6 @@ Revisa bien tus cartas`)
         }
       }
     console.log('assumption', assumption)
-
-
-
-    //contenido de sobre para comparar al acusar definitivo
-    getData('envelope').then((retrievedEnvelope) => {
-      if (retrievedEnvelope) {
-        console.log('Sobre guardado:', retrievedEnvelope);
-      }
-    });
   } 
  
     const showOcurrences = () => {
@@ -488,16 +601,17 @@ Revisa bien tus cartas`)
       )
   }
   const cancelAccuse = () => {
+    playButtonPress();
     setInstructionText("Selecciona un sospechoso y una víctima con los botones MIS y TE (ten en cuenta tus cartas)");
     setShowAccuseButtons(false);
     setShowComputerCard(false);
   }
   const toAccuse = () => {
-    console.log(typeof assumption)
-        router.push({
-          pathname: "/accuse",
-          params:  assumption , 
-        });
+    playButtonPress();
+      router.push({
+        pathname: "/accuse",
+        params:  assumption , 
+      });
   }
 
   return (

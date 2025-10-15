@@ -83,12 +83,14 @@ export default function Letter(){
     return(
        <ImageBackground style={styles.container}  source={require ('../assets/images/letter-back.png')}>
             <View style={styles.textContainer}>
-                <Text style={styles.letterText}>
+                <View style={{ transform: [{ rotate: '3deg' }] }}>
+                    <Text style={styles.letterText}>
                     Le contactamos para encargarle la investigación del misterio del castillo de Transilvania.
                     Un excéntrico aristócrata y la servidumbre que allí vivía han desaparecido en extrañas circunstancias. 
                     Los únicos datos que se tienen están basados en leyendas y supersticiones de las gentes del lugar, 
                     sobre los monstruos que habitan en el castillo y que en las noches de luna llena regresan, y atacan a todo aquel que ose vivir o pasar por allí.
-                </Text>
+                    </Text>
+                </View>
                 <View style={styles.signatureContainer}>
                     <Text style={styles.signatureTitle}>
                         La Talamasca
@@ -119,24 +121,21 @@ const styles = StyleSheet.create({
     letterText: {
         fontFamily: 'ShadowsIntoLightTwo',
         fontSize: 16,
-        transform: [{ rotate: '3deg' }],
         marginLeft: 20
     },
     signatureContainer: {
         marginLeft: 130,
-        transform: [{ rotate: '3deg' }],
         width: '90%',
         marginTop: 25,
+        transform: [{ rotate: '3deg'}]
     },
     signatureTitle: {
         fontFamily: 'ShadowsIntoLightTwo',
         fontSize: 12,
-        transform: [{ rotate: '1deg' }] 
     },
     signatureText: {
         fontFamily: 'ShadowsIntoLightTwo',
         fontSize: 12,
-        transform: [{ rotate: '1deg' }] 
     },
   button: {
     backgroundColor: "rgba(255, 255, 255, 0.8)",

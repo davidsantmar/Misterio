@@ -5,12 +5,15 @@ import { BackArrow, ForwardArrow, LeftArrow, RightArrow, SpiderIcon } from "./Ic
 import { useState, useEffect, useRef } from "react";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ShowCardsButton } from "./ShowCardsButton";
+import { Audio } from "expo-av";
+
 
 export function BoardFloor({ diceValue }) {
 const bounceAnim = useRef(new Animated.Value(0)).current;
 const [opacityBack, setOpacityBack] = useState(1);
 const [activateLoop, setActivateLoop] = useState(false); // Add this state
 const handleShowCardsPress = () => {
+  !cardsDeployed ? playShowcards() : playHidecards();
   setOpacityBack(opacityBack === 1 ? 0.5 : 1);
 };
   const [loaded, error] = useFonts({
@@ -64,7 +67,13 @@ const handleShowCardsPress = () => {
   ];
   const [colors, setColors] = useState(board.map(() => '#808080')); // Color inicial para cada stone
   const [borderColors, setBorderColors] = useState(board.map(() => 'black')); 
-  
+  const [rainSound, setRainSound] = useState(null);
+  const [diceSound, setDiceSound] = useState(null);
+  const [footSteps, setFootSteps] = useState(null);
+  const [openDoor, setOpenDoor] = useState(null);
+const [showcards, setShowcards] = useState(null);
+  const [hidecards, setHidecards] = useState(null);
+  const [cardsDeployed, setCardsDeployed] = useState(null);
   const updateBorderColors = (storedValue, diceValue) => {
     setBorderColors((prevColors) => {
       const newColors = [...prevColors]; // Crear una copia del arreglo
@@ -82,9 +91,41 @@ const handleShowCardsPress = () => {
       return newColors; 
     });
   };
+  useEffect(() => {
+    playRainSound();
+  }, [])
   const toDiceRoll = () => {
+    playDiceSound();
     router.push('/dice');
   };
+  useEffect(() => {
+        Audio.setAudioModeAsync({
+          allowsRecordingIOS: false,
+          playsInSilentModeIOS: true,
+          staysActiveInBackground: false,
+          shouldDuckAndroid: true,
+        });
+    
+        // Liberación de sonidos al desmontar el componente
+        return () => {
+          if (rainSound) {
+            console.log("Liberando rainSound");
+            rainSound.unloadAsync();
+          }
+          if (diceSound) {
+            console.log("Liberando diceSound");
+            diceSound.unloadAsync();
+          }
+          if (footSteps) {
+            console.log("Liberando footSteps");
+            footSteps.unloadAsync();
+          }
+          if (openDoor) {
+            console.log("Liberando openDoor");
+            openDoor.unloadAsync();
+          }
+        };
+      },[diceSound, rainSound, footSteps, openDoor]);
  useEffect(() => {
   if (!activateLoop) return; // Only start if activated
   const loop = Animated.loop(
@@ -142,7 +183,128 @@ const handleShowCardsPress = () => {
     newColors[position] = newColors[position] === '#FF6347' ? '#808080' : '#9cf1a7ff';
     setColors(newColors); // Actualizar el estado
   }, [position]);
+  async function playRainSound() {
+      console.log("Cargando rainSound");
+      try {
+        if (rainSound) {
+          // Si el sonido ya está cargado, reutilízalo
+          console.log("Reproduciendo rainSound existente");
+          await rainSound.replayAsync();
+          return;
+        }
   
+        const { sound } = await Audio.Sound.createAsync(
+          require("../assets/sounds/wolf-howl.mp3")
+        );
+        setRainSound(sound);
+        console.log("Reproduciendo rainSound");
+        await sound.playAsync();
+      } catch (error) {
+        console.error("Error al reproducir rainSound:", error);
+      }
+    }
+    async function playFootSteps() {
+      console.log("Cargando footSteps");
+      try {
+        if (footSteps) {
+          // Si el sonido ya está cargado, reutilízalo
+          console.log("Reproduciendo footSteps existente");
+          await footSteps.replayAsync();
+          return;
+        }
+  
+        const { sound } = await Audio.Sound.createAsync(
+          require("../assets/sounds/footsteps.mp3")
+        );
+        setFootSteps(sound);
+        console.log("Reproduciendo footSteps");
+        await sound.playAsync();
+      } catch (error) {
+        console.error("Error al reproducir footSteps:", error);
+      }
+    }
+    async function playOpenDoor() {
+      console.log("Cargando openDoor");
+      try {
+        if (openDoor) {
+          // Si el sonido ya está cargado, reutilízalo
+          console.log("Reproduciendo openDoor existente");
+          await openDoor.replayAsync();
+          return;
+        }
+  
+        const { sound } = await Audio.Sound.createAsync(
+          require("../assets/sounds/open-door.mp3")
+        );
+        setOpenDoor(sound);
+        console.log("Reproduciendo openDoor");
+        await sound.playAsync();
+      } catch (error) {
+        console.error("Error al reproducir openDoor:", error);
+      }
+    }
+    async function playShowcards() {
+        setCardsDeployed(true);
+        console.log("Cargando showcards");
+        try {
+          if (showcards) {
+            // Si el sonido ya está cargado, reutilízalo
+            console.log("Reproduciendo showcards existente");
+            await showcards.replayAsync();
+            return;
+          }
+    
+          const { sound } = await Audio.Sound.createAsync(
+            require("../assets/sounds/showcards.mp3")
+          );
+          setShowcards(sound);
+          console.log("Reproduciendo showcards");
+          await sound.playAsync();
+        } catch (error) {
+          console.error("Error al reproducir showcards:", error);
+        }
+      }
+      async function playHidecards() {
+        setCardsDeployed(false);
+        console.log("Cargando hidecards");
+        try {
+          if (hidecards) {
+            // Si el sonido ya está cargado, reutilízalo
+            console.log("Reproduciendo hidecards existente");
+            await hidecards.replayAsync();
+            return;
+          }
+    
+          const { sound } = await Audio.Sound.createAsync(
+            require("../assets/sounds/hidecards.mp3")
+          );
+          setHidecards(sound);
+          console.log("Reproduciendo hidecards");
+          await sound.playAsync();
+        } catch (error) {
+          console.error("Error al reproducir hidecards:", error);
+        }
+      }
+  async function playDiceSound() {
+      console.log("Cargando diceSound");
+      try {
+        if (diceSound) {
+          // Si el sonido ya está cargado, reutilízalo
+          console.log("Reproduciendo diceSound existente");
+          await diceSound.replayAsync();
+          return;
+        }
+  
+        const { sound } = await Audio.Sound.createAsync(
+          require("../assets/sounds/dice.mp3")
+        );
+        setDiceSound(sound);
+        console.log("Reproduciendo diceSound");
+        await sound.playAsync();
+      } catch (error) {
+        console.error("Error al reproducir diceSound:", error);
+      }
+    }
   const getPlayerPosition = async () => {
     try {
         const value = await AsyncStorage.getItem('position');
@@ -160,6 +322,7 @@ const handleShowCardsPress = () => {
     }
   };
   const stoneClicked = (index) => { //se guarda la position al clickar
+      playFootSteps();
       setInstructionsText('Tira el dado para continuar');
       setPosition(index)
       storePlayerPosition(index.toString());   
@@ -168,6 +331,7 @@ const handleShowCardsPress = () => {
       setDisabledSquare(true); // Disable squares after selection
   }
   const roomClicked = (room) => {
+    playOpenDoor();
     setDisabledRoom1(true);
     setDisabledRoom2(true);
     setDisabledRoom3(true);

@@ -57,7 +57,7 @@ export function DiceRoll() {
         }
   
         const { sound } = await Audio.Sound.createAsync(
-          require("../assets/sounds/diceRoll.mp3")
+          require("../assets/sounds/dice.mp3")
         );
         setDiceRoll(sound);
         console.log("Reproduciendo diceRoll");

@@ -1,6 +1,7 @@
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState, useRef } from "react";
 import { ImageBackground, StyleSheet, Text, View, Image, Animated, Pressable } from "react-native";
+import { useFonts } from 'expo-font';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const killersMap = {
@@ -32,6 +33,9 @@ export default function Accuse() {
   const [envelopeCards, setEnvelopeCards] = useState([]);
   const [backFlip, setBackFlip] = useState(false);
   const [result, setResult] = useState(null);
+  const [loaded, error] = useFonts({  //to load and use font
+        'SpecialElite': require('../assets/fonts/SpecialElite-Regular.ttf'), 
+    });
   const router = useRouter();
 
  // Animaciones sello
@@ -79,9 +83,9 @@ export default function Accuse() {
   }, []);
 
   // Transformaciones de posición/salida
-  const translateY1 = card1Anim.interpolate({ inputRange: [0, 1], outputRange: [200, 0] });
-  const translateY2 = card2Anim.interpolate({ inputRange: [0, 1], outputRange: [200, 0] });
-  const translateY3 = card3Anim.interpolate({ inputRange: [0, 1], outputRange: [200, 0] });
+  const translateY1 = card1Anim.interpolate({ inputRange: [0, 1], outputRange: [135, 0] });
+  const translateY2 = card2Anim.interpolate({ inputRange: [0, 1], outputRange: [135, 0] });
+  const translateY3 = card3Anim.interpolate({ inputRange: [0, 1], outputRange: [135, 0] });
 
   const rotate1 = card1Anim.interpolate({ inputRange: [0, 1], outputRange: ['0deg', '0deg'] });
   const rotate2 = card2Anim.interpolate({ inputRange: [0, 1], outputRange: ['0deg', '0deg'] });
@@ -301,7 +305,7 @@ const styles = StyleSheet.create({
   },
   characterName: {
     fontFamily: "Creepster-Regular",
-    fontSize: 15,
+    fontSize: 12,
   },
   character: {
     height: 160,
@@ -334,7 +338,7 @@ const styles = StyleSheet.create({
   resultStamp: {
     position: "absolute",
     top: 0,
-    left: 0,
+    left: 50,
     right: 0,
     bottom: 0,
     justifyContent: "center",
@@ -350,9 +354,11 @@ const styles = StyleSheet.create({
   },
   loseText: {
     color: "red",
+    fontFamily: 'SpecialElite'
   },
   winText: {
     color: "limegreen",
+    fontFamily: 'SpecialElite'
   },
   button : {
     backgroundColor: 'green',
@@ -360,7 +366,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     borderRadius: 10,
     padding: 10,
-    marginTop: 50
+    marginTop: 50,
+    marginRight: 50
   },
   button_text: {
     fontFamily: 'Creepster-Regular',

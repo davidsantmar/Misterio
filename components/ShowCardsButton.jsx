@@ -55,7 +55,7 @@ export function ShowCardsButton({ onPress }){
       const [cardBorderColor, setCardBorderColor] = useState('red');
       const [misText, setMisText] = useState('MIS');
       const [cardBorderWidth, setCardBorderWidth] = useState(2);
-      const [cardMarginTop, setCardMarginTop] = useState(20);
+      const [cardMarginTop, setCardMarginTop] = useState(30);
       const [cardTextFontSize, setCardTextFontSize] = useState(15);
       const [card1, setCard1] = useState('');
       const [card2, setCard2] = useState('');
@@ -97,7 +97,7 @@ const showCards = () => {
       prevText === playerCards[7] ? 'MIS' : playerCards[7]
     )
     setCardMarginTop(prevTop => 
-      prevTop === 10 ? 20 : 10
+      prevTop === 5 ? 30 : 5
     )
     setCardTextFontSize(prevFontSize =>
       prevFontSize === 7 ? 15 : 7
@@ -181,6 +181,8 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     justifyContent: 'center',
     alignItems: 'center',
+    borderRadius: 8,
+    overflow: 'hidden' //necesario para aplicarse en ImageBackground
   },
   cardName: {
     color: 'white',

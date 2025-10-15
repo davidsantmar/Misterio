@@ -10,71 +10,89 @@ export default function Entry() {
   const [opacityBack, setOpacityBack] = useState(1);
   const [leak, setLeak] = useState(null);
   const [rats, setRats] = useState(null);
+  const [soundsLoaded, setSoundsLoaded] = useState(false);
+  const [buttonPress, setButtonPress] = useState(null);
+  const [showcards, setShowcards] = useState(null);
+  const [hidecards, setHidecards] = useState(null);
+  const [cardsDeployed, setCardsDeployed] = useState(null);
+ // Cargar sonidos una vez al montar el componente
   useEffect(() => {
-    playLeak();
-    playRats();
-  }, [])
-   useEffect(() => {
-        Audio.setAudioModeAsync({
-          allowsRecordingIOS: false,
-          playsInSilentModeIOS: true,
-          staysActiveInBackground: false,
-          shouldDuckAndroid: true,
-        });
-    
-        // Liberación de sonidos al desmontar el componente
-        return () => {
-          if (leak) {
-            console.log("Liberando leak");
-            leak.unloadAsync();
-          }
-          if (rats) {
-            console.log("Liberando rats");
-            rats.unloadAsync();
-          }
-        };
-      }, [leak, rats]);
-    async function playLeak() {
-        console.log("Cargando leak");
-        try {
-          if (leak) {
-            // Si el sonido ya está cargado, reutilízalo
-            console.log("Reproduciendo leak existente");
-            await leak.replayAsync();
-            return;
-          }
+    const loadSounds = async () => {
+      try {
+        console.log("Cargando sonidos...");
+        
+        // Cargar leak
+        const { sound: leakSound } = await Audio.Sound.createAsync(
+          require("../assets/sounds/leak.mp3"),
+          { shouldPlay: true } // Reproducir inmediatamente después de cargar
+        );
+        setLeak(leakSound);
+        console.log("Leak cargado y reproduciéndose");
 
-          const { sound } = await Audio.Sound.createAsync(
-            require("../assets/sounds/leak.mp3")
-          );
-          setLeak(sound);
-          console.log("Reproduciendo leak");
-          await sound.playAsync();
-        } catch (error) {
-          console.error("Error al reproducir leak:", error);
-        }
-    }
-    async function playRats() {
-        console.log("Cargando rats");
-        try {
-          if (rats) {
-            // Si el sonido ya está cargado, reutilízalo
-            console.log("Reproduciendo rats existente");
-            await rats.replayAsync();
-            return;
-          }
+        // Cargar rats (en secuencia para evitar conflictos)
+        const { sound: ratsSound } = await Audio.Sound.createAsync(
+          require("../assets/sounds/rats.mp3"),
+          { shouldPlay: true } // Reproducir inmediatamente después de cargar
+        );
+        setRats(ratsSound);
+        console.log("Rats cargado y reproduciéndose");
+        
+        setSoundsLoaded(true);
+      } catch (error) {
+        console.error("Error cargando sonidos:", error);
+      }
+    };
 
-          const { sound } = await Audio.Sound.createAsync(
-            require("../assets/sounds/rats.mp3")
-          );
-          setRats(sound);
-          console.log("Reproduciendo rats");
-          await sound.playAsync();
-        } catch (error) {
-          console.error("Error al reproducir rats:", error);
+    loadSounds();
+
+    // Cleanup al desmontar
+    return () => {
+      const unloadSounds = async () => {
+        if (leak) {
+          await leak.unloadAsync();
+          console.log("Leak liberado");
         }
+        if (rats) {
+          await rats.unloadAsync();
+          console.log("Rats liberado");
+        }
+        if (buttonPress) {
+          console.log("Liberando buttonPress");
+          buttonPress.unloadAsync();
+        }
+        if (hidecards) {
+          console.log("Liberando hidecards");
+          hidecards.unloadAsync();
+        }
+        if (showcards) {
+          console.log("Liberando showcards");
+          showcards.unloadAsync();
+        }
+      };
+      unloadSounds();
+    };
+  }, []); // Solo se ejecuta una vez al montar
+
+  // Configurar modo de audio
+  useEffect(() => {
+    Audio.setAudioModeAsync({
+      allowsRecordingIOS: false,
+      playsInSilentModeIOS: true,
+      staysActiveInBackground: false,
+      shouldDuckAndroid: true,
+    });
+  }, []);
+
+  // Opcional: Reproducir sonidos cuando se carguen completamente
+  useEffect(() => {
+    if (soundsLoaded && leak && rats) {
+      // Los sonidos ya se reprodujeron al cargar, pero puedes hacer replay si es necesario
+      console.log("Todos los sonidos listos");
     }
+  }, [soundsLoaded, leak, rats]);
+
   const handleShowCardsPress = () => {
+    !cardsDeployed ? playShowcards() : playHidecards();
     setOpacityBack(opacityBack === 1 ? 0.5 : 1);
   };
   
@@ -85,13 +103,89 @@ export default function Entry() {
         console.log('error saving data');
     }
   };
-   const toDice = () => {
-      //playOpenDoor();
-      storeInitialPosition('0');
-      router.push({
-          pathname: '/dice',
-      });
+  async function playShowcards() {
+        setCardsDeployed(true);
+        console.log("Cargando showcards");
+        try {
+          if (showcards) {
+            // Si el sonido ya está cargado, reutilízalo
+            console.log("Reproduciendo showcards existente");
+            await showcards.replayAsync();
+            return;
+          }
+    
+          const { sound } = await Audio.Sound.createAsync(
+            require("../assets/sounds/showcards.mp3")
+          );
+          setShowcards(sound);
+          console.log("Reproduciendo showcards");
+          await sound.playAsync();
+        } catch (error) {
+          console.error("Error al reproducir showcards:", error);
+        }
+      }
+      async function playHidecards() {
+        setCardsDeployed(false);
+        console.log("Cargando hidecards");
+        try {
+          if (hidecards) {
+            // Si el sonido ya está cargado, reutilízalo
+            console.log("Reproduciendo hidecards existente");
+            await hidecards.replayAsync();
+            return;
+          }
+    
+          const { sound } = await Audio.Sound.createAsync(
+            require("../assets/sounds/hidecards.mp3")
+          );
+          setHidecards(sound);
+          console.log("Reproduciendo hidecards");
+          await sound.playAsync();
+        } catch (error) {
+          console.error("Error al reproducir hidecards:", error);
+        }
+      }
+   async function playButtonPress() {
+        console.log("Cargando buttonPress");
+        try {
+          if (buttonPress) {
+            // Si el sonido ya está cargado, reutilízalo
+            console.log("Reproduciendo buttonPress existente");
+            await buttonPress.replayAsync();
+            return;
+          }
+    
+          const { sound } = await Audio.Sound.createAsync(
+            require("../assets/sounds/button-press.mp3")
+          );
+          setButtonPress(sound);
+          console.log("Reproduciendo buttonPress");
+          await sound.playAsync();
+        } catch (error) {
+          console.error("Error al reproducir buttonPress:", error);
+        }
+      }
+   const toDice = async () => {
+    playButtonPress();
+    try {
+      // Detener y liberar
+      if (leak) {
+        await leak.stopAsync();
+        await leak.unloadAsync();
+        setLeak(null);
+      }
+      if (rats) {
+        await rats.stopAsync();
+        await rats.unloadAsync();
+        setRats(null);
+      }
+    } catch (error) {
+      console.error("Error liberando sonidos:", error);
     }
+    
+    storeInitialPosition('0');
+    router.push({ pathname: '/dice' });
+  };
     return (
       <>
         <ShowCardsButton onPress={handleShowCardsPress} />
@@ -128,17 +222,17 @@ const styles = StyleSheet.create({
   },
   instructions: {
     justifyContent: 'center',
-    marginTop: 80,
+    marginTop: 180,
     width: '90%',
     backgroundColor: "rgba(255, 255, 255, 0.8)",
     alignItems: 'center',
     padding: 10,
-    borderRadius: 10
+    borderRadius: 10,
   },
   buttons_container: {
     justifyContent: 'space-evenly',
     flexDirection: 'row',
-    marginTop: 160,
+    marginTop: 120,
     width: '100%'
   },
   first_floor_container: {
