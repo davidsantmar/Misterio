@@ -110,103 +110,103 @@ export default function Room() {
     setOpacityBack(opacityBack === 1 ? 0.5 : 1);
   };
   async function playShowcards() {
-          setCardsDeployed(true);
-          console.log("Cargando showcards");
-          try {
-            if (showcards) {
-              // Si el sonido ya está cargado, reutilízalo
-              console.log("Reproduciendo showcards existente");
-              await showcards.replayAsync();
-              return;
-            }
-      
-            const { sound } = await Audio.Sound.createAsync(
-              require("../assets/sounds/showcards.mp3")
-            );
-            setShowcards(sound);
-            console.log("Reproduciendo showcards");
-            await sound.playAsync();
-          } catch (error) {
-            console.error("Error al reproducir showcards:", error);
-          }
-        }
-        async function playHidecards() {
-          setCardsDeployed(false);
-          console.log("Cargando hidecards");
-          try {
-            if (hidecards) {
-              // Si el sonido ya está cargado, reutilízalo
-              console.log("Reproduciendo hidecards existente");
-              await hidecards.replayAsync();
-              return;
-            }
-      
-            const { sound } = await Audio.Sound.createAsync(
-              require("../assets/sounds/hidecards.mp3")
-            );
-            setHidecards(sound);
-            console.log("Reproduciendo hidecards");
-            await sound.playAsync();
-          } catch (error) {
-            console.error("Error al reproducir hidecards:", error);
-          }
-        }
-   async function playButtonPress() {
-        console.log("Cargando buttonPress");
-        try {
-          if (buttonPress) {
-            // Si el sonido ya está cargado, reutilízalo
-            console.log("Reproduciendo buttonPress existente");
-            await buttonPress.replayAsync();
-            return;
-          }
-    
-          const { sound } = await Audio.Sound.createAsync(
-            require("../assets/sounds/button-press.mp3")
-          );
-          setButtonPress(sound);
-          console.log("Reproduciendo buttonPress");
-          await sound.playAsync();
-        } catch (error) {
-          console.error("Error al reproducir buttonPress:", error);
-        }
-      }
-      async function playShine() {
-        console.log("Cargando shine");
-        try {
-          if (shine) {
-            // Si el sonido ya está cargado, reutilízalo
-            console.log("Reproduciendo shine existente");
-            await shine.replayAsync();
-            return;
-          }
-    
-          const { sound } = await Audio.Sound.createAsync(
-            require("../assets/sounds/card-appears.mp3")
-          );
-          setShine(sound);
-          console.log("Reproduciendo shine");
-          await sound.playAsync();
-        } catch (error) {
-          console.error("Error al reproducir shine:", error);
-        }
-      }
-  const getData = async (data) => {
+    setCardsDeployed(true);
+    console.log("Cargando showcards");
     try {
-      const stringArray = await AsyncStorage.getItem(data); // Obtener la cadena
-      if (stringArray !== null) {
-        const array = JSON.parse(stringArray); // Convertir la cadena a array
-        console.log('Array recuperado:', array);
-        return array;
-      } else {
-        console.log('No se encontró el array');
-        return null;
+      if (showcards) {
+        // Si el sonido ya está cargado, reutilízalo
+        console.log("Reproduciendo showcards existente");
+        await showcards.replayAsync();
+        return;
       }
+
+      const { sound } = await Audio.Sound.createAsync(
+        require("../assets/sounds/showcards.mp3")
+      );
+      setShowcards(sound);
+      console.log("Reproduciendo showcards");
+      await sound.playAsync();
     } catch (error) {
-      console.error('Error al recuperar el array:', error);
+      console.error("Error al reproducir showcards:", error);
+    }
+  }
+  async function playHidecards() {
+    setCardsDeployed(false);
+    console.log("Cargando hidecards");
+    try {
+      if (hidecards) {
+        // Si el sonido ya está cargado, reutilízalo
+        console.log("Reproduciendo hidecards existente");
+        await hidecards.replayAsync();
+        return;
+      }
+
+      const { sound } = await Audio.Sound.createAsync(
+        require("../assets/sounds/hidecards.mp3")
+      );
+      setHidecards(sound);
+      console.log("Reproduciendo hidecards");
+      await sound.playAsync();
+    } catch (error) {
+      console.error("Error al reproducir hidecards:", error);
+    }
+  }
+  async function playButtonPress() {
+  console.log("Cargando buttonPress");
+  try {
+    if (buttonPress) {
+      // Si el sonido ya está cargado, reutilízalo
+      console.log("Reproduciendo buttonPress existente");
+      await buttonPress.replayAsync();
+      return;
+    }
+
+    const { sound } = await Audio.Sound.createAsync(
+      require("../assets/sounds/button-press.mp3")
+    );
+    setButtonPress(sound);
+    console.log("Reproduciendo buttonPress");
+    await sound.playAsync();
+  } catch (error) {
+    console.error("Error al reproducir buttonPress:", error);
+  }
+}
+async function playShine() {
+  console.log("Cargando shine");
+  try {
+    if (shine) {
+      // Si el sonido ya está cargado, reutilízalo
+      console.log("Reproduciendo shine existente");
+      await shine.replayAsync();
+      return;
+    }
+
+    const { sound } = await Audio.Sound.createAsync(
+      require("../assets/sounds/card-appears.mp3")
+    );
+    setShine(sound);
+    console.log("Reproduciendo shine");
+    await sound.playAsync();
+  } catch (error) {
+    console.error("Error al reproducir shine:", error);
+  }
+}
+const getData = async (data) => {
+  try {
+    const stringArray = await AsyncStorage.getItem(data); // Obtener la cadena
+    if (stringArray !== null) {
+      const array = JSON.parse(stringArray); // Convertir la cadena a array
+      console.log('Array recuperado:', array);
+      return array;
+    } else {
+      console.log('No se encontró el array');
       return null;
     }
-  };
+  } catch (error) {
+    console.error('Error al recuperar el array:', error);
+    return null;
+  }
+};
   const getPlayer = async () => {
     try {
       const currentPlayer = await AsyncStorage.getItem('player'); // Obtener la cadena
@@ -214,6 +214,13 @@ export default function Room() {
     } catch (error) {
       console.error('Error al recuperar el player:', error);
       return null;
+    }
+  };
+  const storePlayerPosition = async (position) => {
+    try {
+        await AsyncStorage.setItem('position', position);
+    } catch (e) {
+        console.log('error saving data');
     }
   };
   useEffect(()=> {
@@ -265,10 +272,12 @@ export default function Room() {
       setPlayer(player); // Actualizar el estado con el valor obtenido
     });
     if (room === 'Laboratorio'){
-      setRoomPrefix('el')
+      setRoomPrefix('el'); 
+      storePlayerPosition('4');
     }
     if (room === 'Alcoba'){
-      setRoomPrefix('la')
+      setRoomPrefix('la');
+      storePlayerPosition('27');
     }
     if (room === 'Cocheras'){
       setRoomPrefix('las')
@@ -280,13 +289,15 @@ export default function Room() {
       setRoomPrefix('la')
     }
     if (room === 'Salón'){
-      setRoomPrefix('el')
+      setRoomPrefix('el');
+       storePlayerPosition('12');
     }
     if (room === 'Vestíbulo'){
       setRoomPrefix('el')
     }
     if (room === 'Biblioteca'){
-      setRoomPrefix('la')
+      setRoomPrefix('la');
+       storePlayerPosition('21');
     }
   }, []);
 
@@ -613,11 +624,21 @@ Revisa bien tus cartas`)
         params:  assumption , 
       });
   }
-
+  const toBoard = () => {
+    playButtonPress();
+      router.push({
+        pathname: "/dice",
+      });
+  }
   return (
     <>
       <ShowCardsButton onPress={handleShowCardsPress} />
       <ImageBackground style={[styles.container, { opacity: opacityBack }]} source={gifSource} resizeMode="cover">
+        <View style={styles.boardButtonContainer}>
+          <Pressable style={styles.boardButton} onPress={toBoard}>
+            <Text style={styles.boardButtonText}>Al pasillo</Text>
+          </Pressable>
+        </View>
         <View style={styles.envelopeContainer}>
           <Pressable style={styles.envelope} onPress={() => showSection("killers")}>
             <Text style={styles.textEnvelope}>MIS</Text>
@@ -667,7 +688,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
-    marginTop: 90,
+    marginTop: 15,
     marginBottom: 5
   },
   envelope: {
@@ -864,6 +885,20 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontFamily: 'Creepster-Regular',
     color: 'white'
+  },
+  boardButtonContainer: {
+    marginTop: 70,
+    marginRight: 230
+  },
+  boardButton: {
+    backgroundColor: "rgba(255, 255, 255, 0.8)",
+    borderRadius: 10,
+    padding: 5,
+    marginRight: 50,
+
+  },
+  boardButtonText: {
+    fontSize: 10,
+    fontFamily: 'Creepster-Regular'
   }
-  
 });

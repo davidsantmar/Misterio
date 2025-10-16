@@ -86,7 +86,9 @@ export function CardIntoEnvelope({ text }) {
         <Text style={styles.textCard}>{text}</Text>
       </Animated.View>
       <ImageBackground style={styles.envelope} source={require("../assets/images/envelope.png")} resizeMode="cover">
-        <Text style={styles.textEnvelope}>MISTERIO</Text>
+        <View style={{ transform: [{ rotate: '-35deg' }] }}>
+          <Text style={styles.textEnvelope}>MISTERIO</Text>
+        </View>
       </ImageBackground>
     </View>
   );
@@ -128,6 +130,5 @@ const styles = StyleSheet.create({
     fontSize: 35,
     fontFamily: 'Creepster-Regular',
     color: 'black',
-    transform: [{ rotate: '-35deg' }],
   }
 });

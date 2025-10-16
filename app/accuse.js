@@ -244,12 +244,10 @@ export default function Accuse() {
         )}
       </Animated.View>
 
-      <ImageBackground
-        style={styles.envelope}
-        source={require("../assets/images/envelope.png")}
-        resizeMode="cover"
-      >
-        <Text style={styles.textEnvelope}>MISTERIO</Text>
+      <ImageBackground style={styles.envelope} source={require("../assets/images/envelope.png")} resizeMode="cover">
+        <View style={{ transform: [{ rotate: '-35deg' }] }}>
+          <Text style={styles.textEnvelope}>MISTERIO</Text>
+        </View>
       </ImageBackground>
       {result && (
           <Animated.View
@@ -258,6 +256,7 @@ export default function Accuse() {
               { transform: [{ scale }], opacity },
             ]}
           >
+          <View style={{  transform: [{rotate: '-30deg'}], marginLeft: 60 }}>
             <Text
               style={[
                 styles.resultText,
@@ -266,9 +265,12 @@ export default function Accuse() {
             >
               {result === 'CASO PERDIDO' ? 'CASO PERDIDO' : 'CASO RESUELTO'}
             </Text>
-            <Pressable style={styles.button} onPress={newGame}>
-              <Text style={styles.button_text}>Nuevo caso</Text>
-            </Pressable>
+            </View>
+            <View style={{  marginTop: 30, marginLeft: 50 }}>
+              <Pressable style={styles.button} onPress={newGame}>
+                <Text style={styles.button_text}>Nuevo caso</Text>
+              </Pressable>
+            </View>
           </Animated.View>
         )}
     </ImageBackground>
@@ -338,7 +340,7 @@ const styles = StyleSheet.create({
   resultStamp: {
     position: "absolute",
     top: 0,
-    left: 50,
+    left: 0,
     right: 0,
     bottom: 0,
     justifyContent: "center",
@@ -346,8 +348,7 @@ const styles = StyleSheet.create({
   },
   resultText: {
     fontFamily: "Creepster-Regular",
-    fontSize: 70,
-    transform: [{ rotate: "-15deg" }],
+    fontSize: 50,
     textShadowColor: "rgba(0,0,0,0.8)",
     textShadowOffset: { width: 4, height: 4 },
     textShadowRadius: 10,
