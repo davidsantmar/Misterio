@@ -7,6 +7,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ShowCardsButton } from "./ShowCardsButton";
 import { Audio } from "expo-av";
 
+//hay que mover el scroll con la playerPosition
+
 
 export function BoardFloor({ diceValue }) {
 const bounceAnim = useRef(new Animated.Value(0)).current;
@@ -31,6 +33,9 @@ const handleShowCardsPress = () => {
   const [disabledRoom3, setDisabledRoom3] = useState(true);
   const [disabledRoom4, setDisabledRoom4] = useState(true);
   const [disabledSquare, setDisabledSquare] = useState(true);
+  const scrollRef = useRef(null);
+  const scrollAnim = useRef(new Animated.Value(0)).current;
+  
   const router = useRouter();
   // Lista de casillas con sus contenidos para facilitar la gestión
   const board = [
@@ -71,7 +76,7 @@ const handleShowCardsPress = () => {
   const [diceSound, setDiceSound] = useState(null);
   const [footSteps, setFootSteps] = useState(null);
   const [openDoor, setOpenDoor] = useState(null);
-const [showcards, setShowcards] = useState(null);
+  const [showcards, setShowcards] = useState(null);
   const [hidecards, setHidecards] = useState(null);
   const [cardsDeployed, setCardsDeployed] = useState(null);
   const updateBorderColors = (storedValue, diceValue) => {
@@ -98,34 +103,41 @@ const [showcards, setShowcards] = useState(null);
     playDiceSound();
     router.push('/dice');
   };
+  const animateScroll = (toValue) => {
+  Animated.timing(scrollAnim, {
+    toValue,
+    duration: 500,
+    useNativeDriver: true,
+  }).start();
+};
   useEffect(() => {
-        Audio.setAudioModeAsync({
-          allowsRecordingIOS: false,
-          playsInSilentModeIOS: true,
-          staysActiveInBackground: false,
-          shouldDuckAndroid: true,
-        });
-    
-        // Liberación de sonidos al desmontar el componente
-        return () => {
-          if (rainSound) {
-            console.log("Liberando rainSound");
-            rainSound.unloadAsync();
-          }
-          if (diceSound) {
-            console.log("Liberando diceSound");
-            diceSound.unloadAsync();
-          }
-          if (footSteps) {
-            console.log("Liberando footSteps");
-            footSteps.unloadAsync();
-          }
-          if (openDoor) {
-            console.log("Liberando openDoor");
-            openDoor.unloadAsync();
-          }
-        };
-      },[diceSound, rainSound, footSteps, openDoor]);
+    Audio.setAudioModeAsync({
+      allowsRecordingIOS: false,
+      playsInSilentModeIOS: true,
+      staysActiveInBackground: false,
+      shouldDuckAndroid: true,
+    });
+
+    // Liberación de sonidos al desmontar el componente
+    return () => {
+      if (rainSound) {
+        console.log("Liberando rainSound");
+        rainSound.unloadAsync();
+      }
+      if (diceSound) {
+        console.log("Liberando diceSound");
+        diceSound.unloadAsync();
+      }
+      if (footSteps) {
+        console.log("Liberando footSteps");
+        footSteps.unloadAsync();
+      }
+      if (openDoor) {
+        console.log("Liberando openDoor");
+        openDoor.unloadAsync();
+      }
+    };
+  },[diceSound, rainSound, footSteps, openDoor]);
  useEffect(() => {
   if (!activateLoop) return; // Only start if activated
   const loop = Animated.loop(
@@ -149,142 +161,167 @@ const [showcards, setShowcards] = useState(null);
   return () => loop.stop(); // Cleanup
 }, [activateLoop, bounceAnim]); // Depend on activateLoop to re-run when it changes
   useEffect(() => {
-    const fetchPosition = async () => {
-    const storedValue = await getPlayerPosition();
-    console.log('Fetched stored value:', storedValue);
-    const newColors = [...colors];
-    // aqui se encuentra el jugador
-    newColors[storedValue] = newColors[storedValue] === '#FF6347' ? '#808080' : '#FF6347';
-    updateBorderColors(storedValue, diceValue);
-    setColors(newColors); // Actualizar el estado
-    // Resaltar habitaciones si el jugador puede entrar en ellas
-    if ((storedValue <= 4 && Number(storedValue) + (Number(diceValue)) > 4) || (storedValue >= 4 && Number(storedValue) - (Number(diceValue)) < 4)){
-      setRoom1Color('yellow');
-      setDisabledRoom1(false);
+  const fetchPosition = async () => {
+    try {
+      const storedValue = await getPlayerPosition();
+      console.log('Fetched stored value:', storedValue);
+      
+      if (storedValue !== null) {
+        const playerIndex = parseInt(storedValue, 10);
+        
+        // Hacer scroll a la posición del jugador
+        // Usar setTimeout para asegurar que el ScrollView esté completamente renderizado
+        setTimeout(() => {
+          scrollToPlayerPosition(playerIndex);
+        }, 100); // Pequeño delay para asegurar renderizado
+        
+        setPosition(playerIndex); // Actualizar posición local
+        
+        // ... resto de tu lógica existente
+        const newColors = [...colors];
+        newColors[playerIndex] = newColors[playerIndex] === '#FF6347' ? '#808080' : '#FF6347';
+        updateBorderColors(playerIndex, diceValue);
+        setColors(newColors);
+        
+        // Lógica de habitaciones...
+        if ((playerIndex <= 4 && playerIndex + Number(diceValue) > 4) || 
+            (playerIndex >= 4 && playerIndex - Number(diceValue) < 4)) {
+          setRoom1Color('yellow');
+          setDisabledRoom1(false);
+        }
+        // ... resto de condiciones de habitaciones
+      }
+    } catch (error) {
+      console.error('Error fetching position:', error);
     }
-    if ((storedValue <= 12 && Number(storedValue) + (Number(diceValue)) > 12) || (storedValue >= 12 && Number(storedValue) - (Number(diceValue)) < 12)){
-      setRoom3Color('yellow');
-      setDisabledRoom3(false);
+  };
+
+  fetchPosition();
+}, [diceValue]); // Agregar diceValue como dependencia si cambia
+  useEffect(() => {
+    if (position !== null && position !== undefined) {
+      // Hacer scroll cuando cambia la posición local
+      scrollToPlayerPosition(position);
+      
+      const newColors = [...colors];
+      newColors[position] = newColors[position] === '#FF6347' ? '#808080' : '#9cf1a7ff';
+      setColors(newColors);
     }
-    if ((storedValue <= 21 && Number(storedValue) + (Number(diceValue)) > 21) || (storedValue >= 21 && Number(storedValue) - (Number(diceValue)) < 21)){
-      setRoom2Color('yellow');
-      setDisabledRoom2(false);
-    }
-    if ((storedValue <= 27 && Number(storedValue) + (Number(diceValue)) > 27) || (storedValue >= 27 && Number(storedValue) - (Number(diceValue)) < 27)){
-      setRoom4Color('yellow');
-      setDisabledRoom4(false);
+  }, [position]);
+  const scrollToPlayerPosition = (playerIndex) => {
+    if (!scrollRef.current || playerIndex === null || isNaN(playerIndex)) return;
+
+    const STONE_HEIGHT = 61;
+    const targetOffset = playerIndex * STONE_HEIGHT;
+    
+    // Obtener las medidas del ScrollView para centrar
+    scrollRef.current.getScrollResponder()?.scrollTo({
+      y: Math.max(0, targetOffset - 300), // 300px de "padding" superior para centrar
+      animated: true,
+    });
+  };
+  async function playRainSound() {
+    console.log("Cargando rainSound");
+    try {
+      if (rainSound) {
+        // Si el sonido ya está cargado, reutilízalo
+        console.log("Reproduciendo rainSound existente");
+        await rainSound.replayAsync();
+        return;
+      }
+
+      const { sound } = await Audio.Sound.createAsync(
+        require("../assets/sounds/wolf-howl.mp3")
+      );
+      setRainSound(sound);
+      console.log("Reproduciendo rainSound");
+      await sound.playAsync();
+    } catch (error) {
+      console.error("Error al reproducir rainSound:", error);
     }
   }
-  fetchPosition();
-  }, []);
-  useEffect(() => {
-    const newColors = [...colors];
-    // aqui se encuentra el jugador
-    newColors[position] = newColors[position] === '#FF6347' ? '#808080' : '#9cf1a7ff';
-    setColors(newColors); // Actualizar el estado
-  }, [position]);
-  async function playRainSound() {
-      console.log("Cargando rainSound");
-      try {
-        if (rainSound) {
-          // Si el sonido ya está cargado, reutilízalo
-          console.log("Reproduciendo rainSound existente");
-          await rainSound.replayAsync();
-          return;
-        }
-  
-        const { sound } = await Audio.Sound.createAsync(
-          require("../assets/sounds/wolf-howl.mp3")
-        );
-        setRainSound(sound);
-        console.log("Reproduciendo rainSound");
-        await sound.playAsync();
-      } catch (error) {
-        console.error("Error al reproducir rainSound:", error);
+  async function playFootSteps() {
+    console.log("Cargando footSteps");
+    try {
+      if (footSteps) {
+        // Si el sonido ya está cargado, reutilízalo
+        console.log("Reproduciendo footSteps existente");
+        await footSteps.replayAsync();
+        return;
       }
+
+      const { sound } = await Audio.Sound.createAsync(
+        require("../assets/sounds/footsteps.mp3")
+      );
+      setFootSteps(sound);
+      console.log("Reproduciendo footSteps");
+      await sound.playAsync();
+    } catch (error) {
+      console.error("Error al reproducir footSteps:", error);
     }
-    async function playFootSteps() {
-      console.log("Cargando footSteps");
-      try {
-        if (footSteps) {
-          // Si el sonido ya está cargado, reutilízalo
-          console.log("Reproduciendo footSteps existente");
-          await footSteps.replayAsync();
-          return;
-        }
-  
-        const { sound } = await Audio.Sound.createAsync(
-          require("../assets/sounds/footsteps.mp3")
-        );
-        setFootSteps(sound);
-        console.log("Reproduciendo footSteps");
-        await sound.playAsync();
-      } catch (error) {
-        console.error("Error al reproducir footSteps:", error);
+  }
+  async function playOpenDoor() {
+    console.log("Cargando openDoor");
+    try {
+      if (openDoor) {
+        // Si el sonido ya está cargado, reutilízalo
+        console.log("Reproduciendo openDoor existente");
+        await openDoor.replayAsync();
+        return;
       }
+
+      const { sound } = await Audio.Sound.createAsync(
+        require("../assets/sounds/open-door.mp3")
+      );
+      setOpenDoor(sound);
+      console.log("Reproduciendo openDoor");
+      await sound.playAsync();
+    } catch (error) {
+      console.error("Error al reproducir openDoor:", error);
     }
-    async function playOpenDoor() {
-      console.log("Cargando openDoor");
-      try {
-        if (openDoor) {
-          // Si el sonido ya está cargado, reutilízalo
-          console.log("Reproduciendo openDoor existente");
-          await openDoor.replayAsync();
-          return;
-        }
-  
-        const { sound } = await Audio.Sound.createAsync(
-          require("../assets/sounds/open-door.mp3")
-        );
-        setOpenDoor(sound);
-        console.log("Reproduciendo openDoor");
-        await sound.playAsync();
-      } catch (error) {
-        console.error("Error al reproducir openDoor:", error);
+  }
+async function playShowcards() {
+    setCardsDeployed(true);
+    console.log("Cargando showcards");
+    try {
+      if (showcards) {
+        // Si el sonido ya está cargado, reutilízalo
+        console.log("Reproduciendo showcards existente");
+        await showcards.replayAsync();
+        return;
       }
+
+      const { sound } = await Audio.Sound.createAsync(
+        require("../assets/sounds/showcards.mp3")
+      );
+      setShowcards(sound);
+      console.log("Reproduciendo showcards");
+      await sound.playAsync();
+    } catch (error) {
+      console.error("Error al reproducir showcards:", error);
     }
-    async function playShowcards() {
-        setCardsDeployed(true);
-        console.log("Cargando showcards");
-        try {
-          if (showcards) {
-            // Si el sonido ya está cargado, reutilízalo
-            console.log("Reproduciendo showcards existente");
-            await showcards.replayAsync();
-            return;
-          }
-    
-          const { sound } = await Audio.Sound.createAsync(
-            require("../assets/sounds/showcards.mp3")
-          );
-          setShowcards(sound);
-          console.log("Reproduciendo showcards");
-          await sound.playAsync();
-        } catch (error) {
-          console.error("Error al reproducir showcards:", error);
-        }
+  }
+  async function playHidecards() {
+    setCardsDeployed(false);
+    console.log("Cargando hidecards");
+    try {
+      if (hidecards) {
+        // Si el sonido ya está cargado, reutilízalo
+        console.log("Reproduciendo hidecards existente");
+        await hidecards.replayAsync();
+        return;
       }
-      async function playHidecards() {
-        setCardsDeployed(false);
-        console.log("Cargando hidecards");
-        try {
-          if (hidecards) {
-            // Si el sonido ya está cargado, reutilízalo
-            console.log("Reproduciendo hidecards existente");
-            await hidecards.replayAsync();
-            return;
-          }
-    
-          const { sound } = await Audio.Sound.createAsync(
-            require("../assets/sounds/hidecards.mp3")
-          );
-          setHidecards(sound);
-          console.log("Reproduciendo hidecards");
-          await sound.playAsync();
-        } catch (error) {
-          console.error("Error al reproducir hidecards:", error);
-        }
-      }
+
+      const { sound } = await Audio.Sound.createAsync(
+        require("../assets/sounds/hidecards.mp3")
+      );
+      setHidecards(sound);
+      console.log("Reproduciendo hidecards");
+      await sound.playAsync();
+    } catch (error) {
+      console.error("Error al reproducir hidecards:", error);
+    }
+  }
   async function playDiceSound() {
       console.log("Cargando diceSound");
       try {
@@ -329,6 +366,19 @@ const [showcards, setShowcards] = useState(null);
       setActivateLoop(true);  
       setDisabledDice(false); // Enable the button
       setDisabledSquare(true); // Disable squares after selection
+      if (index === 0 || index === 29) {
+        router.push({
+          pathname:"/entry"
+        })
+      }
+      if (index === 6){
+        storePlayerPosition('26');
+        setPosition(26)
+      }
+      if (index === 26){
+        storePlayerPosition('6')
+        setPosition(26)
+      }
   }
   const roomClicked = (room) => {
     playOpenDoor();
@@ -379,7 +429,13 @@ const [showcards, setShowcards] = useState(null);
         />
       </Pressable>
     </Animated.View>
-    <ScrollView>
+    <Animated.ScrollView
+     ref={scrollRef}
+      scrollEventThrottle={16}
+      showsVerticalScrollIndicator={true}
+      // Opcional: vincular con scrollAnim para más control
+      // contentOffset={{ x: 0, y: scrollAnim }}
+    >
       <View style={styles.container} >
         <View style={styles.leftRoomsContainer}>
           <Pressable
@@ -426,7 +482,7 @@ const [showcards, setShowcards] = useState(null);
           </Pressable>
         </View>
       </View>
-    </ScrollView>
+    </Animated.ScrollView>
     </ImageBackground>
     </>
   );

@@ -3,6 +3,7 @@ import { useEffect, useState, useRef } from "react";
 import { ImageBackground, StyleSheet, Text, View, Image, Animated, Pressable } from "react-native";
 import { useFonts } from 'expo-font';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Audio } from "expo-av";
 
 const killersMap = {
   MrHyde: require('../assets/images/mis/MrHyde.png'),
@@ -33,6 +34,8 @@ export default function Accuse() {
   const [envelopeCards, setEnvelopeCards] = useState([]);
   const [backFlip, setBackFlip] = useState(false);
   const [result, setResult] = useState(null);
+  const [suspense, setSuspense] = useState(null);
+  const [buttonPress, setButtonPress] = useState(null);
   const [loaded, error] = useFonts({  //to load and use font
         'SpecialElite': require('../assets/fonts/SpecialElite-Regular.ttf'), 
     });
@@ -49,7 +52,26 @@ export default function Accuse() {
   const opacity1 = useRef(new Animated.Value(0)).current;
   const opacity2 = useRef(new Animated.Value(0)).current;
   const opacity3 = useRef(new Animated.Value(0)).current;
+  useEffect(() => {
+    Audio.setAudioModeAsync({
+      allowsRecordingIOS: false,
+      playsInSilentModeIOS: true,
+      staysActiveInBackground: false,
+      shouldDuckAndroid: true,
+    });
 
+    // Liberación de sonidos al desmontar el componente
+    return () => {
+      if (suspense) {
+        console.log("Liberando suspense");
+        suspense.unloadAsync();
+      }
+      if (buttonPress) {
+        console.log("Liberando buttonPress");
+        buttonPress.unloadAsync();
+      }
+    };
+  },[suspense, buttonPress]);
   useEffect(() => {
     if (!assumption) return;
 
@@ -129,6 +151,7 @@ export default function Accuse() {
       setEnvelopeCards(mapped);
       setEnveloped(envelope);
       setBackFlip(true);
+      playSuspense();
       // Comparar arrays
       if (assumptionManaged.length && mapped.length &&
           assumptionManaged.every((v, i) => v === mapped[i])) {
@@ -156,13 +179,53 @@ export default function Accuse() {
     ]).start();
   }, [result]);
   const newGame = () => {
-      router.push({
-          pathname: '/player',
-        });
+    playButtonPress();
+    router.push({
+        pathname: '/player',
+      });
+  }
+  async function playSuspense() {
+    console.log("Cargando suspense");
+    try {
+      if (suspense) {
+        // Si el sonido ya está cargado, reutilízalo
+        console.log("Reproduciendo suspense existente");
+        await suspense.replayAsync();
+        return;
+      }
+
+      const { sound } = await Audio.Sound.createAsync(
+        require("../assets/sounds/suspense.mp3")
+      );
+      setSuspense(sound);
+      console.log("Reproduciendo suspense");
+      await sound.playAsync();
+    } catch (error) {
+      console.error("Error al reproducir suspense:", error);
     }
+  }
+  async function playButtonPress () {
+    console.log("Cargando buttonPress");
+    try {
+      if (buttonPress) {
+        // Si el sonido ya está cargado, reutilízalo
+        console.log("Reproduciendo buttonPress existente");
+        await buttonPress.replayAsync();
+        return;
+      }
+
+      const { sound } = await Audio.Sound.createAsync(
+        require("../assets/sounds/button-press.mp3")
+      );
+      setButtonPress(sound);
+      console.log("Reproduciendo buttonPress");
+      await sound.playAsync();
+    } catch (error) {
+      console.error("Error al reproducir buttonPress:", error);
+    }
+  }
   return (
     <ImageBackground style={styles.container} source={require("../assets/images/table-back.png")}>
-     
       <Text style={styles.title}>Acusación</Text>
       {/* Cartas ya mostradas */}
       <View style={styles.assumptionContainer}>

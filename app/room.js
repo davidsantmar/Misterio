@@ -625,10 +625,9 @@ Revisa bien tus cartas`)
       });
   }
   const toBoard = () => {
-    playButtonPress();
-      router.push({
-        pathname: "/dice",
-      });
+    router.push({
+      pathname: "/dice",
+    });
   }
   return (
     <>

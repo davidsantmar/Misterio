@@ -25,6 +25,15 @@ export function DiceRoll() {
       }, 2000);
       return () => clearTimeout(timer);
     }, [diceValue]);
+    const getPlayerPosition = async () => {
+        try {
+            const value = await AsyncStorage.getItem('position');
+            return value;
+        } catch (e) {
+            console.log('error reading data');
+            return null;
+        }
+      };
   // Genera el dado al montar
   useEffect(() => {
     rollDice();
