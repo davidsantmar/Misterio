@@ -81,6 +81,9 @@ export function Intro () {
             pathname: '/letter',
         });
     }
+    if (!loaded) {
+      return null; // o <ActivityIndicator size="large" color="#fff" />
+    }
     return (
         <ImageBackground style={styles.container} source={require ('../assets/gifs/Intro.gif')}>
             <View style={styles.header}>

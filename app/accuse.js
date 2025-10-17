@@ -36,6 +36,7 @@ export default function Accuse() {
   const [result, setResult] = useState(null);
   const [suspense, setSuspense] = useState(null);
   const [buttonPress, setButtonPress] = useState(null);
+  const [solved, setSolved] = useState(null);
   const [loaded, error] = useFonts({  //to load and use font
         'SpecialElite': require('../assets/fonts/SpecialElite-Regular.ttf'), 
     });
@@ -70,8 +71,12 @@ export default function Accuse() {
         console.log("Liberando buttonPress");
         buttonPress.unloadAsync();
       }
+       if (solved) {
+        console.log("Liberando solved");
+        solved.unloadAsync();
+      }
     };
-  },[suspense, buttonPress]);
+  },[suspense, buttonPress, solved]);
   useEffect(() => {
     if (!assumption) return;
 
@@ -147,17 +152,17 @@ export default function Accuse() {
         };
         return map[v] ?? v;
       });
-
       setEnvelopeCards(mapped);
       setEnveloped(envelope);
       setBackFlip(true);
-      playSuspense();
       // Comparar arrays
       if (assumptionManaged.length && mapped.length &&
           assumptionManaged.every((v, i) => v === mapped[i])) {
         setResult("CASO RESUELTO");
+        playSolved();
       } else {
         setResult("CASO PERDIDO");
+        playSuspense();
       }
     };
 
@@ -165,7 +170,26 @@ export default function Accuse() {
     const timer = setTimeout(checkEnvelope, 4500);
     return () => clearTimeout(timer);
   }, [assumptionManaged]);
-
+  useEffect(() => {
+      Audio.setAudioModeAsync({
+        allowsRecordingIOS: false,
+        playsInSilentModeIOS: true,
+        staysActiveInBackground: false,
+        shouldDuckAndroid: true,
+      });
+  
+      // Liberación de sonidos al desmontar el componente
+      return () => {
+        if (solved) {
+          console.log("Liberando solved");
+          solved.unloadAsync();
+        }
+        if (buttonPress) {
+          console.log("Liberando buttonPress");
+          buttonPress.unloadAsync();
+        }
+      };
+    },[buttonPress, start]);
   // Lanzar animación de sello
   useEffect(() => {
     if (!result) return;
@@ -202,6 +226,26 @@ export default function Accuse() {
       await sound.playAsync();
     } catch (error) {
       console.error("Error al reproducir suspense:", error);
+    }
+  }
+  async function playSolved () {
+    console.log("Cargando solved");
+    try {
+      if (solved) {
+        // Si el sonido ya está cargado, reutilízalo
+        console.log("Reproduciendo solved existente");
+        await solved.replayAsync();
+        return;
+      }
+
+      const { sound } = await Audio.Sound.createAsync(
+        require("../assets/sounds/siren.mp3")
+      );
+      setSolved(sound);
+      console.log("Reproduciendo solved");
+      await sound.playAsync();
+    } catch (error) {
+      console.error("Error al reproducir solved:", error);
     }
   }
   async function playButtonPress () {
