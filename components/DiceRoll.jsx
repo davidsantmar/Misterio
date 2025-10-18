@@ -9,7 +9,7 @@ import {
 import { useRouter } from "expo-router";
 import { Audio } from "expo-av";
 
-export function DiceRoll() {
+export function DiceRoll({ board }) {
   const [diceValue, setDiceValue] = useState(0);
   const [rotation] = useState(new Animated.Value(0));
   const [diceRoll, setDiceRoll] = useState(null);
@@ -18,26 +18,17 @@ export function DiceRoll() {
       if (diceValue === 0) return; // Ignora el valor inicial
       const timer = setTimeout(() => {
         router.push({
-          //pathname: "/firstFloor",
           pathname: "/board",
-          params: { diceValue: diceValue.toString() }, // Convierte a string explícitamente
+          params: { diceValue: diceValue.toString(), board: board }, // Convierte a string explícitamente
         });
       }, 2000);
       return () => clearTimeout(timer);
     }, [diceValue]);
-    const getPlayerPosition = async () => {
-        try {
-            const value = await AsyncStorage.getItem('position');
-            return value;
-        } catch (e) {
-            console.log('error reading data');
-            return null;
-        }
-      };
   // Genera el dado al montar
   useEffect(() => {
     rollDice();
     diceRollSound();
+    console.log('board en Dice Roll', board)
   }, []);
   useEffect(() => {
       Audio.setAudioModeAsync({

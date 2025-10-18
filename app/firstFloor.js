@@ -1,6 +1,6 @@
 import { FirstFloorAdvance } from "../components/FirstFloorAdvance";
 import { View, StyleSheet } from "react-native";
-import { useLocalSearchParams, useRouter } from "expo-router";
+import { useLocalSearchParams } from "expo-router";
 
 export default function FirstFloor(){
 const { diceValue = "0" } = useLocalSearchParams(); // Valor por defecto  

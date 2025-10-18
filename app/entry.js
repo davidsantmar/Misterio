@@ -165,7 +165,7 @@ export default function Entry() {
           console.error("Error al reproducir buttonPress:", error);
         }
       }
-   const toDice = async () => {
+   const toDice = async (board) => {
     playButtonPress();
     try {
       // Detener y liberar
@@ -184,7 +184,10 @@ export default function Entry() {
     }
     
     storeInitialPosition('0');
-    router.push({ pathname: '/dice' });
+    router.push({ 
+      pathname: '/dice',
+      params: { board }
+    });
   };
     return (
       <>
@@ -194,14 +197,14 @@ export default function Entry() {
               <Text style={styles.button_text}>A dónde te diriges?</Text>
           </View>
           <View style={styles.buttons_container}>
-            <Pressable style={styles.first_floor_container} onPress={toDice}>
+            <Pressable style={styles.first_floor_container} onPress={()=> toDice('firstFloor')}>
               <Text style={styles.button_text_title}>Primer piso</Text>
               <Text style={styles.button_text}>Laboratorio</Text>
               <Text style={styles.button_text}>Salón</Text>
               <Text style={styles.button_text}>Biblioteca</Text>
               <Text style={styles.button_text}>Alcoba</Text>
             </Pressable>
-            <Pressable style={styles.ground_container} onPress={toDice}>
+            <Pressable style={styles.ground_container} onPress={()=> toDice('ground')}>
               <Text style={styles.button_text_title}>Planta baja</Text>
               <Text style={styles.button_text}>Cocheras</Text>
               <Text style={styles.button_text}>Vestíbulo</Text>

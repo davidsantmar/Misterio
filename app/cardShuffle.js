@@ -8,7 +8,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 const { width } = Dimensions.get('window');
 
 export default function CardShuffle() {
-    const router = useRouter();
+  const router = useRouter();
   const [cardReverseText, setCardReverseText] = useState('MIS');
   // Crear referencias para las animaciones de cada carta
   const card1Anim = useRef(new Animated.ValueXY({ x: 0, y: 0 })).current;

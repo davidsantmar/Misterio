@@ -30,7 +30,7 @@ const playersMap = {
   David: fichaDavid,
 };
 
-export function BoardFloor({ diceValue }) {
+export function FirstFloor({ diceValue }) {
   const bounceAnim = useRef(new Animated.Value(0)).current;
   const [opacityBack, setOpacityBack] = useState(1);
   const [activateLoop, setActivateLoop] = useState(false); // Add this state
@@ -433,6 +433,7 @@ export function BoardFloor({ diceValue }) {
   const [diceSound, setDiceSound] = useState(null);
   const [footSteps, setFootSteps] = useState(null);
   const [openDoor, setOpenDoor] = useState(null);
+  const [jump, setJump] = useState(null);
   const [showcards, setShowcards] = useState(null);
   const [hidecards, setHidecards] = useState(null);
   const [cardsDeployed, setCardsDeployed] = useState(null);
@@ -524,8 +525,12 @@ useEffect(() => {
         console.log("Liberando openDoor");
         openDoor.unloadAsync();
       }
+      if (jump) {
+        console.log("Liberando jump");
+        jump.unloadAsync();
+      }
     };
-  }, [diceSound, rainSound, footSteps, openDoor]);
+  }, [diceSound, rainSound, footSteps, openDoor, jump]);
   useEffect(() => {
     if (!activateLoop) return; // Only start if activated
     const loop = Animated.loop(
@@ -693,6 +698,26 @@ useEffect(() => {
       console.error("Error al reproducir openDoor:", error);
     }
   }
+  async function playJump() {
+    console.log("Cargando jump");
+    try {
+      if (jump) {
+        // Si el sonido ya está cargado, reutilízalo
+        console.log("Reproduciendo jump existente");
+        await jump.replayAsync();
+        return;
+      }
+
+      const { sound } = await Audio.Sound.createAsync(
+        require("../assets/sounds/jump.mp3")
+      );
+      setJump(sound);
+      console.log("Reproduciendo jump");
+      await sound.playAsync();
+    } catch (error) {
+      console.error("Error al reproducir jump:", error);
+    }
+  }
   async function playShowcards() {
     setCardsDeployed(true);
     console.log("Cargando showcards");
@@ -782,8 +807,17 @@ useEffect(() => {
   };
   const stoneClicked = (index) => {
     //se guarda la position al clickar
+    console.log('index', index)
     setStoneOccuped(index);
-    playFootSteps();
+
+    //playJump();
+    if (index === 6 || index === 26){
+      setTimeout(() => {
+        playJump();
+      }, 100)
+    }else{
+      playFootSteps();
+    }
     setInstructionsText("Tira el dado para continuar");
     setPosition(index);
     storePlayerPosition(index.toString());
