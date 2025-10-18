@@ -16,7 +16,7 @@ import {
   ForwardArrow,
   LeftArrow,
   RightArrow,
-  SpiderIcon,
+  PumpkinIcon,
 } from "./Icons";
 import { useState, useEffect, useRef } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -61,6 +61,7 @@ export function Ground({ diceValue }) {
   const [disabledSouth, setDisabledSouth] = useState(true);
   const [playerImage, setPlayerImage] = useState(null);
   const [stoneOccuped, setStoneOccuped] = useState(null);
+  const [ground, setGround] = useState('ground');
   const scrollRef = useRef(null);
   const router = useRouter();
   const board = [ //no se visualiza la imagen del player
@@ -76,7 +77,7 @@ export function Ground({ diceValue }) {
           <>
             
               <ForwardArrow size={24} />
-              <Text style={styles.stoneText}>Planta baja</Text>
+              <Text style={styles.stoneText}>Primer piso</Text>
         
           </>
         )
@@ -126,7 +127,7 @@ export function Ground({ diceValue }) {
           />
         ) : (
            <>
-          <Text style={styles.stoneText}>Laboratorio</Text>
+          <Text style={styles.stoneText}>Cocheras</Text>
           <LeftArrow />
         </>
         )
@@ -151,7 +152,7 @@ export function Ground({ diceValue }) {
             resizeMode="cover"
           />
         ) : (
-          <SpiderIcon />
+          <PumpkinIcon />
         )
       ),  },
     { content: (
@@ -219,7 +220,7 @@ export function Ground({ diceValue }) {
           />
         ) : (
           <>
-          <Text style={styles.stoneText}>Salón</Text>
+          <Text style={styles.stoneText}>Vestíbulo</Text>
           <RightArrow />
         </>
         )
@@ -323,7 +324,7 @@ export function Ground({ diceValue }) {
           />
         ) : (
           <>
-           <Text style={styles.stoneText}>Biblioteca</Text>
+           <Text style={styles.stoneText}>Bodega</Text>
           <LeftArrow />
         </>
         )
@@ -381,7 +382,7 @@ export function Ground({ diceValue }) {
             resizeMode="cover"
           />
         ) : (
-         <SpiderIcon />
+         <PumpkinIcon />
         )
       ),   },
     {
@@ -394,7 +395,7 @@ export function Ground({ diceValue }) {
           />
         ) : (
          <>
-          <Text style={styles.stoneText}>Alcoba</Text>
+          <Text style={styles.stoneText}>Panteón</Text>
           <RightArrow />
         </>
         )
@@ -421,7 +422,7 @@ export function Ground({ diceValue }) {
         ) : (
          <>
               <ForwardArrow size={24} />
-              <Text style={styles.stoneText}>Planta baja</Text>
+              <Text style={styles.stoneText}>Primer piso</Text>
           </>
         )
       ),
@@ -496,9 +497,9 @@ useEffect(() => {
 }, []);
   
   const toDiceRoll = () => {
-    playDiceSound();
-    router.push("/dice");
-  };
+  playDiceSound();
+  router.push(`/dice?board=${ground}`);
+};
   useEffect(() => {
     Audio.setAudioModeAsync({
       allowsRecordingIOS: false,
@@ -910,22 +911,22 @@ useEffect(() => {
             <View style={styles.leftRoomsContainer}>
               <Pressable
                 disabled={disabledRoom1}
-                onPress={() => roomClicked("Laboratorio")}
+                onPress={() => roomClicked("Cocheras")}
                 style={[styles.room1Container, { borderColor: room1Color }]}
               >
                 <ImageBackground
                   style={styles.room}
-                  source={require("../assets/images/boardImages/Labo.png")}
+                  source={require("../assets/images/boardImages/garage.png")}
                 />
               </Pressable>
               <Pressable
                 disabled={disabledRoom2}
-                onPress={() => roomClicked("Biblioteca")}
+                onPress={() => roomClicked("Bodega")}
                 style={[styles.room2Container, { borderColor: room2Color }]}
               >
                 <ImageBackground
                   style={styles.room}
-                  source={require("../assets/images/boardImages/Library.png")}
+                  source={require("../assets/images/boardImages/wine-cellar.png")}
                 />
               </Pressable>
             </View>
@@ -950,22 +951,22 @@ useEffect(() => {
             <View style={styles.rightRoomsContainer}>
               <Pressable
                 disabled={disabledRoom3}
-                onPress={() => roomClicked("Salon")}
+                onPress={() => roomClicked("Vestíbulo")}
                 style={[styles.room3Container, { borderColor: room3Color }]}
               >
                 <ImageBackground
                   style={styles.room}
-                  source={require("../assets/images/boardImages/Lounge.png")}
+                  source={require("../assets/images/boardImages/lobby.png")}
                 />
               </Pressable>
               <Pressable
                 disabled={disabledRoom4}
-                onPress={() => roomClicked("Alcoba")}
+                onPress={() => roomClicked("Panteón")}
                 style={[styles.room4Container, { borderColor: room4Color }]}
               >
                 <ImageBackground
                   style={styles.room}
-                  source={require("../assets/images/boardImages/Bedroom.png")}
+                  source={require("../assets/images/boardImages/pantheon.png")}
                 />
               </Pressable>
             </View>

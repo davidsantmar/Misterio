@@ -25,3 +25,7 @@ export const SpiderIcon = (props) => (
 export const TouchIcon = (props) => (
     <MaterialIcons name="touch-app" size={48} color="orange" {...props} />
 )
+
+export const PumpkinIcon = (props) => (
+    <MaterialCommunityIcons name="halloween" size={24} color="black"  {...props} />
+)

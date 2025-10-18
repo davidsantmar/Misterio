@@ -1,6 +1,6 @@
 import { DiceRoll } from "../components/DiceRoll";
 import { View } from "react-native";
-import { useLocalSearchParams, useRouter } from "expo-router";
+import { useLocalSearchParams } from "expo-router";
 
 export default function Dice() {
   const { board } = useLocalSearchParams();

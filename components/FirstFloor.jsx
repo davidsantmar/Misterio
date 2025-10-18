@@ -61,6 +61,7 @@ export function FirstFloor({ diceValue }) {
   const [disabledSouth, setDisabledSouth] = useState(true);
   const [playerImage, setPlayerImage] = useState(null);
   const [stoneOccuped, setStoneOccuped] = useState(null);
+  const [firstFloor, setFirstFloor] = useState('firstFloor');
   const scrollRef = useRef(null);
   const router = useRouter();
   const board = [ //no se visualiza la imagen del player
@@ -496,9 +497,9 @@ useEffect(() => {
 }, []);
   
   const toDiceRoll = () => {
-    playDiceSound();
-    router.push("/dice");
-  };
+  playDiceSound();
+  router.push(`/dice?board=${firstFloor}`);
+};
   useEffect(() => {
     Audio.setAudioModeAsync({
       allowsRecordingIOS: false,
