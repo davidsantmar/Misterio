@@ -37,6 +37,7 @@ export default function Accuse() {
   const [suspense, setSuspense] = useState(null);
   const [buttonPress, setButtonPress] = useState(null);
   const [solved, setSolved] = useState(null);
+  const [laugh, setLaugh] = useState(null);
   const [loaded, error] = useFonts({  //to load and use font
         'SpecialElite': require('../assets/fonts/SpecialElite-Regular.ttf'), 
     });
@@ -75,8 +76,12 @@ export default function Accuse() {
         console.log("Liberando solved");
         solved.unloadAsync();
       }
+      if (laugh) {
+        console.log("Liberando laugh");
+        laugh.unloadAsync();
+      }
     };
-  },[suspense, buttonPress, solved]);
+  },[suspense, buttonPress, solved, laugh]);
   useEffect(() => {
     if (!assumption) return;
 
@@ -162,34 +167,16 @@ export default function Accuse() {
         playSolved();
       } else {
         setResult("CASO PERDIDO");
-        playSuspense();
+        playLaugh();
       }
     };
+    playSuspense();
+  
 
     // Esperar un poco antes de verificar
     const timer = setTimeout(checkEnvelope, 4500);
     return () => clearTimeout(timer);
   }, [assumptionManaged]);
-  useEffect(() => {
-      Audio.setAudioModeAsync({
-        allowsRecordingIOS: false,
-        playsInSilentModeIOS: true,
-        staysActiveInBackground: false,
-        shouldDuckAndroid: true,
-      });
-  
-      // Liberación de sonidos al desmontar el componente
-      return () => {
-        if (solved) {
-          console.log("Liberando solved");
-          solved.unloadAsync();
-        }
-        if (buttonPress) {
-          console.log("Liberando buttonPress");
-          buttonPress.unloadAsync();
-        }
-      };
-    },[buttonPress, start]);
   // Lanzar animación de sello
   useEffect(() => {
     if (!result) return;
@@ -226,6 +213,26 @@ export default function Accuse() {
       await sound.playAsync();
     } catch (error) {
       console.error("Error al reproducir suspense:", error);
+    }
+  }
+  async function playLaugh() {
+    console.log("Cargando laugh");
+    try {
+      if (laugh) {
+        // Si el sonido ya está cargado, reutilízalo
+        console.log("Reproduciendo laugh existente");
+        await laugh.replayAsync();
+        return;
+      }
+
+      const { sound } = await Audio.Sound.createAsync(
+        require("../assets/sounds/lose.mp3")
+      );
+      setLaugh(sound);
+      console.log("Reproduciendo laugh");
+      await sound.playAsync();
+    } catch (error) {
+      console.error("Error al reproducir laugh:", error);
     }
   }
   async function playSolved () {

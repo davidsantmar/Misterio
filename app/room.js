@@ -23,7 +23,7 @@ const victimsMap = {
   Doncella: require('../assets/images/te/Maid.png'),
 };
 const roomsMap = {
-  Laboratorio: require('../assets/images/boardImages/Labo.png'),
+  Laboratorio: require('../assets/images/boardImages/Labo.png'),  //Problema con salón, pantéon, vestíbulo por el acento (no se muestra en room)
   Salon: require('../assets/images/boardImages/Lounge.png'),
   Biblioteca: require('../assets/images/boardImages/Library.png'),
   Alcoba: require('../assets/images/boardImages/Bedroom.png'),
@@ -33,10 +33,10 @@ const roomsMap = {
   Bodega: require('../assets/images/boardImages/Store.png'),*/
 };
 const gifMap = {
-  Laboratorio: require("../assets/gifs/Laboratorio.gif"),
-  /*Salon: require("../assets/gifs/Salon.gif"),
-  Biblioteca: require("../assets/gifs/Biblioteca.gif"),
-  Alcoba: require("../assets/gifs/Alcoba.gif"),*/
+  Laboratorio: require("../assets/gifs/lab.gif"),
+  Salon: require("../assets/gifs/lounge.gif"),
+  Biblioteca: require("../assets/gifs/library.gif"),
+  Alcoba: require("../assets/gifs/bedroom.gif"),
 };
 
 
@@ -76,6 +76,20 @@ export default function Room() {
   const [showcards, setShowcards] = useState(null);
   const [hidecards, setHidecards] = useState(null);
   const [shine, setShine] = useState(null);
+  const [roomNameToShow, setRoomNameToShow] = useState(null);
+  useEffect(() => { //adding accent to exceptions to show room's name
+    if (room === 'Salon'){
+      setRoomNameToShow('Salón')
+    }else
+    if (room === 'Panteon'){
+      setRoomNameToShow('Panteón')
+    }else
+    if (room === 'Vestibulo'){
+      setRoomNameToShow('Vestíbulo')
+    }else{
+      setRoomNameToShow(room)
+    }
+  }, [room])
   useEffect(() => {
       Audio.setAudioModeAsync({
         allowsRecordingIOS: false,
@@ -105,6 +119,7 @@ export default function Room() {
         }
       };
     },[buttonPress, hidecards, showcards, shine]);
+
   const handleShowCardsPress = () => {
     !cardsDeployed ? playShowcards() : playHidecards();
     setOpacityBack(opacityBack === 1 ? 0.5 : 1);
@@ -369,6 +384,7 @@ const getData = async (data) => {
     outputRange: [0, 1],
   });
   const showSection = (section) => {
+    console.log('sectio', section)
     playButtonPress();
     setSelectedSection(section); // Update the selected section
     if (section === "killers") {
@@ -379,9 +395,10 @@ const getData = async (data) => {
       setCharactersOpacity(1); // Show characters
       setKillersOpacity(0); // Hide killers
       setInstructionText("Selecciona una víctima");
-    }else if (section === "") {
+    }else if (section === roomNameToShow) {
       setCharactersOpacity(0); // Hide characters
       setKillersOpacity(0); // Hide killers
+      setInstructionText(roomNameToShow)
     }
   };
   const showKiller = (killer) => {    
@@ -489,14 +506,8 @@ const getData = async (data) => {
           </Pressable>
         </View>
       )
-    }else if (selectedSection === "") {
-      return (
-        <View style={styles.roomTitleContainer}>
-          <View style={styles.title}>
-            <Text style={styles.text}>{room}</Text>
-          </View>
-        </View>
-      )
+    }else if (selectedSection === roomNameToShow) {
+      return null;
     }
     return null; // Return nothing if no section is selected
   };
@@ -520,13 +531,9 @@ const getData = async (data) => {
   const manageAssumption = () => {
     playButtonPress();
     setAssumptionOpacity(0);
-    // También podrías resetear los estados si es necesario
-    /*setKiller("");
-    setVictim("");*/
     setKillersOpacity(0);
     setCharactersOpacity(0);
     setShowComputerCard(true);
-    //Mostrar alguna carta de otro jugador si existen
     assumption.push(killer);
     assumption.push(victim);
     assumption.push(room);
@@ -647,9 +654,9 @@ Revisa bien tus cartas`)
             <Text style={styles.textEnvelope}>TE</Text>
             <Text style={styles.plusEnvelope}>+</Text>
           </Pressable>
-          <Pressable style={styles.envelope} onPress={() => showSection("")}>
+          <Pressable style={styles.envelope} onPress={() => showSection(roomNameToShow)}>
             <Text style={styles.textEnvelope}>RIO</Text>
-            <Text style={styles.roomEnvelope}>{room}</Text>
+            <Text style={styles.roomEnvelope}>{roomNameToShow}</Text>
           </Pressable>
         </View>
         <View style={styles.instructionsContainer}>

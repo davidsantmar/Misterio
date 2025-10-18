@@ -22,6 +22,13 @@ import { useState, useEffect, useRef } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { ShowCardsButton } from "./ShowCardsButton";
 import { Audio } from "expo-av";
+import fichaNely from '../assets/images/fichaNely.png';
+import fichaDavid from '../assets/images/fichaDavid.png';
+
+const playersMap = {
+  Nely: fichaNely,
+  David: fichaDavid,
+};
 
 export function BoardFloor({ diceValue }) {
   const bounceAnim = useRef(new Animated.Value(0)).current;
@@ -48,84 +55,371 @@ export function BoardFloor({ diceValue }) {
   const [disabledRoom3, setDisabledRoom3] = useState(true);
   const [disabledRoom4, setDisabledRoom4] = useState(true);
   const [disabledSquare, setDisabledSquare] = useState(true);
+  const [playerImage, setPlayerImage] = useState(null);
+  const [stoneOccuped, setStoneOccuped] = useState(null);
   const scrollRef = useRef(null);
-  const scrollAnim = useRef(new Animated.Value(0)).current;
-
   const router = useRouter();
-  // Lista de casillas con sus contenidos para facilitar la gestión
-  const board = [
+  const board = [ //no se visualiza la imagen del player
     {
       content: (
-        <>
-          <ForwardArrow size={24} />
-          <Text style={styles.stoneText}>Planta baja</Text>
-        </>
+        stoneOccuped === 0 ? (
+          <Image
+            style={styles.playerContainer}
+            source={playerImage}
+            resizeMode="cover"
+          />
+        ) : (
+          <>
+            <ForwardArrow size={24} />
+            <Text style={styles.stoneText}>Planta baja</Text>
+          </>
+        )
       ),
     },
-    { content: null },
-    { content: null },
-    { content: null },
+    { content: (
+        stoneOccuped === 1 ? (
+          <Image
+            style={styles.playerContainer}
+            source={playerImage}
+            resizeMode="cover"
+          />
+        ) : (
+          null
+        )
+      ),
+    },
+    { content: (
+        stoneOccuped === 2 ? (
+          <Image
+            style={styles.playerContainer}
+            source={playerImage}
+            resizeMode="cover"
+          />
+        ) : (
+          null
+        )
+      ), },
+    { content: (
+        stoneOccuped === 3 ? (
+          <Image
+            style={styles.playerContainer}
+            source={playerImage}
+            resizeMode="cover"
+          />
+        ) : (
+          null
+        )
+      ), },
     {
       content: (
-        <>
+        stoneOccuped === 4 ? (
+          <Image
+            style={styles.playerContainer}
+            source={playerImage}
+            resizeMode="cover"
+          />
+        ) : (
+           <>
           <Text style={styles.stoneText}>Laboratorio</Text>
           <LeftArrow />
         </>
+        )
       ),
     },
-    { content: null },
-    { content: <SpiderIcon /> },
-    { content: null },
-    { content: null },
-    { content: null },
-    { content: null },
-    { content: null },
+    { content: (
+        stoneOccuped === 5 ? (
+          <Image
+            style={styles.playerContainer}
+            source={playerImage}
+            resizeMode="cover"
+          />
+        ) : (
+          null
+        )
+      ), },
+    { content: (
+        stoneOccuped === 6 ? (
+          <Image
+            style={styles.playerContainer}
+            source={playerImage}
+            resizeMode="cover"
+          />
+        ) : (
+          <SpiderIcon />
+        )
+      ),  },
+    { content: (
+        stoneOccuped === 7 ? (
+          <Image
+            style={styles.playerContainer}
+            source={playerImage}
+            resizeMode="cover"
+          />
+        ) : (
+          null
+        )
+      ), },
+    { content: (
+        stoneOccuped === 8 ? (
+          <Image
+            style={styles.playerContainer}
+            source={playerImage}
+            resizeMode="cover"
+          />
+        ) : (
+          null
+        )
+      ), },
+    { content: (
+        stoneOccuped === 9 ? (
+          <Image
+            style={styles.playerContainer}
+            source={playerImage}
+            resizeMode="cover"
+          />
+        ) : (
+          null
+        )
+      ), },
+    { content: (
+        stoneOccuped === 10 ? (
+          <Image
+            style={styles.playerContainer}
+            source={playerImage}
+            resizeMode="cover"
+          />
+        ) : (
+          null
+        )
+      ), },
+    { content: (
+        stoneOccuped === 11 ? (
+          <Image
+            style={styles.playerContainer}
+            source={playerImage}
+            resizeMode="cover"
+          />
+        ) : (
+          null
+        )
+      ), },
     {
       content: (
-        <>
+        stoneOccuped === 12 ? (
+          <Image
+            style={styles.playerContainer}
+            source={playerImage}
+            resizeMode="cover"
+          />
+        ) : (
+          <>
           <Text style={styles.stoneText}>Salón</Text>
           <RightArrow />
         </>
+        )
       ),
     },
-    { content: null },
-    { content: null },
-    { content: null },
-    { content: null },
-    { content: null },
-    { content: null },
-    { content: null },
-    { content: null },
+    { content: (
+        stoneOccuped === 13 ? (
+          <Image
+            style={styles.playerContainer}
+            source={playerImage}
+            resizeMode="cover"
+          />
+        ) : (
+          null
+        )
+      ), },
+    { content: (
+        stoneOccuped === 14 ? (
+          <Image
+            style={styles.playerContainer}
+            source={playerImage}
+            resizeMode="cover"
+          />
+        ) : (
+          null
+        )
+      ), },
+    { content: (
+        stoneOccuped === 15 ? (
+          <Image
+            style={styles.playerContainer}
+            source={playerImage}
+            resizeMode="cover"
+          />
+        ) : (
+          null
+        )
+      ), },
+    { content: (
+        stoneOccuped === 16 ? (
+          <Image
+            style={styles.playerContainer}
+            source={playerImage}
+            resizeMode="cover"
+          />
+        ) : (
+          null
+        )
+      ), },
+    { content: (
+        stoneOccuped === 17 ? (
+          <Image
+            style={styles.playerContainer}
+            source={playerImage}
+            resizeMode="cover"
+          />
+        ) : (
+          null
+        )
+      ), },
+    { content: (
+        stoneOccuped === 18 ? (
+          <Image
+            style={styles.playerContainer}
+            source={playerImage}
+            resizeMode="cover"
+          />
+        ) : (
+          null
+        )
+      ), },
+    { content: (
+        stoneOccuped === 19 ? (
+          <Image
+            style={styles.playerContainer}
+            source={playerImage}
+            resizeMode="cover"
+          />
+        ) : (
+          null
+        )
+      ), },
+    { content: (
+        stoneOccuped === 20 ? (
+          <Image
+            style={styles.playerContainer}
+            source={playerImage}
+            resizeMode="cover"
+          />
+        ) : (
+          null
+        )
+      ), },
     {
       content: (
-        <>
-          <Text style={styles.stoneText}>Biblioteca</Text>
+        stoneOccuped === 21 ? (
+          <Image
+            style={styles.playerContainer}
+            source={playerImage}
+            resizeMode="cover"
+          />
+        ) : (
+          <>
+           <Text style={styles.stoneText}>Biblioteca</Text>
           <LeftArrow />
         </>
-      ),
+        )
+      )
     },
-    { content: null },
-    { content: null },
-    { content: null },
-    { content: null },
-    { content: <SpiderIcon /> },
+    { content: (
+        stoneOccuped === 22 ? (
+          <Image
+            style={styles.playerContainer}
+            source={playerImage}
+            resizeMode="cover"
+          />
+        ) : (
+          null
+        )
+      ), },
+    { content: (
+        stoneOccuped === 23 ? (
+          <Image
+            style={styles.playerContainer}
+            source={playerImage}
+            resizeMode="cover"
+          />
+        ) : (
+          null
+        )
+      ), },
+    { content: (
+        stoneOccuped === 24 ? (
+          <Image
+            style={styles.playerContainer}
+            source={playerImage}
+            resizeMode="cover"
+          />
+        ) : (
+          null
+        )
+      ), },
+    { content: (
+        stoneOccuped === 25 ? (
+          <Image
+            style={styles.playerContainer}
+            source={playerImage}
+            resizeMode="cover"
+          />
+        ) : (
+          null
+        )
+      ), },
+    { content: (
+        stoneOccuped === 26 ? (
+          <Image
+            style={styles.playerContainer}
+            source={playerImage}
+            resizeMode="cover"
+          />
+        ) : (
+         <SpiderIcon />
+        )
+      ),   },
     {
       content: (
-        <>
+        stoneOccuped === 27 ? (
+          <Image
+            style={styles.playerContainer}
+            source={playerImage}
+            resizeMode="cover"
+          />
+        ) : (
+         <>
           <Text style={styles.stoneText}>Alcoba</Text>
           <RightArrow />
         </>
-      ),
+        )
+      ),   
     },
-    { content: null },
-    {
-      content: (
-        <>
+    { content: (
+        stoneOccuped === 28 ? (
+          <Image
+            style={styles.playerContainer}
+            source={playerImage}
+            resizeMode="cover"
+          />
+        ) : (
+          null
+        )
+      ), },
+    { content: (
+      stoneOccuped === 29 ? (
+          <Image
+            style={styles.playerContainer}
+            source={playerImage}
+            resizeMode="cover"
+          />
+        ) : (
+         <>
           <Text style={styles.stoneText}>Planta baja</Text>
           <BackArrow size={24} />
         </>
+        )
       ),
-    },
+    }
   ];
   const [colors, setColors] = useState(board.map(() => "#808080")); // Color inicial para cada stone
   const [borderColors, setBorderColors] = useState(board.map(() => "black"));
@@ -155,9 +449,29 @@ export function BoardFloor({ diceValue }) {
       return newColors;
     });
   };
-  useEffect(() => {
-    playRainSound();
-  }, []);
+  
+useEffect(() => {
+  playRainSound();
+  
+    const fetchPlayer = async () => {
+    try {
+      const storedPlayer = await getPlayer();
+      
+      console.log('Players available:', Object.keys(playersMap));
+      console.log(`Image for ${storedPlayer}:`, playersMap[storedPlayer]);
+      
+      if (playersMap[storedPlayer]) {
+        setPlayerImage(playersMap[storedPlayer]); // Esto funcionará con los IDs
+        console.log(playerImage)
+      }
+    } catch (error) {
+      console.error("Error:", error);
+    }
+  };
+
+  fetchPlayer();
+}, []);
+  
   const toDiceRoll = () => {
     playDiceSound();
     router.push("/dice");
@@ -216,11 +530,9 @@ export function BoardFloor({ diceValue }) {
     const fetchPosition = async () => {
       try {
         const storedValue = await getPlayerPosition();
-        console.log("Fetched stored value:", storedValue);
-
+        console.log("Fetched stored value:", storedValue);        
         if (storedValue !== null) {
           const playerIndex = parseInt(storedValue, 10);
-
           // Hacer scroll a la posición del jugador
           // Usar setTimeout para asegurar que el ScrollView esté completamente renderizado
           setTimeout(() => {
@@ -228,13 +540,14 @@ export function BoardFloor({ diceValue }) {
           }, 100); // Pequeño delay para asegurar renderizado
 
           setPosition(playerIndex); // Actualizar posición local
+          setStoneOccuped(playerIndex);
 
           // ... resto de tu lógica existente
-          const newColors = [...colors];
+          /*const newColors = [...colors];
           newColors[playerIndex] =
-            newColors[playerIndex] === "#FF6347" ? "#808080" : "#FF6347";
+            newColors[playerIndex] === "#FF6347" ? "#808080" : "#FF6347";*/
           updateBorderColors(playerIndex, diceValue);
-          setColors(newColors);
+          //setColors(newColors);
 
           // Lógica de habitaciones...
           if (
@@ -243,6 +556,27 @@ export function BoardFloor({ diceValue }) {
           ) {
             setRoom1Color("yellow");
             setDisabledRoom1(false);
+          }
+          if (
+            (playerIndex <= 21 && playerIndex + Number(diceValue) > 21) ||
+            (playerIndex >= 21 && playerIndex - Number(diceValue) < 21)
+          ) {
+            setRoom2Color("yellow");
+            setDisabledRoom2(false);
+          }
+          if (
+            (playerIndex <= 12 && playerIndex + Number(diceValue) > 12) ||
+            (playerIndex >= 12 && playerIndex - Number(diceValue) < 12)
+          ) {
+            setRoom3Color("yellow");
+            setDisabledRoom3(false);
+          }
+          if (
+            (playerIndex <= 27 && playerIndex + Number(diceValue) > 27) ||
+            (playerIndex >= 27 && playerIndex - Number(diceValue) < 27)
+          ) {
+            setRoom4Color("yellow");
+            setDisabledRoom4(false);
           }
           // ... resto de condiciones de habitaciones
         }
@@ -258,10 +592,10 @@ export function BoardFloor({ diceValue }) {
       // Hacer scroll cuando cambia la posición local
       scrollToPlayerPosition(position);
 
-      const newColors = [...colors];
+      /*const newColors = [...colors];
       newColors[position] =
         newColors[position] === "#FF6347" ? "#808080" : "#9cf1a7ff";
-      setColors(newColors);
+      setColors(newColors);*/
     }
   }, [position]);
   const scrollToPlayerPosition = (playerIndex) => {
@@ -399,6 +733,15 @@ export function BoardFloor({ diceValue }) {
       console.error("Error al reproducir diceSound:", error);
     }
   }
+  const getPlayer = async () => {
+    try {
+      const value = await AsyncStorage.getItem("player");
+      return value;
+    } catch (e) {
+      console.log("error reading data");
+      return null;
+    }
+  };
   const getPlayerPosition = async () => {
     try {
       const value = await AsyncStorage.getItem("position");
@@ -417,6 +760,7 @@ export function BoardFloor({ diceValue }) {
   };
   const stoneClicked = (index) => {
     //se guarda la position al clickar
+    setStoneOccuped(index);
     playFootSteps();
     setInstructionsText("Tira el dado para continuar");
     setPosition(index);
@@ -432,10 +776,12 @@ export function BoardFloor({ diceValue }) {
     if (index === 6) {
       storePlayerPosition("26");
       setPosition(26);
+      setStoneOccuped(26);
     }
     if (index === 26) {
       storePlayerPosition("6");
-      setPosition(26);
+      setPosition(6);
+      setStoneOccuped(6);
     }
   };
   const roomClicked = (room) => {
@@ -544,7 +890,7 @@ export function BoardFloor({ diceValue }) {
             <View style={styles.rightRoomsContainer}>
               <Pressable
                 disabled={disabledRoom3}
-                onPress={() => roomClicked("Salón")}
+                onPress={() => roomClicked("Salon")}
                 style={[styles.room3Container, { borderColor: room3Color }]}
               >
                 <ImageBackground
@@ -661,4 +1007,12 @@ const styles = StyleSheet.create({
     fontFamily: "Creepster-Regular",
     textAlign: "center",
   },
+  playerContainer: {
+    borderRadius: 50,
+    borderWidth: 2,
+    borderColor: 'blue',
+    width: 50,
+    height: 50
+
+  }
 });
