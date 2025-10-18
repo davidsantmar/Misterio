@@ -45,16 +45,20 @@ export function BoardFloor({ diceValue }) {
     "Selecciona una casilla amarilla para moverte"
   );
   const [position, setPosition] = useState(0);
-  const [room1Color, setRoom1Color] = useState("");
-  const [room2Color, setRoom2Color] = useState("");
-  const [room3Color, setRoom3Color] = useState("");
-  const [room4Color, setRoom4Color] = useState("");
+  const [groundNorthColor, setGroundNorthColor] = useState(null);
+  const [groundSouthColor, setGroundSouthColor] = useState(null);
+  const [room1Color, setRoom1Color] = useState(null);
+  const [room2Color, setRoom2Color] = useState(null);
+  const [room3Color, setRoom3Color] = useState(null);
+  const [room4Color, setRoom4Color] = useState(null);
   const [disabledDice, setDisabledDice] = useState(true); // Estado para activar/desactivar el botón
   const [disabledRoom1, setDisabledRoom1] = useState(true);
   const [disabledRoom2, setDisabledRoom2] = useState(true);
   const [disabledRoom3, setDisabledRoom3] = useState(true);
   const [disabledRoom4, setDisabledRoom4] = useState(true);
   const [disabledSquare, setDisabledSquare] = useState(true);
+  const [disabledNorth, setDisabledNorth] = useState(true);
+  const [disabledSouth, setDisabledSouth] = useState(true);
   const [playerImage, setPlayerImage] = useState(null);
   const [stoneOccuped, setStoneOccuped] = useState(null);
   const scrollRef = useRef(null);
@@ -70,8 +74,10 @@ export function BoardFloor({ diceValue }) {
           />
         ) : (
           <>
-            <ForwardArrow size={24} />
-            <Text style={styles.stoneText}>Planta baja</Text>
+            
+              <ForwardArrow size={24} />
+              <Text style={styles.stoneText}>Planta baja</Text>
+        
           </>
         )
       ),
@@ -414,9 +420,9 @@ export function BoardFloor({ diceValue }) {
           />
         ) : (
          <>
-          <Text style={styles.stoneText}>Planta baja</Text>
-          <BackArrow size={24} />
-        </>
+              <ForwardArrow size={24} />
+              <Text style={styles.stoneText}>Planta baja</Text>
+          </>
         )
       ),
     }
@@ -431,24 +437,40 @@ export function BoardFloor({ diceValue }) {
   const [hidecards, setHidecards] = useState(null);
   const [cardsDeployed, setCardsDeployed] = useState(null);
   const updateBorderColors = (storedValue, diceValue) => {
-    setBorderColors((prevColors) => {
-      const newColors = [...prevColors]; // Crear una copia del arreglo
-      const sumIndex = Number(storedValue) + Number(diceValue);
-      const diffIndex = Number(storedValue) - Number(diceValue);
-      // Validar que los índices sean válidos
-      if (sumIndex >= 0 && sumIndex < newColors.length) {
-        newColors[sumIndex] =
-          newColors[sumIndex] === "black" ? "yellow" : "black";
-        //setDisabledSquare(false);
-      }
-      if (diffIndex >= 0 && diffIndex < newColors.length) {
-        newColors[diffIndex] =
-          newColors[diffIndex] === "black" ? "yellow" : "black";
-        //setDisabledSquare(false);
-      }
-      return newColors;
-    });
-  };
+  setBorderColors((prevColors) => {
+    const newColors = [...prevColors]; // Crear una copia del arreglo
+    const sumIndex = Number(storedValue) + Number(diceValue);
+    const diffIndex = Number(storedValue) - Number(diceValue);
+    // Resetear todos los colores a negro por defecto
+    newColors.fill("black");
+    // Resaltar casillas dentro del rango
+    if (sumIndex > 0 && sumIndex < newColors.length - 1) {
+      newColors[sumIndex] = "yellow";
+    }
+    if (diffIndex > 0 && diffIndex < newColors.length - 1) {
+      newColors[diffIndex] = "yellow";
+    }
+    // Resaltar casilla 0 si el movimiento lleva a <= 0
+    if (sumIndex <= 0 || diffIndex <= 0) {
+      newColors[0] = "yellow";
+      setGroundNorthColor("yellow");
+      setDisabledNorth(false);
+    } else {
+      setGroundNorthColor(null);
+      setDisabledNorth(true);
+    }
+    // Resaltar casilla 29 si el movimiento lleva a >= 29
+    if (sumIndex >= 29 || diffIndex >= 29) {
+      newColors[29] = "yellow";
+      setGroundSouthColor("yellow");
+      setDisabledSouth(false);
+    } else {
+      setGroundSouthColor(null);
+      setDisabledSouth(true);
+    }
+    return newColors;
+  });
+};
   
 useEffect(() => {
   playRainSound();
@@ -526,76 +548,76 @@ useEffect(() => {
     loop.start();
     return () => loop.stop(); // Cleanup
   }, [activateLoop, bounceAnim]); // Depend on activateLoop to re-run when it changes
-  useEffect(() => {
-    const fetchPosition = async () => {
-      try {
-        const storedValue = await getPlayerPosition();
-        console.log("Fetched stored value:", storedValue);        
-        if (storedValue !== null) {
-          const playerIndex = parseInt(storedValue, 10);
-          // Hacer scroll a la posición del jugador
-          // Usar setTimeout para asegurar que el ScrollView esté completamente renderizado
-          setTimeout(() => {
-            scrollToPlayerPosition(playerIndex);
-          }, 100); // Pequeño delay para asegurar renderizado
+ useEffect(() => {
+  const fetchPosition = async () => {
+    try {
+      const storedValue = await getPlayerPosition();
+      console.log("Fetched stored value:", storedValue);
+      if (storedValue !== null) {
+        const playerIndex = parseInt(storedValue, 10);
+        setTimeout(() => {
+          scrollToPlayerPosition(playerIndex);
+        }, 100);
 
-          setPosition(playerIndex); // Actualizar posición local
-          setStoneOccuped(playerIndex);
+        setPosition(playerIndex);
+        setStoneOccuped(playerIndex);
 
-          // ... resto de tu lógica existente
-          /*const newColors = [...colors];
-          newColors[playerIndex] =
-            newColors[playerIndex] === "#FF6347" ? "#808080" : "#FF6347";*/
-          updateBorderColors(playerIndex, diceValue);
-          //setColors(newColors);
+        // Actualizar colores de los bordes
+        updateBorderColors(playerIndex, diceValue);
 
-          // Lógica de habitaciones...
-          if (
-            (playerIndex <= 4 && playerIndex + Number(diceValue) > 4) ||
-            (playerIndex >= 4 && playerIndex - Number(diceValue) < 4)
-          ) {
-            setRoom1Color("yellow");
-            setDisabledRoom1(false);
-          }
-          if (
-            (playerIndex <= 21 && playerIndex + Number(diceValue) > 21) ||
-            (playerIndex >= 21 && playerIndex - Number(diceValue) < 21)
-          ) {
-            setRoom2Color("yellow");
-            setDisabledRoom2(false);
-          }
-          if (
-            (playerIndex <= 12 && playerIndex + Number(diceValue) > 12) ||
-            (playerIndex >= 12 && playerIndex - Number(diceValue) < 12)
-          ) {
-            setRoom3Color("yellow");
-            setDisabledRoom3(false);
-          }
-          if (
-            (playerIndex <= 27 && playerIndex + Number(diceValue) > 27) ||
-            (playerIndex >= 27 && playerIndex - Number(diceValue) < 27)
-          ) {
-            setRoom4Color("yellow");
-            setDisabledRoom4(false);
-          }
-          // ... resto de condiciones de habitaciones
+        // Lógica de habitaciones
+        if (
+          (playerIndex <= 4 && playerIndex + Number(diceValue) > 4) ||
+          (playerIndex >= 4 && playerIndex - Number(diceValue) < 4)
+        ) {
+          setRoom1Color("yellow");
+          setDisabledRoom1(false);
+        } else {
+          setRoom1Color(null);
+          setDisabledRoom1(true);
         }
-      } catch (error) {
-        console.error("Error fetching position:", error);
+        if (
+          (playerIndex <= 21 && playerIndex + Number(diceValue) > 21) ||
+          (playerIndex >= 21 && playerIndex - Number(diceValue) < 21)
+        ) {
+          setRoom2Color("yellow");
+          setDisabledRoom2(false);
+        } else {
+          setRoom2Color(null);
+          setDisabledRoom2(true);
+        }
+        if (
+          (playerIndex <= 12 && playerIndex + Number(diceValue) > 12) ||
+          (playerIndex >= 12 && playerIndex - Number(diceValue) < 12)
+        ) {
+          setRoom3Color("yellow");
+          setDisabledRoom3(false);
+        } else {
+          setRoom3Color(null);
+          setDisabledRoom3(true);
+        }
+        if (
+          (playerIndex <= 27 && playerIndex + Number(diceValue) > 27) ||
+          (playerIndex >= 27 && playerIndex - Number(diceValue) < 27)
+        ) {
+          setRoom4Color("yellow");
+          setDisabledRoom4(false);
+        } else {
+          setRoom4Color(null);
+          setDisabledRoom4(true);
+        }
       }
-    };
+    } catch (error) {
+      console.error("Error fetching position:", error);
+    }
+  };
 
-    fetchPosition();
-  }, [diceValue]); // Agregar diceValue como dependencia si cambia
+  fetchPosition();
+}, [diceValue]);
   useEffect(() => {
     if (position !== null && position !== undefined) {
       // Hacer scroll cuando cambia la posición local
       scrollToPlayerPosition(position);
-
-      /*const newColors = [...colors];
-      newColors[position] =
-        newColors[position] === "#FF6347" ? "#808080" : "#9cf1a7ff";
-      setColors(newColors);*/
     }
   }, [position]);
   const scrollToPlayerPosition = (playerIndex) => {
@@ -769,6 +791,10 @@ useEffect(() => {
     setDisabledDice(false); // Enable the button
     setDisabledSquare(true); // Disable squares after selection
     if (index === 0 || index === 29) {
+      setGroundNorthColor(null);
+      setGroundSouthColor(null);
+      setDisabledNorth(true);
+      setDisabledSouth(true);
       router.push({
         pathname: "/entry",
       });
