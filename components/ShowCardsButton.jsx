@@ -23,10 +23,10 @@ const killers = {
       Salon: require('../assets/images/boardImages/Lounge.png'),
       Biblioteca: require('../assets/images/boardImages/Library.png'),
       Alcoba: require('../assets/images/boardImages/Bedroom.png'),
-      /*Cocheras: require('../assets/images/boardImages/Garage.png'),
-      Vestibulo: require('../assets/images/boardImages/Lobby.png'),
-      Panteon: require('../assets/images/boardImages/Pantheon.png'),
-      Bodega: require('../assets/images/boardImages/Store.png'),*/
+      Cocheras: require('../assets/images/boardImages/garage.png'),
+      Vestibulo: require('../assets/images/boardImages/lobby.png'),
+      Panteon: require('../assets/images/boardImages/pantheon.png'),
+      Bodega: require('../assets/images/boardImages/wine-cellar.png'),
     };
 const getData = async (data) => {
   try {

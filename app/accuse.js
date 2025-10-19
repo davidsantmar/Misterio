@@ -26,6 +26,10 @@ const roomsMap = {
   Salon: require('../assets/images/boardImages/Lounge.png'),
   Biblioteca: require('../assets/images/boardImages/Library.png'),
   Alcoba: require('../assets/images/boardImages/Bedroom.png'),
+  Cocheras: require('../assets/images/boardImages/garage.png'),
+  Vestibulo: require('../assets/images/boardImages/lobby.png'),
+  Panteon: require('../assets/images/boardImages/pantheon.png'),
+  Bodega: require('../assets/images/boardImages/wine-cellar.png'),
 };
 
 export default function Accuse() {

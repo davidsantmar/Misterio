@@ -128,7 +128,7 @@ export function Ground({ diceValue }) {
         ) : (
            <>
           <Text style={styles.stoneText}>Cocheras</Text>
-          <LeftArrow />
+          <RightArrow />
         </>
         )
       ),
@@ -221,7 +221,7 @@ export function Ground({ diceValue }) {
         ) : (
           <>
           <Text style={styles.stoneText}>Vestíbulo</Text>
-          <RightArrow />
+          <LeftArrow />
         </>
         )
       ),
@@ -325,7 +325,7 @@ export function Ground({ diceValue }) {
         ) : (
           <>
            <Text style={styles.stoneText}>Bodega</Text>
-          <LeftArrow />
+          <RightArrow />
         </>
         )
       )
@@ -396,10 +396,10 @@ export function Ground({ diceValue }) {
         ) : (
          <>
           <Text style={styles.stoneText}>Panteón</Text>
-          <RightArrow />
+          <LeftArrow />
         </>
         )
-      ),   
+      ),
     },
     { content: (
         stoneOccuped === 28 ? (
@@ -911,22 +911,22 @@ useEffect(() => {
             <View style={styles.leftRoomsContainer}>
               <Pressable
                 disabled={disabledRoom1}
-                onPress={() => roomClicked("Cocheras")}
+                onPress={() => roomClicked("Vestíbulo")}
                 style={[styles.room1Container, { borderColor: room1Color }]}
               >
                 <ImageBackground
                   style={styles.room}
-                  source={require("../assets/images/boardImages/garage.png")}
+                  source={require("../assets/images/boardImages/lobby.png")}
                 />
               </Pressable>
               <Pressable
                 disabled={disabledRoom2}
-                onPress={() => roomClicked("Bodega")}
+                onPress={() => roomClicked("Panteón")}
                 style={[styles.room2Container, { borderColor: room2Color }]}
               >
                 <ImageBackground
                   style={styles.room}
-                  source={require("../assets/images/boardImages/wine-cellar.png")}
+                  source={require("../assets/images/boardImages/pantheon.png")}
                 />
               </Pressable>
             </View>
@@ -951,22 +951,22 @@ useEffect(() => {
             <View style={styles.rightRoomsContainer}>
               <Pressable
                 disabled={disabledRoom3}
-                onPress={() => roomClicked("Vestíbulo")}
+                onPress={() => roomClicked("Cocheras")}
                 style={[styles.room3Container, { borderColor: room3Color }]}
               >
                 <ImageBackground
                   style={styles.room}
-                  source={require("../assets/images/boardImages/lobby.png")}
+                  source={require("../assets/images/boardImages/garage.png")}
                 />
               </Pressable>
               <Pressable
                 disabled={disabledRoom4}
-                onPress={() => roomClicked("Panteón")}
+                onPress={() => roomClicked("Bodega")}
                 style={[styles.room4Container, { borderColor: room4Color }]}
               >
                 <ImageBackground
                   style={styles.room}
-                  source={require("../assets/images/boardImages/pantheon.png")}
+                  source={require("../assets/images/boardImages/wine-cellar.png")}
                 />
               </Pressable>
             </View>
@@ -1015,7 +1015,7 @@ const styles = StyleSheet.create({
     borderWidth: 4,
     borderColor: "black",
     height: 258,
-    marginBottom: 860,
+    marginTop: 500,
     width: 133,
   },
   room2Container: {
@@ -1023,7 +1023,7 @@ const styles = StyleSheet.create({
     borderColor: "black",
     height: 258,
     width: 133,
-    marginBottom: 290,
+    marginTop: 600,
   },
   rightRoomsContainer: {
     flexDirection: "column",
@@ -1034,14 +1034,14 @@ const styles = StyleSheet.create({
     borderColor: "black",
     height: 258,
     width: 133,
-    marginTop: 400,
+    marginBottom: 750,
   },
   room4Container: {
     borderWidth: 4,
     borderColor: "black",
     height: 258,
     width: 133,
-    marginTop: 550,
+    marginBottom: 450,
   },
   room: {
     height: 250,
