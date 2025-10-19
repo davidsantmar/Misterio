@@ -8,7 +8,7 @@ import { Audio } from "expo-av";
 
 const killersMap = {
   MrHyde: require('../assets/images/mis/MrHyde.png'),
-  Dracula: require('../assets/images/mis/Dracula.png'),
+  Drácula: require('../assets/images/mis/Dracula.png'),
   Frankenstein: require('../assets/images/mis/Frankenstein.png'),
   Hombrelobo : require('../assets/images/mis/Werewolf.png'),
   Fantasma: require('../assets/images/mis/Ghost.png'),
@@ -24,17 +24,17 @@ const victimsMap = {
 };
 const roomsMap = {
   Laboratorio: require('../assets/images/boardImages/Labo.png'),  //Problema con salón, pantéon, vestíbulo por el acento (no se muestra en room)
-  Salon: require('../assets/images/boardImages/Lounge.png'),
+  Salón: require('../assets/images/boardImages/Lounge.png'),
   Biblioteca: require('../assets/images/boardImages/Library.png'),
   Alcoba: require('../assets/images/boardImages/Bedroom.png'),
   Cocheras: require('../assets/images/boardImages/garage.png'),
-  Vestibulo: require('../assets/images/boardImages/lobby.png'),
-  Panteon: require('../assets/images/boardImages/pantheon.png'),
+  Vestíbulo: require('../assets/images/boardImages/lobby.png'),
+  Panteón: require('../assets/images/boardImages/pantheon.png'),
   Bodega: require('../assets/images/boardImages/wine-cellar.png'),
 };
 const gifMap = {
   Laboratorio: require("../assets/gifs/lab.gif"),
-  Salon: require("../assets/gifs/lounge.gif"),
+  Salón: require("../assets/gifs/lounge.gif"),
   Biblioteca: require("../assets/gifs/library.gif"),
   Alcoba: require("../assets/gifs/bedroom.gif"),
   Cocheras: require("../assets/gifs/garage.gif"),
@@ -42,8 +42,6 @@ const gifMap = {
   Bodega: require("../assets/gifs/wine-cellar.gif"),
   Panteon: require("../assets/gifs/pantheon.gif"),
 };
-
-
 
 export default function Room() {
   const { room } = useLocalSearchParams();
@@ -80,8 +78,8 @@ export default function Room() {
   const [showcards, setShowcards] = useState(null);
   const [hidecards, setHidecards] = useState(null);
   const [shine, setShine] = useState(null);
-  const [roomNameToShow, setRoomNameToShow] = useState(null);
-  useEffect(() => { //adding accent to exceptions to show room's name
+  //const [roomNameToShow, setRoomNameToShow] = useState(null);
+  /*useEffect(() => { //adding accent to exceptions to show room's name
     if (room === 'Salon'){
       setRoomNameToShow('Salón')
     }else
@@ -93,7 +91,7 @@ export default function Room() {
     }else{
       setRoomNameToShow(room)
     }
-  }, [room])
+  }, [room])*/
   useEffect(() => {
       Audio.setAudioModeAsync({
         allowsRecordingIOS: false,
@@ -257,10 +255,10 @@ const getData = async (data) => {
         assumptionComputerCards.splice(0, 1);
         assumptionComputerCards.splice(0, 1, 'Hombrelobo');
       }
-       if (assumptionComputerCards[0] === 'Drácula'){
+      /* if (assumptionComputerCards[0] === 'Drácula'){
         assumptionComputerCards.splice(0, 1);
         assumptionComputerCards.splice(0, 1, 'Dracula');
-      }
+      }*/
       setComputerCardCharacter(killersMap[assumptionComputerCards[0]])
     } else if (teComputerCards.length > 0) {
       setBigCardText('TE');
@@ -271,7 +269,7 @@ const getData = async (data) => {
       setComputerCardCharacter(victimsMap[assumptionComputerCards[0]])
     } else if (rioComputerCards.length > 0) {
       setBigCardText('RIO');
-      if (assumptionComputerCards[2] === 'Panteón'){
+      /*if (assumptionComputerCards[2] === 'Panteón'){
         assumptionComputerCards.splice(0, 1);
         assumptionComputerCards.splice(0, 1, 'Panteon');
       }
@@ -282,7 +280,7 @@ const getData = async (data) => {
       if (assumptionComputerCards[2] === 'Vestíbulo'){
         assumptionComputerCards.splice(0, 1);
         assumptionComputerCards.splice(0, 1, 'Vestibulo');
-      }
+      }*/
       setComputerCardCharacter(roomsMap[assumptionComputerCards[0]])
     }
   }, [assumptionComputerCards, killers, victims, rooms]);
@@ -399,10 +397,10 @@ const getData = async (data) => {
       setCharactersOpacity(1); // Show characters
       setKillersOpacity(0); // Hide killers
       setInstructionText("Selecciona una víctima");
-    }else if (section === roomNameToShow) {
+    }else if (section === room) {
       setCharactersOpacity(0); // Hide characters
       setKillersOpacity(0); // Hide killers
-      setInstructionText(roomNameToShow)
+      setInstructionText(room)
     }
   };
   const showKiller = (killer) => {    
@@ -510,7 +508,7 @@ const getData = async (data) => {
           </Pressable>
         </View>
       )
-    }else if (selectedSection === roomNameToShow) {
+    }else if (selectedSection === room) {
       return null;
     }
     return null; // Return nothing if no section is selected
@@ -658,9 +656,9 @@ Revisa bien tus cartas`)
             <Text style={styles.textEnvelope}>TE</Text>
             <Text style={styles.plusEnvelope}>+</Text>
           </Pressable>
-          <Pressable style={styles.envelope} onPress={() => showSection(roomNameToShow)}>
+          <Pressable style={styles.envelope} onPress={() => showSection(room)}>
             <Text style={styles.textEnvelope}>RIO</Text>
-            <Text style={styles.roomEnvelope}>{roomNameToShow}</Text>
+            <Text style={styles.roomEnvelope}>{room}</Text>
           </Pressable>
         </View>
         <View style={styles.instructionsContainer}>

@@ -4,7 +4,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFonts } from "expo-font";
 const killers = {
       MrHyde: require('../assets/images/mis/MrHyde.png'),
-      Dracula: require('../assets/images/mis/Dracula.png'),
+      Drácula: require('../assets/images/mis/Dracula.png'),
       Frankenstein: require('../assets/images/mis/Frankenstein.png'),
       Hombrelobo : require('../assets/images/mis/Werewolf.png'),
       Fantasma: require('../assets/images/mis/Ghost.png'),
@@ -20,12 +20,12 @@ const killers = {
     };
     const rooms = {
       Laboratorio: require('../assets/images/boardImages/Labo.png'),
-      Salon: require('../assets/images/boardImages/Lounge.png'),
+      Salón: require('../assets/images/boardImages/Lounge.png'),
       Biblioteca: require('../assets/images/boardImages/Library.png'),
       Alcoba: require('../assets/images/boardImages/Bedroom.png'),
       Cocheras: require('../assets/images/boardImages/garage.png'),
-      Vestibulo: require('../assets/images/boardImages/lobby.png'),
-      Panteon: require('../assets/images/boardImages/pantheon.png'),
+      Vestíbulo: require('../assets/images/boardImages/lobby.png'),
+      Panteón: require('../assets/images/boardImages/pantheon.png'),
       Bodega: require('../assets/images/boardImages/wine-cellar.png'),
     };
 const getData = async (data) => {
@@ -65,6 +65,11 @@ export function ShowCardsButton({ onPress }){
       const [card6, setCard6] = useState('');
       const [card7, setCard7] = useState('');
       const [card8, setCard8] = useState('');
+      const [card1ToShow, setCard1ToShow] = useState(card1);
+      const [card2ToShow, setCard2ToShow] = useState(card2);
+      const [card6ToShow, setCard6ToShow] = useState(card6);
+      const [card7ToShow, setCard7ToShow] = useState(card7);
+      const [card8ToShow, setCard8ToShow] = useState(card8);
     const [backgroundOpacity, setBackgroundOpacity] = useState(1);
       const [cardNames, setCardNames] = useState([]);
         const [playerCards, setPlayerCards] = useState([]);
@@ -76,6 +81,42 @@ export function ShowCardsButton({ onPress }){
       setCardNames(playerCardsWithSpaces);
     });
   }, []);
+  
+useEffect(() => {
+  if (card1 === 'Drácula'){
+    setCard1ToShow('Dracula')
+  }
+  if (card2 === 'Drácula'){
+    setCard2ToShow('Dracula')
+  }
+  if (card6 === 'Panteón'){
+    setCard6ToShow('Panteon')
+  }else
+  if (card6 === ' Vestíbulo'){
+    setCard6ToShow('Vestibulo')
+  }else
+  if (card6 === 'Salón'){
+    setCard6ToShow('Salon')
+  }
+  if (card7 === 'Panteón'){
+    setCard7ToShow('Panteon')
+  }else
+  if (card7 === ' Vestíbulo'){
+    setCard7ToShow('Vestibulo')
+  }else
+  if (card7 === 'Salón'){
+    setCard7ToShow('Salon')
+  }
+  if (card8 === 'Panteón'){
+    setCard8ToShow('Panteon')
+  }else
+  if (card8 === ' Vestíbulo'){
+    setCard8ToShow('Vestibulo')
+  }else
+  if (card8 === 'Salón'){
+    setCard8ToShow('Salon')
+  }
+}, [card1ToShow, card2ToShow, card6ToShow, card7ToShow, card8ToShow])
 const showCards = () => {
     onPress();
     setPosition(prevPosition => 
@@ -102,6 +143,7 @@ const showCards = () => {
     setCardTextFontSize(prevFontSize =>
       prevFontSize === 7 ? 15 : 7
     )
+    //source
     setCard1(prevCard => prevCard === killers[playerCards[0]] ? '' : killers[playerCards[0]]);
     setCard2(prevCard => prevCard === killers[playerCards[1]] ? '' : killers[playerCards[1]]);
     setCard3(prevCard => prevCard === victims[playerCards[2]] ? '': victims[playerCards[2]]);
@@ -109,7 +151,8 @@ const showCards = () => {
     setCard5(prevCard => prevCard === victims[playerCards[4]] ? '' : victims[playerCards[4]]);
     setCard6(prevCard => prevCard === rooms[playerCards[5]] ? '' : rooms[playerCards[5]]);
     setCard7(prevCard => prevCard === rooms[playerCards[6]] ? '' : rooms[playerCards[6]]);
-    setBackgroundOpacity(prevOpacity => //como influir en board o en room?
+    setCard8(prevCard => prevCard === rooms[playerCards[7]] ? 'MIS' : rooms[playerCards[7]]);
+    setBackgroundOpacity(prevOpacity =>
       prevOpacity === 1 ? 0.5 : 1
     )
   }

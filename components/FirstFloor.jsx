@@ -951,7 +951,7 @@ useEffect(() => {
             <View style={styles.rightRoomsContainer}>
               <Pressable
                 disabled={disabledRoom3}
-                onPress={() => roomClicked("Salon")}
+                onPress={() => roomClicked("Salón")}
                 style={[styles.room3Container, { borderColor: room3Color }]}
               >
                 <ImageBackground
