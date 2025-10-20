@@ -30,7 +30,7 @@ const playersMap = {
   David: fichaDavid,
 };
 
-export function FirstFloor({ diceValue }) {
+export function FirstFloor({ diceValue, floor }) {
   const bounceAnim = useRef(new Animated.Value(0)).current;
   const [opacityBack, setOpacityBack] = useState(1);
   const [activateLoop, setActivateLoop] = useState(false); // Add this state
@@ -497,9 +497,12 @@ useEffect(() => {
 }, []);
   
   const toDiceRoll = () => {
-  playDiceSound();
-  router.push(`/dice?board=${firstFloor}`);
-};
+    playDiceSound();
+    router.push({ 
+      pathname: '/dice',
+      params: { floor }
+    });
+  };
   useEffect(() => {
     Audio.setAudioModeAsync({
       allowsRecordingIOS: false,
@@ -793,7 +796,7 @@ useEffect(() => {
   const getPlayerPosition = async () => {
     try {
       const value = await AsyncStorage.getItem("position");
-      return value;
+      return Number(value);
     } catch (e) {
       console.log("error reading data");
       return null;
@@ -859,7 +862,7 @@ useEffect(() => {
     setDisabledSquare(true); // Disable squares after selection
     router.push({
       pathname: "/room",
-      params: { room: room },
+      params: { room: room, floor: floor },
     });
   };
   return (

@@ -38,13 +38,14 @@ const gifMap = {
   Biblioteca: require("../assets/gifs/library.gif"),
   Alcoba: require("../assets/gifs/bedroom.gif"),
   Cocheras: require("../assets/gifs/garage.gif"),
-  Vestibulo: require("../assets/gifs/lobby.gif"),
+  Vestíbulo: require("../assets/gifs/lobby.gif"),
   Bodega: require("../assets/gifs/wine-cellar.gif"),
-  Panteon: require("../assets/gifs/pantheon.gif"),
+  Panteón: require("../assets/gifs/pantheon.gif"),
 };
 
 export default function Room() {
   const { room } = useLocalSearchParams();
+  const { floor } = useLocalSearchParams();
   const router = useRouter();
   const [killersOpacity, setKillersOpacity] = useState(0);
   const [charactersOpacity, setCharactersOpacity] = useState(0);
@@ -78,20 +79,12 @@ export default function Room() {
   const [showcards, setShowcards] = useState(null);
   const [hidecards, setHidecards] = useState(null);
   const [shine, setShine] = useState(null);
-  //const [roomNameToShow, setRoomNameToShow] = useState(null);
-  /*useEffect(() => { //adding accent to exceptions to show room's name
-    if (room === 'Salon'){
-      setRoomNameToShow('Salón')
-    }else
-    if (room === 'Panteon'){
-      setRoomNameToShow('Panteón')
-    }else
-    if (room === 'Vestibulo'){
-      setRoomNameToShow('Vestíbulo')
-    }else{
-      setRoomNameToShow(room)
+  useEffect(() => {
+    if (floor) {
+      console.log('Valor de floor:', floor);
+      // Aquí puedes usar el valor de 'floor' (que contiene el valor de 'floor')
     }
-  }, [room])*/
+  }, [floor]);
   useEffect(() => {
       Audio.setAudioModeAsync({
         allowsRecordingIOS: false,
@@ -297,20 +290,24 @@ const getData = async (data) => {
       storePlayerPosition('27');
     }
     if (room === 'Cocheras'){
-      setRoomPrefix('las')
+      setRoomPrefix('las');
+      storePlayerPosition('4');
     }
     if (room === 'Panteón'){
-      setRoomPrefix('el')
+      setRoomPrefix('el');
+      storePlayerPosition('27');
     }
     if (room === 'Bodega'){
-      setRoomPrefix('la')
+      setRoomPrefix('la');
+      storePlayerPosition('21');
     }
     if (room === 'Salón'){
       setRoomPrefix('el');
        storePlayerPosition('12');
     }
     if (room === 'Vestíbulo'){
-      setRoomPrefix('el')
+      setRoomPrefix('el');
+      storePlayerPosition('12')
     }
     if (room === 'Biblioteca'){
       setRoomPrefix('la');
@@ -634,8 +631,9 @@ Revisa bien tus cartas`)
       });
   }
   const toBoard = () => {
-    router.push({
-      pathname: "/dice",
+    router.push({ 
+      pathname: '/dice',
+      params: { floor }
     });
   }
   return (

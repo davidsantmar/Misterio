@@ -9,7 +9,7 @@ import {
 import { useRouter } from "expo-router";
 import { Audio } from "expo-av";
 
-export function DiceRoll({ board }) {
+export function DiceRoll({ floor }) {
   const [diceValue, setDiceValue] = useState(0);
   const [rotation] = useState(new Animated.Value(0));
   const [diceRoll, setDiceRoll] = useState(null);
@@ -19,7 +19,7 @@ export function DiceRoll({ board }) {
       const timer = setTimeout(() => {
         router.push({
           pathname: "/board",
-          params: { diceValue: diceValue.toString(), board: board }, // Convierte a string explícitamente
+          params: { diceValue: diceValue.toString(), floor: floor }, // board no funciona cuando se presiona "Al pasillo"
         });
       }, 2000);
       return () => clearTimeout(timer);
@@ -28,7 +28,7 @@ export function DiceRoll({ board }) {
   useEffect(() => {
     rollDice();
     diceRollSound();
-    console.log('board en Dice Roll', board)
+    console.log('floor en Dice Roll', floor)
   }, []);
   useEffect(() => {
       Audio.setAudioModeAsync({

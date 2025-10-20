@@ -3,11 +3,13 @@ import { View } from "react-native";
 import { useLocalSearchParams } from "expo-router";
 
 export default function Dice() {
-  const { board } = useLocalSearchParams();
-  console.log('board en Dice', board)
+  //const { board } = useLocalSearchParams();
+  const { floor } = useLocalSearchParams()
+  
+  console.log('floor en Dice', floor)
   return (
     <View style={{ flex: 1 }}>
-      <DiceRoll board={board} />
+      <DiceRoll floor={floor} />
     </View>
   );
 }

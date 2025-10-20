@@ -165,7 +165,7 @@ export default function Entry() {
           console.error("Error al reproducir buttonPress:", error);
         }
       }
-   const toDice = async (board) => {
+   const toDice = async (floor) => {
     playButtonPress();
     try {
       // Detener y liberar
@@ -186,7 +186,7 @@ export default function Entry() {
     storeInitialPosition('0');
     router.push({ 
       pathname: '/dice',
-      params: { board }
+      params: { floor }
     });
   };
     return (

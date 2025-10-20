@@ -5,15 +5,15 @@ import { Ground } from '../components/Ground';
 
 export default function Board(){
     const { diceValue = "0" } = useLocalSearchParams(); // Valor por defecto  
-    const { board } = useLocalSearchParams(); // Valor por defecto  
-    console.log('board en board', board)
-    if (board === 'firstFloor'){
+    const { floor } = useLocalSearchParams(); // Valor por defecto  
+    console.log('floor en board', floor)
+    if (floor === 'firstFloor'){
         return(
-            <FirstFloor diceValue={diceValue} />
+            <FirstFloor diceValue={diceValue} floor={floor} />
         )
-    }else if (board === 'ground'){
+    }else if (floor === 'ground'){
         return(
-            <Ground diceValue={diceValue} />
+            <Ground diceValue={diceValue} floor={floor} />
         )
     }
 }

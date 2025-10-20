@@ -30,7 +30,7 @@ const playersMap = {
   David: fichaDavid,
 };
 
-export function Ground({ diceValue }) {
+export function Ground({ diceValue, floor }) {
   const bounceAnim = useRef(new Animated.Value(0)).current;
   const [opacityBack, setOpacityBack] = useState(1);
   const [activateLoop, setActivateLoop] = useState(false); // Add this state
@@ -141,7 +141,7 @@ export function Ground({ diceValue }) {
             resizeMode="cover"
           />
         ) : (
-          null
+          <PumpkinIcon />
         )
       ), },
     { content: (
@@ -152,7 +152,7 @@ export function Ground({ diceValue }) {
             resizeMode="cover"
           />
         ) : (
-          <PumpkinIcon />
+          null
         )
       ),  },
     { content: (
@@ -338,7 +338,7 @@ export function Ground({ diceValue }) {
             resizeMode="cover"
           />
         ) : (
-          null
+          <PumpkinIcon />
         )
       ), },
     { content: (
@@ -382,7 +382,7 @@ export function Ground({ diceValue }) {
             resizeMode="cover"
           />
         ) : (
-         <PumpkinIcon />
+         null
         )
       ),   },
     {
@@ -497,9 +497,12 @@ useEffect(() => {
 }, []);
   
   const toDiceRoll = () => {
-  playDiceSound();
-  router.push(`/dice?board=${ground}`);
-};
+    playDiceSound();
+    router.push({ 
+      pathname: '/dice',
+      params: { floor }
+    });
+  };
   useEffect(() => {
     Audio.setAudioModeAsync({
       allowsRecordingIOS: false,
@@ -573,28 +576,8 @@ useEffect(() => {
 
         // Lógica de habitaciones
         if (
-          (playerIndex <= 4 && playerIndex + Number(diceValue) > 4) ||
+          (playerIndex <= 4 && playerIndex + Number(diceValue) > 4) || //cocheras
           (playerIndex >= 4 && playerIndex - Number(diceValue) < 4)
-        ) {
-          setRoom1Color("yellow");
-          setDisabledRoom1(false);
-        } else {
-          setRoom1Color(null);
-          setDisabledRoom1(true);
-        }
-        if (
-          (playerIndex <= 21 && playerIndex + Number(diceValue) > 21) ||
-          (playerIndex >= 21 && playerIndex - Number(diceValue) < 21)
-        ) {
-          setRoom2Color("yellow");
-          setDisabledRoom2(false);
-        } else {
-          setRoom2Color(null);
-          setDisabledRoom2(true);
-        }
-        if (
-          (playerIndex <= 12 && playerIndex + Number(diceValue) > 12) ||
-          (playerIndex >= 12 && playerIndex - Number(diceValue) < 12)
         ) {
           setRoom3Color("yellow");
           setDisabledRoom3(false);
@@ -603,14 +586,34 @@ useEffect(() => {
           setDisabledRoom3(true);
         }
         if (
-          (playerIndex <= 27 && playerIndex + Number(diceValue) > 27) ||
-          (playerIndex >= 27 && playerIndex - Number(diceValue) < 27)
+          (playerIndex <= 21 && playerIndex + Number(diceValue) > 21) || //bodega
+          (playerIndex >= 21 && playerIndex - Number(diceValue) < 21)
         ) {
           setRoom4Color("yellow");
           setDisabledRoom4(false);
         } else {
           setRoom4Color(null);
           setDisabledRoom4(true);
+        }
+        if (
+          (playerIndex <= 12 && playerIndex + Number(diceValue) > 12) || //vestíbulo
+          (playerIndex >= 12 && playerIndex - Number(diceValue) < 12)
+        ) {
+          setRoom1Color("yellow");
+          setDisabledRoom1(false);
+        } else {
+          setRoom1Color(null);
+          setDisabledRoom1(true);
+        }
+        if (
+          (playerIndex <= 27 && playerIndex + Number(diceValue) > 27) || //panteón
+          (playerIndex >= 27 && playerIndex - Number(diceValue) < 27)
+        ) {
+          setRoom2Color("yellow");
+          setDisabledRoom2(false);
+        } else {
+          setRoom2Color(null);
+          setDisabledRoom2(true);
         }
       }
     } catch (error) {
@@ -793,7 +796,7 @@ useEffect(() => {
   const getPlayerPosition = async () => {
     try {
       const value = await AsyncStorage.getItem("position");
-      return value;
+      return Number(value);
     } catch (e) {
       console.log("error reading data");
       return null;
@@ -812,7 +815,7 @@ useEffect(() => {
     setStoneOccuped(index);
 
     //playJump();
-    if (index === 6 || index === 26){
+    if (index === 5 || index === 22){
       setTimeout(() => {
         playJump();
       }, 100)
@@ -859,7 +862,7 @@ useEffect(() => {
     setDisabledSquare(true); // Disable squares after selection
     router.push({
       pathname: "/room",
-      params: { room: room },
+      params: { room: room, floor: floor },
     });
   };
   return (
