@@ -476,7 +476,6 @@ export function Ground({ diceValue, floor }) {
   
 useEffect(() => {
   playRainSound();
-  
     const fetchPlayer = async () => {
     try {
       const storedPlayer = await getPlayer();
@@ -653,7 +652,7 @@ useEffect(() => {
       }
 
       const { sound } = await Audio.Sound.createAsync(
-        require("../assets/sounds/wolf-howl.mp3")
+        require("../assets/sounds/indoor-music.mp3")
       );
       setRainSound(sound);
       console.log("Reproduciendo rainSound");
@@ -837,15 +836,15 @@ useEffect(() => {
         pathname: "/entry",
       });
     }
-    if (index === 6) {
-      storePlayerPosition("26");
-      setPosition(26);
-      setStoneOccuped(26);
+    if (index === 5) {
+      storePlayerPosition("22");
+      setPosition(22);
+      setStoneOccuped(22);
     }
-    if (index === 26) {
-      storePlayerPosition("6");
-      setPosition(6);
-      setStoneOccuped(6);
+    if (index === 22) {
+      storePlayerPosition("5");
+      setPosition(5);
+      setStoneOccuped(5);
     }
   };
   const roomClicked = (room) => {

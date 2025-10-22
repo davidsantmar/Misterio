@@ -802,6 +802,12 @@ useEffect(() => {
       return null;
     }
   };
+  const computerThrow = () => {
+    router.push({ 
+      pathname: '/dice',
+      params: { floor }
+    });
+  }
   const storePlayerPosition = async (position) => {
     try {
       await AsyncStorage.setItem("position", position);
@@ -813,8 +819,6 @@ useEffect(() => {
     //se guarda la position al clickar
     console.log('index', index)
     setStoneOccuped(index);
-
-    //playJump();
     if (index === 6 || index === 26){
       setTimeout(() => {
         playJump();
@@ -847,6 +851,7 @@ useEffect(() => {
       setPosition(6);
       setStoneOccuped(6);
     }
+    computerThrow();
   };
   const roomClicked = (room) => {
     playOpenDoor();

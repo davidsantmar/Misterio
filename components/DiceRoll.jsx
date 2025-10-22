@@ -8,11 +8,14 @@ import {
 } from "react-native";
 import { useRouter } from "expo-router";
 import { Audio } from "expo-av";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
 
 export function DiceRoll({ floor }) {
   const [diceValue, setDiceValue] = useState(0);
   const [rotation] = useState(new Animated.Value(0));
   const [diceRoll, setDiceRoll] = useState(null);
+  const [player, setPlayer] = useState(null);
   const router = useRouter();
   useEffect(() => {
       if (diceValue === 0) return; // Ignora el valor inicial
@@ -25,11 +28,32 @@ export function DiceRoll({ floor }) {
       return () => clearTimeout(timer);
     }, [diceValue]);
   // Genera el dado al montar
+  
   useEffect(() => {
     rollDice();
     diceRollSound();
-    console.log('floor en Dice Roll', floor)
+    console.log('floor en Dice Roll', floor);
   }, []);
+  
+ useEffect(() => {
+  const fetchPlayer = async () => {
+    try {
+      const value = await AsyncStorage.getItem("player");
+      if (value === "Nely"){
+        setPlayer("Detective Nely")
+      }else{
+        setPlayer("Inspector David")
+      }
+    } catch (e) {
+      console.log("error reading data", e);
+      setPlayer(null);
+    }
+  };
+
+  fetchPlayer(); // Llamar la función
+}, []); // Dependencias vacías = se ejecuta una sola vez
+
+// Ahora puedes usar player en tu componente
   useEffect(() => {
       Audio.setAudioModeAsync({
         allowsRecordingIOS: false,
@@ -143,7 +167,7 @@ export function DiceRoll({ floor }) {
       source={require("../assets/images/table-back.png")}
     >
       <View style={styles.header}>
-        <Text style={styles.header_text}>Misterio</Text>
+        <Text style={styles.header_text}>{player}</Text>
       </View>
       <Animated.View style={[styles.dice, { transform: [{ rotate: spin }] }]}>
         {renderDiceFace(diceValue)}
@@ -156,14 +180,14 @@ const styles = StyleSheet.create({
   container: { flex: 1, alignItems: "center" },
   header: {
     height: 80,
-    width: 200,
+    width: 250,
     opacity: 0.9,
     alignItems: "center",
     justifyContent: "center",
     borderRadius: 10,
     marginTop: 300,
   },
-  header_text: { fontFamily: "Creepster-Regular", fontSize: 40 },
+  header_text: { fontFamily: "Creepster-Regular", fontSize: 40},
   dice: {
     width: 100,
     height: 100,
