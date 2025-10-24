@@ -9,11 +9,11 @@ export default function Board(){
     console.log('floor en board', floor)
     if (floor === 'firstFloor'){
         return(
-            <FirstFloor diceValue={diceValue} floor={floor} />
+            <FirstFloor diceValue={diceValue}  />
         )
     }else if (floor === 'ground'){
         return(
-            <Ground diceValue={diceValue} floor={floor} />
+            <Ground diceValue={diceValue}  />
         )
     }
 }

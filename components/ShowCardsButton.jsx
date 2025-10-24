@@ -33,7 +33,6 @@ const getData = async (data) => {
     const stringArray = await AsyncStorage.getItem(data); // Obtener la cadena
     if (stringArray !== null) {
       const array = JSON.parse(stringArray); // Convertir la cadena a array
-      console.log('Array recuperado:', array);
       return array;
     } else {
       console.log('No se encontró el array');

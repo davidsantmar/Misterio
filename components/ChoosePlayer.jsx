@@ -1,7 +1,7 @@
 import { StyleSheet, Text, View, ImageBackground, Pressable} from 'react-native';
 import { useFonts } from 'expo-font';
 import { Audio } from "expo-av";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "expo-router";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -13,18 +13,17 @@ export function ChoosePlayer() {
   const [loaded, error] = useFonts({  //to load and use font
         'Creepster-Regular': require('../assets/fonts/Creepster-Regular.ttf'), 
     });
-  const [playerChoose, setPlayerChoose] = useState('Nely');
+  const [playerChoose, setPlayerChoose] = useState('Detective Nely');
   const router = useRouter();
-  const videoRef = useRef(null); // Referencia para el componente Video
   useEffect(() => {
     playStart();
   }, [])
   useEffect(() => {
     // Cambia el GIF por una imagen estática después de X milisegundos (duración aproximada del GIF)
     const timer = setTimeout(() => {
-      if (playerChoose === 'Nely'){
+      if (playerChoose === 'Detective Nely'){
         setGifSource(require('../assets/images/Nely.png')); // Imagen estática (último cuadro del GIF)
-      }else if (playerChoose === 'David'){
+      }else if (playerChoose === 'Inspector David'){
         setGifSource(require('../assets/images/David.png'));
       }
     }, 5500); // Ajusta el tiempo según la duración del GIF
@@ -41,74 +40,102 @@ export function ChoosePlayer() {
       // Liberación de sonidos al desmontar el componente
       return () => {
         if (start) {
-          console.log("Liberando start");
           start.unloadAsync();
         }
         if (buttonPress) {
-          console.log("Liberando buttonPress");
           buttonPress.unloadAsync();
         }
       };
     },[buttonPress, start]);
     async function playStart() {
-      console.log("Cargando start");
       try {
         if (start) {
-          // Si el sonido ya está cargado, reutilízalo
-          console.log("Reproduciendo start existente");
           await start.replayAsync();
           return;
         }
-  
         const { sound } = await Audio.Sound.createAsync(
           require("../assets/sounds/start.mp3")
         );
         setStart(sound);
-        console.log("Reproduciendo start");
         await sound.playAsync();
       } catch (error) {
         console.error("Error al reproducir start:", error);
       }
     }
-  const storePlayer = async (player) => {
+ 
+  //computer data
+
+  // ✅ 2. FUNCIÓN para SUBIR POSITION
+  //con una const [computerData, setComputerData] = useState(null)
+  /*const changePosition = async () => {
+    if (!computerData) return;
+    
+    // Crear nuevo player con level +1
+    const updatedComputerData = { ...computerData, level: computerData.position + 1 };
+    
+    // Guardar en AsyncStorage
+    await AsyncStorage.setItem("computerData", JSON.stringify(updatedComputerData));
+    
+    // Actualizar estado
+    setPlayer(updatedComputerData);
+    
+    console.log('✅ Level UP:', updatedComputerData.position);
+  };*/
+  const getComputerData = async () => {
     try {
-      await AsyncStorage.setItem('player', player); // Guardar en AsyncStorage
-      console.log('Player guardado exitosamente');
-    } catch (error) {
-      console.error('Error al guardar el player:', error);
+      const value = await AsyncStorage.getItem("computerData");
+      return value ? JSON.parse(value) : null;
+    } catch (e) {
+      console.log("error reading computer data");
+      return null;
     }
   };
+  const storeComputerData = async (name) => { //se crea el computer data
+    const computerData = { id: 1, name: name, position: 0, floor: '', computerCards: [], discardedCards: [], roomToGo: '' };
+    await AsyncStorage.setItem("computerData", JSON.stringify(computerData));
+    console.log('✅ computer data saved:', computerData);
+  };
+  const storePlayerData = async (name) => {
+    const playerData = { id: 0, name: name, position: 0, floor: '', playerCards: [], discardedCards: []  };
+    await AsyncStorage.setItem("playerData", JSON.stringify(playerData));
+    console.log('✅ player data saved:', playerData);
+  };
+  const storeTurn = async (turn) => {
+    await AsyncStorage.setItem("turn", turn);
+    console.log('✅ turn saved:', turn);
+  };
   async function playButtonPress() {
-      console.log("Cargando buttonPress");
-      try {
-        if (buttonPress) {
-          // Si el sonido ya está cargado, reutilízalo
-          console.log("Reproduciendo buttonPress existente");
-          await buttonPress.replayAsync();
-          return;
-        }
-  
-        const { sound } = await Audio.Sound.createAsync(
-          require("../assets/sounds/button-press.mp3")
-        );
-        setButtonPress(sound);
-        console.log("Reproduciendo buttonPress");
-        await sound.playAsync();
-      } catch (error) {
-        console.error("Error al reproducir buttonPress:", error);
+    try {
+      if (buttonPress) {
+        await buttonPress.replayAsync();
+        return;
       }
+      const { sound } = await Audio.Sound.createAsync(
+        require("../assets/sounds/button-press.mp3")
+      );
+      setButtonPress(sound);
+      await sound.playAsync();
+    } catch (error) {
+      console.error("Error al reproducir buttonPress:", error);
     }
-    const toEntry = () => {
-      storePlayer(playerChoose);
-      playButtonPress();
-      router.push({
-          pathname: '/cardShuffle',
-        });
+  }
+  const toEntry = () => {
+    storeTurn('player');
+    storePlayerData(playerChoose)
+    if (playerChoose === 'Detective Nely'){
+      storeComputerData('Inspector David')
+    }else{
+      storeComputerData('Detective Nely');
     }
+    playButtonPress();
+    router.push({
+        pathname: '/cardShuffle',
+      });
+  }
   const toAnotherPlayer = () => {
     playButtonPress();
    setPlayerChoose(prevPlayer => 
-    prevPlayer === 'Nely' ? 'David' : 'Nely'
+    prevPlayer === 'Detective Nely' ? 'Inspector David' : 'Detective Nely'
    )
    setGifSource(prevGifSource =>
     prevGifSource === require('../assets/gifs/Intro_Nely.gif') ? require('../assets/gifs/Intro_David.gif') : require('../assets/gifs/Intro_Nely.gif')

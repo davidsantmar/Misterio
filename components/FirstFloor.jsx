@@ -61,7 +61,9 @@ export function FirstFloor({ diceValue, floor }) {
   const [disabledSouth, setDisabledSouth] = useState(true);
   const [playerImage, setPlayerImage] = useState(null);
   const [stoneOccuped, setStoneOccuped] = useState(null);
-  const [firstFloor, setFirstFloor] = useState('firstFloor');
+  const [computerData, setComputerData] = useState({});
+  const [computerFloor, setComputerFloor] = useState(null);
+  const [turn, setTurn] = useState(null);
   const scrollRef = useRef(null);
   const router = useRouter();
   const board = [ //no se visualiza la imagen del player
@@ -75,10 +77,8 @@ export function FirstFloor({ diceValue, floor }) {
           />
         ) : (
           <>
-            
-              <ForwardArrow size={24} />
-              <Text style={styles.stoneText}>Planta baja</Text>
-        
+            <ForwardArrow size={24} />
+            <Text style={styles.stoneText}>Planta baja</Text>
           </>
         )
       ),
@@ -437,22 +437,21 @@ export function FirstFloor({ diceValue, floor }) {
   const [jump, setJump] = useState(null);
   const [showcards, setShowcards] = useState(null);
   const [hidecards, setHidecards] = useState(null);
+  const [playerData, setPlayerData] = useState({});
   const [cardsDeployed, setCardsDeployed] = useState(null);
+  
   const updateBorderColors = (storedValue, diceValue) => {
   setBorderColors((prevColors) => {
     const newColors = [...prevColors]; // Crear una copia del arreglo
     const sumIndex = Number(storedValue) + Number(diceValue);
     const diffIndex = Number(storedValue) - Number(diceValue);
-    // Resetear todos los colores a negro por defecto
     newColors.fill("black");
-    // Resaltar casillas dentro del rango
     if (sumIndex > 0 && sumIndex < newColors.length - 1) {
       newColors[sumIndex] = "yellow";
     }
     if (diffIndex > 0 && diffIndex < newColors.length - 1) {
       newColors[diffIndex] = "yellow";
     }
-    // Resaltar casilla 0 si el movimiento lleva a <= 0
     if (sumIndex <= 0 || diffIndex <= 0) {
       newColors[0] = "yellow";
       setGroundNorthColor("yellow");
@@ -476,31 +475,34 @@ export function FirstFloor({ diceValue, floor }) {
   
 useEffect(() => {
   playRainSound();
-  
     const fetchPlayer = async () => {
-    try {
-      const storedPlayer = await getPlayer();
-      
-      console.log('Players available:', Object.keys(playersMap));
-      console.log(`Image for ${storedPlayer}:`, playersMap[storedPlayer]);
-      
-      if (playersMap[storedPlayer]) {
-        setPlayerImage(playersMap[storedPlayer]); // Esto funcionará con los IDs
-        console.log(playerImage)
+      try {
+        const storedPlayer = await getPlayer();        
+        if (playersMap[storedPlayer]) {
+          setPlayerImage(playersMap[storedPlayer]); // Esto funcionará con los IDs
+        }
+      } catch (error) {
+        console.error("Error:", error);
       }
-    } catch (error) {
-      console.error("Error:", error);
-    }
-  };
+    };
 
   fetchPlayer();
+  getPlayerData().then(value => {
+      if (value) {
+        setPlayerData(value);
+      }
+    });
+  getComputerData().then(value1 => {
+        if (value1) {
+          setComputerData(value1);
+        }
+      });
 }, []);
-  
   const toDiceRoll = () => {
     playDiceSound();
     router.push({ 
       pathname: '/dice',
-      params: { floor }
+      params: { floor, turn}
     });
   };
   useEffect(() => {
@@ -510,27 +512,21 @@ useEffect(() => {
       staysActiveInBackground: false,
       shouldDuckAndroid: true,
     });
-
     // Liberación de sonidos al desmontar el componente
     return () => {
       if (rainSound) {
-        console.log("Liberando rainSound");
         rainSound.unloadAsync();
       }
       if (diceSound) {
-        console.log("Liberando diceSound");
         diceSound.unloadAsync();
       }
       if (footSteps) {
-        console.log("Liberando footSteps");
         footSteps.unloadAsync();
       }
       if (openDoor) {
-        console.log("Liberando openDoor");
         openDoor.unloadAsync();
       }
       if (jump) {
-        console.log("Liberando jump");
         jump.unloadAsync();
       }
     };
@@ -561,19 +557,15 @@ useEffect(() => {
   const fetchPosition = async () => {
     try {
       const storedValue = await getPlayerPosition();
-      console.log("Fetched stored value:", storedValue);
       if (storedValue !== null) {
         const playerIndex = parseInt(storedValue, 10);
         setTimeout(() => {
           scrollToPlayerPosition(playerIndex);
         }, 100);
-
         setPosition(playerIndex);
         setStoneOccuped(playerIndex);
-
         // Actualizar colores de los bordes
         updateBorderColors(playerIndex, diceValue);
-
         // Lógica de habitaciones
         if (
           (playerIndex <= 4 && playerIndex + Number(diceValue) > 4) ||
@@ -643,11 +635,8 @@ useEffect(() => {
     });
   };
   async function playRainSound() {
-    console.log("Cargando rainSound");
     try {
-      if (rainSound) {
-        // Si el sonido ya está cargado, reutilízalo
-        console.log("Reproduciendo rainSound existente");
+      if (rainSound) {     
         await rainSound.replayAsync();
         return;
       }
@@ -656,18 +645,24 @@ useEffect(() => {
         require("../assets/sounds/wolf-howl.mp3")
       );
       setRainSound(sound);
-      console.log("Reproduciendo rainSound");
+   
       await sound.playAsync();
     } catch (error) {
       console.error("Error al reproducir rainSound:", error);
     }
   }
+   const getComputerData = async () => {
+      try {
+        const value = await AsyncStorage.getItem("computerData");
+        return value ? JSON.parse(value) : null;
+      } catch (e) {
+        console.log("error reading computer data");
+        return null;
+      }
+    };
   async function playFootSteps() {
-    console.log("Cargando footSteps");
     try {
       if (footSteps) {
-        // Si el sonido ya está cargado, reutilízalo
-        console.log("Reproduciendo footSteps existente");
         await footSteps.replayAsync();
         return;
       }
@@ -676,18 +671,15 @@ useEffect(() => {
         require("../assets/sounds/footsteps.mp3")
       );
       setFootSteps(sound);
-      console.log("Reproduciendo footSteps");
+
       await sound.playAsync();
     } catch (error) {
       console.error("Error al reproducir footSteps:", error);
     }
   }
   async function playOpenDoor() {
-    console.log("Cargando openDoor");
     try {
       if (openDoor) {
-        // Si el sonido ya está cargado, reutilízalo
-        console.log("Reproduciendo openDoor existente");
         await openDoor.replayAsync();
         return;
       }
@@ -696,27 +688,22 @@ useEffect(() => {
         require("../assets/sounds/open-door.mp3")
       );
       setOpenDoor(sound);
-      console.log("Reproduciendo openDoor");
+  
       await sound.playAsync();
     } catch (error) {
       console.error("Error al reproducir openDoor:", error);
     }
   }
   async function playJump() {
-    console.log("Cargando jump");
     try {
       if (jump) {
-        // Si el sonido ya está cargado, reutilízalo
-        console.log("Reproduciendo jump existente");
         await jump.replayAsync();
         return;
       }
-
       const { sound } = await Audio.Sound.createAsync(
         require("../assets/sounds/jump.mp3")
       );
       setJump(sound);
-      console.log("Reproduciendo jump");
       await sound.playAsync();
     } catch (error) {
       console.error("Error al reproducir jump:", error);
@@ -724,20 +711,15 @@ useEffect(() => {
   }
   async function playShowcards() {
     setCardsDeployed(true);
-    console.log("Cargando showcards");
     try {
-      if (showcards) {
-        // Si el sonido ya está cargado, reutilízalo
-        console.log("Reproduciendo showcards existente");
+      if (showcards) {    
         await showcards.replayAsync();
         return;
       }
-
       const { sound } = await Audio.Sound.createAsync(
         require("../assets/sounds/showcards.mp3")
       );
       setShowcards(sound);
-      console.log("Reproduciendo showcards");
       await sound.playAsync();
     } catch (error) {
       console.error("Error al reproducir showcards:", error);
@@ -745,40 +727,30 @@ useEffect(() => {
   }
   async function playHidecards() {
     setCardsDeployed(false);
-    console.log("Cargando hidecards");
     try {
       if (hidecards) {
-        // Si el sonido ya está cargado, reutilízalo
-        console.log("Reproduciendo hidecards existente");
         await hidecards.replayAsync();
         return;
       }
-
       const { sound } = await Audio.Sound.createAsync(
         require("../assets/sounds/hidecards.mp3")
       );
       setHidecards(sound);
-      console.log("Reproduciendo hidecards");
       await sound.playAsync();
     } catch (error) {
       console.error("Error al reproducir hidecards:", error);
     }
   }
   async function playDiceSound() {
-    console.log("Cargando diceSound");
     try {
       if (diceSound) {
-        // Si el sonido ya está cargado, reutilízalo
-        console.log("Reproduciendo diceSound existente");
         await diceSound.replayAsync();
         return;
       }
-
       const { sound } = await Audio.Sound.createAsync(
         require("../assets/sounds/dice.mp3")
       );
       setDiceSound(sound);
-      console.log("Reproduciendo diceSound");
       await sound.playAsync();
     } catch (error) {
       console.error("Error al reproducir diceSound:", error);
@@ -802,12 +774,6 @@ useEffect(() => {
       return null;
     }
   };
-  const computerThrow = () => {
-    router.push({ 
-      pathname: '/dice',
-      params: { floor }
-    });
-  }
   const storePlayerPosition = async (position) => {
     try {
       await AsyncStorage.setItem("position", position);
@@ -815,9 +781,35 @@ useEffect(() => {
       console.log("error saving data");
     }
   };
+  const storeTurn = async (turn) => {
+    await AsyncStorage.setItem("turn", turn);
+  };
+  const getPlayerData = async () => {
+    try {
+      const value = await AsyncStorage.getItem("playerData");
+      return value ? JSON.parse(value) : null;
+    } catch (e) {
+      console.log("error reading player data");
+      return null;
+    }
+  };
+  const editPositionPlayer = async (index) => {
+    if (!playerData) return;
+    const updatedPlayerData = { ...playerData, position: index };
+    await AsyncStorage.setItem("playerData", JSON.stringify(updatedPlayerData));
+    setPlayerData(updatedPlayerData);
+  }
+   const toComputerDiceRoll = (floorCompu, turnCompu) => {
+      setComputerFloor(computerData.floor);
+      playDiceSound();
+      router.push({ 
+        pathname: '/dice',
+        params: { floorCompu, turnCompu } 
+      });
+    };
   const stoneClicked = (index) => {
-    //se guarda la position al clickar
-    console.log('index', index)
+    setTurn('computer'); 
+    storeTurn('computer');
     setStoneOccuped(index);
     if (index === 6 || index === 26){
       setTimeout(() => {
@@ -827,8 +819,10 @@ useEffect(() => {
       playFootSteps();
     }
     setInstructionsText("Tira el dado para continuar");
-    setPosition(index);
-    storePlayerPosition(index.toString());
+    setPosition(index); 
+    //storePlayerPosition(index.toString());  hay que cambiarlo por editar el objeto playerData
+    
+    editPositionPlayer(index);
     setActivateLoop(true);
     setDisabledDice(false); // Enable the button
     setDisabledSquare(true); // Disable squares after selection
@@ -843,15 +837,17 @@ useEffect(() => {
     }
     if (index === 6) {
       storePlayerPosition("26");
-      setPosition(26);
+      //setPosition(26);  hay que cambiarlo por editar el objeto playerData
       setStoneOccuped(26);
     }
     if (index === 26) {
-      storePlayerPosition("6");
+      //storePlayerPosition("6");  hay que cambiarlo por editar el objeto playerData
       setPosition(6);
       setStoneOccuped(6);
     }
-    computerThrow();
+    setTimeout(() => {
+      toComputerDiceRoll(computerData.floor, 'computer' );
+    }, 1000)
   };
   const roomClicked = (room) => {
     playOpenDoor();
@@ -899,7 +895,7 @@ useEffect(() => {
               borderRadius: 50,
               elevation: 5,
             }}
-            onPress={toDiceRoll}
+            //onPress={toDiceRoll}
           >
             <Image
               style={{ width: 50, height: 50, borderRadius: 50 }}

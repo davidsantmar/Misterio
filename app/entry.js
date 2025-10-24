@@ -15,57 +15,46 @@ export default function Entry() {
   const [showcards, setShowcards] = useState(null);
   const [hidecards, setHidecards] = useState(null);
   const [cardsDeployed, setCardsDeployed] = useState(null);
+  const [turn, setTurn] = useState('player');
+  const [player, setPlayer] = useState('playerData');
  // Cargar sonidos una vez al montar el componente
   useEffect(() => {
     const loadSounds = async () => {
-      try {
-        console.log("Cargando sonidos...");
-        
+      try {        
         // Cargar leak
         const { sound: leakSound } = await Audio.Sound.createAsync(
           require("../assets/sounds/leak.mp3"),
           { shouldPlay: true } // Reproducir inmediatamente después de cargar
         );
         setLeak(leakSound);
-        console.log("Leak cargado y reproduciéndose");
-
         // Cargar rats (en secuencia para evitar conflictos)
         const { sound: ratsSound } = await Audio.Sound.createAsync(
           require("../assets/sounds/rats.mp3"),
           { shouldPlay: true } // Reproducir inmediatamente después de cargar
         );
-        setRats(ratsSound);
-        console.log("Rats cargado y reproduciéndose");
-        
+        setRats(ratsSound);        
         setSoundsLoaded(true);
       } catch (error) {
         console.error("Error cargando sonidos:", error);
       }
     };
-
     loadSounds();
-
     // Cleanup al desmontar
     return () => {
       const unloadSounds = async () => {
         if (leak) {
           await leak.unloadAsync();
-          console.log("Leak liberado");
         }
         if (rats) {
-          await rats.unloadAsync();
-          console.log("Rats liberado");
+          await rats.unloadAsync();;
         }
         if (buttonPress) {
-          console.log("Liberando buttonPress");
           buttonPress.unloadAsync();
         }
         if (hidecards) {
-          console.log("Liberando hidecards");
           hidecards.unloadAsync();
         }
         if (showcards) {
-          console.log("Liberando showcards");
           showcards.unloadAsync();
         }
       };
@@ -73,7 +62,8 @@ export default function Entry() {
     };
   }, []); // Solo se ejecuta una vez al montar
 
-  // Configurar modo de audio
+  
+  
   useEffect(() => {
     Audio.setAudioModeAsync({
       allowsRecordingIOS: false,
@@ -81,13 +71,15 @@ export default function Entry() {
       staysActiveInBackground: false,
       shouldDuckAndroid: true,
     });
+    setTurn('player')
+    
   }, []);
 
   // Opcional: Reproducir sonidos cuando se carguen completamente
   useEffect(() => {
     if (soundsLoaded && leak && rats) {
       // Los sonidos ya se reprodujeron al cargar, pero puedes hacer replay si es necesario
-      console.log("Todos los sonidos listos");
+      ("Todos los sonidos listos");
     }
   }, [soundsLoaded, leak, rats]);
 
@@ -95,21 +87,17 @@ export default function Entry() {
     !cardsDeployed ? playShowcards() : playHidecards();
     setOpacityBack(opacityBack === 1 ? 0.5 : 1);
   };
-  
-  const storeInitialPosition = async (position) => {
+  const storeTurn = async (turn) => {
     try {
-        await AsyncStorage.setItem('position', position);
+        await AsyncStorage.setItem('turn', turn);
     } catch (e) {
-        console.log('error saving data');
+        console.log('error saving turn');
     }
   };
   async function playShowcards() {
         setCardsDeployed(true);
-        console.log("Cargando showcards");
         try {
           if (showcards) {
-            // Si el sonido ya está cargado, reutilízalo
-            console.log("Reproduciendo showcards existente");
             await showcards.replayAsync();
             return;
           }
@@ -118,7 +106,6 @@ export default function Entry() {
             require("../assets/sounds/showcards.mp3")
           );
           setShowcards(sound);
-          console.log("Reproduciendo showcards");
           await sound.playAsync();
         } catch (error) {
           console.error("Error al reproducir showcards:", error);
@@ -126,11 +113,8 @@ export default function Entry() {
       }
       async function playHidecards() {
         setCardsDeployed(false);
-        console.log("Cargando hidecards");
         try {
           if (hidecards) {
-            // Si el sonido ya está cargado, reutilízalo
-            console.log("Reproduciendo hidecards existente");
             await hidecards.replayAsync();
             return;
           }
@@ -139,33 +123,28 @@ export default function Entry() {
             require("../assets/sounds/hidecards.mp3")
           );
           setHidecards(sound);
-          console.log("Reproduciendo hidecards");
           await sound.playAsync();
         } catch (error) {
           console.error("Error al reproducir hidecards:", error);
         }
       }
    async function playButtonPress() {
-        console.log("Cargando buttonPress");
         try {
           if (buttonPress) {
-            // Si el sonido ya está cargado, reutilízalo
-            console.log("Reproduciendo buttonPress existente");
             await buttonPress.replayAsync();
             return;
           }
-    
           const { sound } = await Audio.Sound.createAsync(
             require("../assets/sounds/button-press.mp3")
           );
           setButtonPress(sound);
-          console.log("Reproduciendo buttonPress");
           await sound.playAsync();
         } catch (error) {
           console.error("Error al reproducir buttonPress:", error);
         }
       }
-   const toDice = async (floor) => {
+   const toDice = async () => {
+    storeTurn('player');
     playButtonPress();
     try {
       // Detener y liberar
@@ -183,10 +162,8 @@ export default function Entry() {
       console.error("Error liberando sonidos:", error);
     }
     
-    storeInitialPosition('0');
     router.push({ 
       pathname: '/dice',
-      params: { floor }
     });
   };
     return (

@@ -43,17 +43,13 @@ export function CardIntoEnvelope({ text }) {
       // Liberación de sonidos al desmontar el componente
       return () => {
         if (shuffling) {
-          console.log("Liberando shuffling");
           shuffling.unloadAsync();
         }
       };
     },[shuffling]);
   async function shufflingSound() {
-        console.log("Cargando shuffling");
         try {
           if (shuffling) {
-            // Si el sonido ya está cargado, reutilízalo
-            console.log("Reproduciendo shuffling existente");
             await shuffling.replayAsync();
             return;
           }
@@ -62,7 +58,6 @@ export function CardIntoEnvelope({ text }) {
             require("../assets/sounds/shuffling-cards.mp3")
           );
           setShuffling(sound);
-          console.log("Reproduciendo shuffling");
           await sound.playAsync();
         } catch (error) {
           console.error("Error al reproducir shuffling:", error);

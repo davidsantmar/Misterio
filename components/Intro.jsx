@@ -26,21 +26,17 @@ export function Intro () {
       // Liberación de sonidos al desmontar el componente
       return () => {
         if (start) {
-          console.log("Liberando start");
           start.unloadAsync();
         }
         if (buttonPress) {
-          console.log("Liberando buttonPress");
           buttonPress.unloadAsync();
         }
       };
     }, [start, buttonPress]);
     async function playStart() {
-      console.log("Cargando start");
       try {
         if (start) {
           // Si el sonido ya está cargado, reutilízalo
-          console.log("Reproduciendo start existente");
           await start.replayAsync();
           return;
         }
@@ -49,18 +45,15 @@ export function Intro () {
           require("../assets/sounds/start.mp3")
         );
         setStart(sound);
-        console.log("Reproduciendo start");
         await sound.playAsync();
       } catch (error) {
         console.error("Error al reproducir start:", error);
       }
     }
     async function playButtonPress() {
-      console.log("Cargando buttonPress");
       try {
         if (buttonPress) {
           // Si el sonido ya está cargado, reutilízalo
-          console.log("Reproduciendo buttonPress existente");
           await buttonPress.replayAsync();
           return;
         }
@@ -69,7 +62,6 @@ export function Intro () {
           require("../assets/sounds/button-press.mp3")
         );
         setButtonPress(sound);
-        console.log("Reproduciendo buttonPress");
         await sound.playAsync();
       } catch (error) {
         console.error("Error al reproducir buttonPress:", error);
