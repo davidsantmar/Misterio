@@ -23,7 +23,6 @@ export function DiceRoll({ turn }) {
   const router = useRouter();
   useEffect(() => {
       if (diceValue === 0) return; // Ignora el valor inicial
-      
     }, [diceValue]);
  const getPlayerData = async () => {
     try {
@@ -57,6 +56,7 @@ export function DiceRoll({ turn }) {
           setPlayerData(value);;
         }
       });
+      setPlayerToShow(turn === 'player' ? playerData.name : computerData.name);
       if (turn === 'player'){
         const timer = setTimeout(() => {
           router.push({

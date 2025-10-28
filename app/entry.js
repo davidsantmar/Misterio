@@ -143,8 +143,24 @@ export default function Entry() {
           console.error("Error al reproducir buttonPress:", error);
         }
       }
-   const toDice = async () => {
+  const storePlayerFloor = async (floor) => { //se guardan las cartas de la computadora
+      try {
+        const storedData = await AsyncStorage.getItem("playerData");
+        const currentData = storedData ? JSON.parse(storedData) : null;
+        if (!currentData) return;
+  
+        const updatedPlayerData = { ...currentData, floor: floor };
+        await AsyncStorage.setItem(
+          "playerData",
+          JSON.stringify(updatedPlayerData)
+        );
+      } catch (e) {
+        console.log("❌ Error updating data:", e);
+      }
+    };
+   const toDice = async (floor) => {
     storeTurn('player');
+    storePlayerFloor(floor);
     playButtonPress();
     try {
       // Detener y liberar
