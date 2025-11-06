@@ -19,7 +19,6 @@ export default function Dice() {
         console.log('No turn found in AsyncStorage');
         return null; // O un valor predeterminado, como 'player'
       }
-      console.log('Turn retrieved from AsyncStorage:', turn);
       setCurrentTurn(turn);
       return turn;
     } catch (e) {
@@ -47,7 +46,7 @@ export default function Dice() {
   };
   return (
     <View style={{ flex: 1 }}>
-      <DiceRoll turn={currentTurn} />
+      <DiceRoll />
     </View>
   );
 }

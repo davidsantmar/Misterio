@@ -25,12 +25,13 @@ import { Audio } from "expo-av";
 import fichaNely from '../assets/images/fichaNely.png';
 import fichaDavid from '../assets/images/fichaDavid.png';
 
+
 const playersMap = {
-  Nely: fichaNely,
-  David: fichaDavid,
+  Nely: require('../assets/images/fichaNely.png'),
+  David: require('../assets/images/fichaDavid.png'),
 };
 
-export function FirstFloor({ diceValue, floor }) {
+export function FirstFloor({ diceValue }) {
   const bounceAnim = useRef(new Animated.Value(0)).current;
   const [opacityBack, setOpacityBack] = useState(1);
   const [activateLoop, setActivateLoop] = useState(false); // Add this state
@@ -60,372 +61,854 @@ export function FirstFloor({ diceValue, floor }) {
   const [disabledNorth, setDisabledNorth] = useState(true);
   const [disabledSouth, setDisabledSouth] = useState(true);
   const [playerImage, setPlayerImage] = useState(null);
-  const [stoneOccuped, setStoneOccuped] = useState(null);
+  const [computerImage, setComputerImage] = useState(null);
+  const [stoneOccuped, setStoneOccuped] = useState(0);
+  const [stoneComputerOccuped, setStoneComputerOccuped] = useState(null);
   const [computerData, setComputerData] = useState({});
   const [computerFloor, setComputerFloor] = useState(null);
-  const [turn, setTurn] = useState(null);
+  //const [turn, setTurn] = useState(null);
+  const [isVisible, setIsVisible] = useState(false);
   const scrollRef = useRef(null);
   const router = useRouter();
-  const board = [ //no se visualiza la imagen del player
+  const board = [ 
     {
       content: (
-        stoneOccuped === 0 ? (
-          <Image
-            style={styles.playerContainer}
-            source={playerImage}
-            resizeMode="cover"
-          />
-        ) : (
-          <>
-            <ForwardArrow size={24} />
-            <Text style={styles.stoneText}>Planta baja</Text>
-          </>
-        )
+        <>
+          {(stoneOccuped === 0 || stoneComputerOccuped === 0) ? (
+            <View style={styles.playersContainer}>
+              {/* Jugador */}
+              {stoneOccuped === 0 && (
+                <Image
+                  style={styles.playerContainer}
+                  source={playerImage}
+                  resizeMode="cover"
+                />
+              )}
+
+              {/* Computadora */}
+              {stoneComputerOccuped === 0 && isVisible && computerImage && (
+                <Image
+                  style={styles.computerContainer}
+                  source={computerImage}
+                  resizeMode="cover"
+                />
+              )}
+            </View>
+          ) : (
+            <>
+              <ForwardArrow size={24} />
+              <Text style={styles.stoneText}>Planta baja</Text>
+            </>
+          )}
+        </>
       ),
     },
     { content: (
-        stoneOccuped === 1 ? (
-          <Image
-            style={styles.playerContainer}
-            source={playerImage}
-            resizeMode="cover"
-          />
-        ) : (
-          null
-        )
+        <>
+          {(stoneOccuped === 1 || stoneComputerOccuped === 1) ? (
+            <View style={styles.playersContainer}>
+              {/* Jugador */}
+              {stoneOccuped === 1 && (
+                <Image
+                  style={styles.playerContainer}
+                  source={playerImage}
+                  resizeMode="cover"
+                />
+              )}
+
+              {/* Computadora */}
+              {stoneComputerOccuped === 1 && isVisible && computerImage && (
+                <Image
+                  style={styles.computerContainer}
+                  source={computerImage}
+                  resizeMode="cover"
+                />
+              )}
+            </View>
+          ) : (
+            null
+          )}
+        </>
       ),
     },
     { content: (
-        stoneOccuped === 2 ? (
-          <Image
-            style={styles.playerContainer}
-            source={playerImage}
-            resizeMode="cover"
-          />
-        ) : (
-          null
-        )
+        <>
+          {(stoneOccuped === 2 || stoneComputerOccuped === 2) ? (
+            <View style={styles.playersContainer}>
+              {/* Jugador */}
+              {stoneOccuped === 2 && (
+                <Image
+                  style={styles.playerContainer}
+                  source={playerImage}
+                  resizeMode="cover"
+                />
+              )}
+
+              {/* Computadora */}
+              {stoneComputerOccuped === 2 && isVisible && computerImage && (
+                <Image
+                  style={styles.computerContainer}
+                  source={computerImage}
+                  resizeMode="cover"
+                />
+              )}
+            </View>
+          ) : (
+            null
+          )}
+        </>
       ), },
     { content: (
-        stoneOccuped === 3 ? (
-          <Image
-            style={styles.playerContainer}
-            source={playerImage}
-            resizeMode="cover"
-          />
-        ) : (
-          null
-        )
-      ), },
-    {
-      content: (
-        stoneOccuped === 4 ? (
-          <Image
-            style={styles.playerContainer}
-            source={playerImage}
-            resizeMode="cover"
-          />
-        ) : (
-           <>
+        <>
+          {(stoneOccuped === 3 || stoneComputerOccuped === 3) ? (
+            <View style={styles.playersContainer}>
+              {/* Jugador */}
+              {stoneOccuped === 3 && (
+                <Image
+                  style={styles.playerContainer}
+                  source={playerImage}
+                  resizeMode="cover"
+                />
+              )}
+
+              {/* Computadora */}
+              {stoneComputerOccuped === 3 && isVisible && computerImage && (
+                <Image
+                  style={styles.computerContainer}
+                  source={computerImage}
+                  resizeMode="cover"
+                />
+              )}
+            </View>
+          ) : (
+            null
+          )}
+        </>
+      ),},
+    {content: (
+        <>
+          {(stoneOccuped === 4 || stoneComputerOccuped === 4) ? (
+            <View style={styles.playersContainer}>
+              {/* Jugador */}
+              {stoneOccuped === 4 && (
+                <Image
+                  style={styles.playerContainer}
+                  source={playerImage}
+                  resizeMode="cover"
+                />
+              )}
+
+              {/* Computadora */}
+              {stoneComputerOccuped === 4 && isVisible && computerImage && (
+                <Image
+                  style={styles.computerContainer}
+                  source={computerImage}
+                  resizeMode="cover"
+                />
+              )}
+            </View>
+          ) : (
+            <>
           <Text style={styles.stoneText}>Laboratorio</Text>
           <LeftArrow />
         </>
-        )
+          )}
+        </>
       ),
+       
     },
     { content: (
-        stoneOccuped === 5 ? (
-          <Image
-            style={styles.playerContainer}
-            source={playerImage}
-            resizeMode="cover"
-          />
-        ) : (
-          null
-        )
+        <>
+          {(stoneOccuped === 5 || stoneComputerOccuped === 5) ? (
+            <View style={styles.playersContainer}>
+              {/* Jugador */}
+              {stoneOccuped === 5 && (
+                <Image
+                  style={styles.playerContainer}
+                  source={playerImage}
+                  resizeMode="cover"
+                />
+              )}
+
+              {/* Computadora */}
+              {stoneComputerOccuped === 5 && isVisible && computerImage && (
+                <Image
+                  style={styles.computerContainer}
+                  source={computerImage}
+                  resizeMode="cover"
+                />
+              )}
+            </View>
+          ) : (
+            null
+          )}
+        </>
       ), },
     { content: (
-        stoneOccuped === 6 ? (
-          <Image
-            style={styles.playerContainer}
-            source={playerImage}
-            resizeMode="cover"
-          />
-        ) : (
-          <SpiderIcon />
-        )
+        <>
+          {(stoneOccuped === 6 || stoneComputerOccuped === 6) ? (
+            <View style={styles.playersContainer}>
+              {/* Jugador */}
+              {stoneOccuped === 6 && (
+                <Image
+                  style={styles.playerContainer}
+                  source={playerImage}
+                  resizeMode="cover"
+                />
+              )}
+
+              {/* Computadora */}
+              {stoneComputerOccuped === 6 && isVisible && computerImage && (
+                <Image
+                  style={styles.computerContainer}
+                  source={computerImage}
+                  resizeMode="cover"
+                />
+              )}
+            </View>
+          ) : (
+            <SpiderIcon />
+          )}
+        </>
       ),  },
     { content: (
-        stoneOccuped === 7 ? (
-          <Image
-            style={styles.playerContainer}
-            source={playerImage}
-            resizeMode="cover"
-          />
-        ) : (
-          null
-        )
+        <>
+          {(stoneOccuped === 7 || stoneComputerOccuped === 7) ? (
+            <View style={styles.playersContainer}>
+              {/* Jugador */}
+              {stoneOccuped === 7 && (
+                <Image
+                  style={styles.playerContainer}
+                  source={playerImage}
+                  resizeMode="cover"
+                />
+              )}
+
+              {/* Computadora */}
+              {stoneComputerOccuped === 7 && isVisible && computerImage && (
+                <Image
+                  style={styles.computerContainer}
+                  source={computerImage}
+                  resizeMode="cover"
+                />
+              )}
+            </View>
+          ) : (
+            null
+          )}
+        </>
       ), },
     { content: (
-        stoneOccuped === 8 ? (
-          <Image
-            style={styles.playerContainer}
-            source={playerImage}
-            resizeMode="cover"
-          />
-        ) : (
-          null
-        )
+        <>
+          {(stoneOccuped === 8 || stoneComputerOccuped === 8) ? (
+            <View style={styles.playersContainer}>
+              {/* Jugador */}
+              {stoneOccuped === 8 && (
+                <Image
+                  style={styles.playerContainer}
+                  source={playerImage}
+                  resizeMode="cover"
+                />
+              )}
+
+              {/* Computadora */}
+              {stoneComputerOccuped === 8 && isVisible && computerImage && (
+                <Image
+                  style={styles.computerContainer}
+                  source={computerImage}
+                  resizeMode="cover"
+                />
+              )}
+            </View>
+          ) : (
+            null
+          )}
+        </>
       ), },
     { content: (
-        stoneOccuped === 9 ? (
-          <Image
-            style={styles.playerContainer}
-            source={playerImage}
-            resizeMode="cover"
-          />
-        ) : (
-          null
-        )
+        <>
+          {(stoneOccuped === 9 || stoneComputerOccuped === 9) ? (
+            <View style={styles.playersContainer}>
+              {/* Jugador */}
+              {stoneOccuped === 9 && (
+                <Image
+                  style={styles.playerContainer}
+                  source={playerImage}
+                  resizeMode="cover"
+                />
+              )}
+
+              {/* Computadora */}
+              {stoneComputerOccuped === 9 && isVisible && computerImage && (
+                <Image
+                  style={styles.computerContainer}
+                  source={computerImage}
+                  resizeMode="cover"
+                />
+              )}
+            </View>
+          ) : (
+            null
+          )}
+        </>
       ), },
     { content: (
-        stoneOccuped === 10 ? (
-          <Image
-            style={styles.playerContainer}
-            source={playerImage}
-            resizeMode="cover"
-          />
-        ) : (
-          null
-        )
+        <>
+          {(stoneOccuped === 10 || stoneComputerOccuped === 10) ? (
+            <View style={styles.playersContainer}>
+              {/* Jugador */}
+              {stoneOccuped === 10 && (
+                <Image
+                  style={styles.playerContainer}
+                  source={playerImage}
+                  resizeMode="cover"
+                />
+              )}
+
+              {/* Computadora */}
+              {stoneComputerOccuped === 10 && isVisible && computerImage && (
+                <Image
+                  style={styles.computerContainer}
+                  source={computerImage}
+                  resizeMode="cover"
+                />
+              )}
+            </View>
+          ) : (
+            null
+          )}
+        </>
       ), },
     { content: (
-        stoneOccuped === 11 ? (
-          <Image
-            style={styles.playerContainer}
-            source={playerImage}
-            resizeMode="cover"
-          />
-        ) : (
-          null
-        )
+        <>
+          {(stoneOccuped === 11 || stoneComputerOccuped === 11) ? (
+            <View style={styles.playersContainer}>
+              {/* Jugador */}
+              {stoneOccuped === 11 && (
+                <Image
+                  style={styles.playerContainer}
+                  source={playerImage}
+                  resizeMode="cover"
+                />
+              )}
+
+              {/* Computadora */}
+              {stoneComputerOccuped === 11 && isVisible && computerImage && (
+                <Image
+                  style={styles.computerContainer}
+                  source={computerImage}
+                  resizeMode="cover"
+                />
+              )}
+            </View>
+          ) : (
+            null
+          )}
+        </>
       ), },
-    {
-      content: (
-        stoneOccuped === 12 ? (
-          <Image
-            style={styles.playerContainer}
-            source={playerImage}
-            resizeMode="cover"
-          />
-        ) : (
-          <>
+    {content: (
+        <>
+          {(stoneOccuped === 12 || stoneComputerOccuped === 12) ? (
+            <View style={styles.playersContainer}>
+              {/* Jugador */}
+              {stoneOccuped === 12 && (
+                <Image
+                  style={styles.playerContainer}
+                  source={playerImage}
+                  resizeMode="cover"
+                />
+              )}
+
+              {/* Computadora */}
+              {stoneComputerOccuped === 12 && isVisible && computerImage && (
+                <Image
+                  style={styles.computerContainer}
+                  source={computerImage}
+                  resizeMode="cover"
+                />
+              )}
+            </View>
+          ) : (
+            <>
           <Text style={styles.stoneText}>Salón</Text>
           <RightArrow />
         </>
-        )
-      ),
+          )}
+        </>
+      )
+          
+        
     },
     { content: (
-        stoneOccuped === 13 ? (
-          <Image
-            style={styles.playerContainer}
-            source={playerImage}
-            resizeMode="cover"
-          />
-        ) : (
-          null
-        )
+        <>
+          {(stoneOccuped === 13 || stoneComputerOccuped === 13) ? (
+            <View style={styles.playersContainer}>
+              {/* Jugador */}
+              {stoneOccuped === 13 && (
+                <Image
+                  style={styles.playerContainer}
+                  source={playerImage}
+                  resizeMode="cover"
+                />
+              )}
+
+              {/* Computadora */}
+              {stoneComputerOccuped === 13 && isVisible && computerImage && (
+                <Image
+                  style={styles.computerContainer}
+                  source={computerImage}
+                  resizeMode="cover"
+                />
+              )}
+            </View>
+          ) : (
+            null
+          )}
+        </>
       ), },
     { content: (
-        stoneOccuped === 14 ? (
-          <Image
-            style={styles.playerContainer}
-            source={playerImage}
-            resizeMode="cover"
-          />
-        ) : (
-          null
-        )
+        <>
+          {(stoneOccuped === 14 || stoneComputerOccuped === 14) ? (
+            <View style={styles.playersContainer}>
+              {/* Jugador */}
+              {stoneOccuped === 14 && (
+                <Image
+                  style={styles.playerContainer}
+                  source={playerImage}
+                  resizeMode="cover"
+                />
+              )}
+
+              {/* Computadora */}
+              {stoneComputerOccuped === 14 && isVisible && computerImage && (
+                <Image
+                  style={styles.computerContainer}
+                  source={computerImage}
+                  resizeMode="cover"
+                />
+              )}
+            </View>
+          ) : (
+            null
+          )}
+        </>
       ), },
     { content: (
-        stoneOccuped === 15 ? (
-          <Image
-            style={styles.playerContainer}
-            source={playerImage}
-            resizeMode="cover"
-          />
-        ) : (
-          null
-        )
+        <>
+          {(stoneOccuped === 15 || stoneComputerOccuped === 15) ? (
+            <View style={styles.playersContainer}>
+              {/* Jugador */}
+              {stoneOccuped === 15 && (
+                <Image
+                  style={styles.playerContainer}
+                  source={playerImage}
+                  resizeMode="cover"
+                />
+              )}
+
+              {/* Computadora */}
+              {stoneComputerOccuped === 15 && isVisible && computerImage && (
+                <Image
+                  style={styles.computerContainer}
+                  source={computerImage}
+                  resizeMode="cover"
+                />
+              )}
+            </View>
+          ) : (
+            null
+          )}
+        </>
       ), },
     { content: (
-        stoneOccuped === 16 ? (
-          <Image
-            style={styles.playerContainer}
-            source={playerImage}
-            resizeMode="cover"
-          />
-        ) : (
-          null
-        )
+        <>
+          {(stoneOccuped === 16 || stoneComputerOccuped === 16) ? (
+            <View style={styles.playersContainer}>
+              {/* Jugador */}
+              {stoneOccuped === 16 && (
+                <Image
+                  style={styles.playerContainer}
+                  source={playerImage}
+                  resizeMode="cover"
+                />
+              )}
+
+              {/* Computadora */}
+              {stoneComputerOccuped === 16 && isVisible && computerImage && (
+                <Image
+                  style={styles.computerContainer}
+                  source={computerImage}
+                  resizeMode="cover"
+                />
+              )}
+            </View>
+          ) : (
+            null
+          )}
+        </>
       ), },
     { content: (
-        stoneOccuped === 17 ? (
-          <Image
-            style={styles.playerContainer}
-            source={playerImage}
-            resizeMode="cover"
-          />
-        ) : (
-          null
-        )
+        <>
+          {(stoneOccuped === 17 || stoneComputerOccuped === 17) ? (
+            <View style={styles.playersContainer}>
+              {/* Jugador */}
+              {stoneOccuped === 17 && (
+                <Image
+                  style={styles.playerContainer}
+                  source={playerImage}
+                  resizeMode="cover"
+                />
+              )}
+
+              {/* Computadora */}
+              {stoneComputerOccuped === 17 && isVisible && computerImage && (
+                <Image
+                  style={styles.computerContainer}
+                  source={computerImage}
+                  resizeMode="cover"
+                />
+              )}
+            </View>
+          ) : (
+            null
+          )}
+        </>
       ), },
     { content: (
-        stoneOccuped === 18 ? (
-          <Image
-            style={styles.playerContainer}
-            source={playerImage}
-            resizeMode="cover"
-          />
-        ) : (
-          null
-        )
+        <>
+          {(stoneOccuped === 18 || stoneComputerOccuped === 18) ? (
+            <View style={styles.playersContainer}>
+              {/* Jugador */}
+              {stoneOccuped === 18 && (
+                <Image
+                  style={styles.playerContainer}
+                  source={playerImage}
+                  resizeMode="cover"
+                />
+              )}
+
+              {/* Computadora */}
+              {stoneComputerOccuped === 18 && isVisible && computerImage && (
+                <Image
+                  style={styles.computerContainer}
+                  source={computerImage}
+                  resizeMode="cover"
+                />
+              )}
+            </View>
+          ) : (
+            null
+          )}
+        </>
       ), },
     { content: (
-        stoneOccuped === 19 ? (
-          <Image
-            style={styles.playerContainer}
-            source={playerImage}
-            resizeMode="cover"
-          />
-        ) : (
-          null
-        )
+        <>
+          {(stoneOccuped === 19 || stoneComputerOccuped === 19) ? (
+            <View style={styles.playersContainer}>
+              {/* Jugador */}
+              {stoneOccuped === 19 && (
+                <Image
+                  style={styles.playerContainer}
+                  source={playerImage}
+                  resizeMode="cover"
+                />
+              )}
+
+              {/* Computadora */}
+              {stoneComputerOccuped === 19 && isVisible && computerImage && (
+                <Image
+                  style={styles.computerContainer}
+                  source={computerImage}
+                  resizeMode="cover"
+                />
+              )}
+            </View>
+          ) : (
+            null
+          )}
+        </>
       ), },
     { content: (
-        stoneOccuped === 20 ? (
-          <Image
-            style={styles.playerContainer}
-            source={playerImage}
-            resizeMode="cover"
-          />
-        ) : (
-          null
-        )
+        <>
+          {(stoneOccuped === 20 || stoneComputerOccuped === 20) ? (
+            <View style={styles.playersContainer}>
+              {/* Jugador */}
+              {stoneOccuped === 20 && (
+                <Image
+                  style={styles.playerContainer}
+                  source={playerImage}
+                  resizeMode="cover"
+                />
+              )}
+
+              {/* Computadora */}
+              {stoneComputerOccuped === 20 && isVisible && computerImage && (
+                <Image
+                  style={styles.computerContainer}
+                  source={computerImage}
+                  resizeMode="cover"
+                />
+              )}
+            </View>
+          ) : (
+            null
+          )}
+        </>
       ), },
-    {
-      content: (
-        stoneOccuped === 21 ? (
-          <Image
-            style={styles.playerContainer}
-            source={playerImage}
-            resizeMode="cover"
-          />
-        ) : (
-          <>
+    {content: (
+        <>
+          {(stoneOccuped === 21 || stoneComputerOccuped === 21) ? (
+            <View style={styles.playersContainer}>
+              {/* Jugador */}
+              {stoneOccuped === 21 && (
+                <Image
+                  style={styles.playerContainer}
+                  source={playerImage}
+                  resizeMode="cover"
+                />
+              )}
+
+              {/* Computadora */}
+              {stoneComputerOccuped === 21 && isVisible && computerImage && (
+                <Image
+                  style={styles.computerContainer}
+                  source={computerImage}
+                  resizeMode="cover"
+                />
+              )}
+            </View>
+          ) : (
+            <>
            <Text style={styles.stoneText}>Biblioteca</Text>
           <LeftArrow />
         </>
-        )
+          )}
+        </>
       )
     },
     { content: (
-        stoneOccuped === 22 ? (
-          <Image
-            style={styles.playerContainer}
-            source={playerImage}
-            resizeMode="cover"
-          />
-        ) : (
-          null
-        )
+        <>
+          {(stoneOccuped === 22 || stoneComputerOccuped === 22) ? (
+            <View style={styles.playersContainer}>
+              {/* Jugador */}
+              {stoneOccuped === 22 && (
+                <Image
+                  style={styles.playerContainer}
+                  source={playerImage}
+                  resizeMode="cover"
+                />
+              )}
+
+              {/* Computadora */}
+              {stoneComputerOccuped === 22 && isVisible && computerImage && (
+                <Image
+                  style={styles.computerContainer}
+                  source={computerImage}
+                  resizeMode="cover"
+                />
+              )}
+            </View>
+          ) : (
+            null
+          )}
+        </>
       ), },
     { content: (
-        stoneOccuped === 23 ? (
-          <Image
-            style={styles.playerContainer}
-            source={playerImage}
-            resizeMode="cover"
-          />
-        ) : (
-          null
-        )
+        <>
+          {(stoneOccuped === 23 || stoneComputerOccuped === 23) ? (
+            <View style={styles.playersContainer}>
+              {/* Jugador */}
+              {stoneOccuped === 23 && (
+                <Image
+                  style={styles.playerContainer}
+                  source={playerImage}
+                  resizeMode="cover"
+                />
+              )}
+
+              {/* Computadora */}
+              {stoneComputerOccuped === 23 && isVisible && computerImage && (
+                <Image
+                  style={styles.computerContainer}
+                  source={computerImage}
+                  resizeMode="cover"
+                />
+              )}
+            </View>
+          ) : (
+            null
+          )}
+        </>
       ), },
     { content: (
-        stoneOccuped === 24 ? (
-          <Image
-            style={styles.playerContainer}
-            source={playerImage}
-            resizeMode="cover"
-          />
-        ) : (
-          null
-        )
+        <>
+          {(stoneOccuped === 24 || stoneComputerOccuped === 24) ? (
+            <View style={styles.playersContainer}>
+              {/* Jugador */}
+              {stoneOccuped === 24 && (
+                <Image
+                  style={styles.playerContainer}
+                  source={playerImage}
+                  resizeMode="cover"
+                />
+              )}
+
+              {/* Computadora */}
+              {stoneComputerOccuped === 24 && isVisible && computerImage && (
+                <Image
+                  style={styles.computerContainer}
+                  source={computerImage}
+                  resizeMode="cover"
+                />
+              )}
+            </View>
+          ) : (
+            null
+          )}
+        </>
       ), },
     { content: (
-        stoneOccuped === 25 ? (
-          <Image
-            style={styles.playerContainer}
-            source={playerImage}
-            resizeMode="cover"
-          />
-        ) : (
-          null
-        )
+        <>
+          {(stoneOccuped === 25 || stoneComputerOccuped === 25) ? (
+            <View style={styles.playersContainer}>
+              {/* Jugador */}
+              {stoneOccuped === 25 && (
+                <Image
+                  style={styles.playerContainer}
+                  source={playerImage}
+                  resizeMode="cover"
+                />
+              )}
+
+              {/* Computadora */}
+              {stoneComputerOccuped === 25 && isVisible && computerImage && (
+                <Image
+                  style={styles.computerContainer}
+                  source={computerImage}
+                  resizeMode="cover"
+                />
+              )}
+            </View>
+          ) : (
+            null
+          )}
+        </>
       ), },
     { content: (
-        stoneOccuped === 26 ? (
-          <Image
-            style={styles.playerContainer}
-            source={playerImage}
-            resizeMode="cover"
-          />
-        ) : (
-         <SpiderIcon />
-        )
-      ),   },
-    {
-      content: (
-        stoneOccuped === 27 ? (
-          <Image
-            style={styles.playerContainer}
-            source={playerImage}
-            resizeMode="cover"
-          />
-        ) : (
-         <>
+        <>
+          {(stoneOccuped === 26 || stoneComputerOccuped === 26) ? (
+            <View style={styles.playersContainer}>
+              {/* Jugador */}
+              {stoneOccuped === 26 && (
+                <Image
+                  style={styles.playerContainer}
+                  source={playerImage}
+                  resizeMode="cover"
+                />
+              )}
+
+              {/* Computadora */}
+              {stoneComputerOccuped === 26 && isVisible && computerImage && (
+                <Image
+                  style={styles.computerContainer}
+                  source={computerImage}
+                  resizeMode="cover"
+                />
+              )}
+            </View>
+          ) : (
+            <SpiderIcon />
+          )}
+        </>
+      )},
+    {content: (
+        <>
+          {(stoneOccuped === 27 || stoneComputerOccuped === 27) ? (
+            <View style={styles.playersContainer}>
+              {/* Jugador */}
+              {stoneOccuped === 27 && (
+                <Image
+                  style={styles.playerContainer}
+                  source={playerImage}
+                  resizeMode="cover"
+                />
+              )}
+
+              {/* Computadora */}
+              {stoneComputerOccuped === 27 && isVisible && computerImage && (
+                <Image
+                  style={styles.computerContainer}
+                  source={computerImage}
+                  resizeMode="cover"
+                />
+              )}
+            </View>
+          ) : (
+            <>
           <Text style={styles.stoneText}>Alcoba</Text>
           <RightArrow />
         </>
-        )
-      ),   
+          )}
+        </>
+      )
     },
     { content: (
-        stoneOccuped === 28 ? (
-          <Image
-            style={styles.playerContainer}
-            source={playerImage}
-            resizeMode="cover"
-          />
-        ) : (
-          null
-        )
+        <>
+          {(stoneOccuped === 28 || stoneComputerOccuped === 28) ? (
+            <View style={styles.playersContainer}>
+              {/* Jugador */}
+              {stoneOccuped === 28 && (
+                <Image
+                  style={styles.playerContainer}
+                  source={playerImage}
+                  resizeMode="cover"
+                />
+              )}
+
+              {/* Computadora */}
+              {stoneComputerOccuped === 28 && isVisible && computerImage && (
+                <Image
+                  style={styles.computerContainer}
+                  source={computerImage}
+                  resizeMode="cover"
+                />
+              )}
+            </View>
+          ) : (
+            null
+          )}
+        </>
       ), },
     { content: (
-      stoneOccuped === 29 ? (
-          <Image
-            style={styles.playerContainer}
-            source={playerImage}
-            resizeMode="cover"
-          />
-        ) : (
-         <>
+        <>
+          {(stoneOccuped === 29 || stoneComputerOccuped === 29) ? (
+            <View style={styles.playersContainer}>
+              {/* Jugador */}
+              {stoneOccuped === 29 && (
+                <Image
+                  style={styles.playerContainer}
+                  source={playerImage}
+                  resizeMode="cover"
+                />
+              )}
+
+              {/* Computadora */}
+              {stoneComputerOccuped === 29 && isVisible && computerImage && (
+                <Image
+                  style={styles.computerContainer}
+                  source={computerImage}
+                  resizeMode="cover"
+                />
+              )}
+            </View>
+          ) : (
+            <>
               <ForwardArrow size={24} />
               <Text style={styles.stoneText}>Planta baja</Text>
           </>
-        )
-      ),
+          )}
+        </>
+      )
     }
   ];
   const [colors, setColors] = useState(board.map(() => "#808080")); // Color inicial para cada stone
@@ -439,72 +922,43 @@ export function FirstFloor({ diceValue, floor }) {
   const [hidecards, setHidecards] = useState(null);
   const [playerData, setPlayerData] = useState({});
   const [cardsDeployed, setCardsDeployed] = useState(null);
-  
-  const updateBorderColors = (storedValue, diceValue) => {
-  setBorderColors((prevColors) => {
-    const newColors = [...prevColors]; // Crear una copia del arreglo
-    const sumIndex = Number(storedValue) + Number(diceValue);
-    const diffIndex = Number(storedValue) - Number(diceValue);
-    newColors.fill("black");
-    if (sumIndex > 0 && sumIndex < newColors.length - 1) {
-      newColors[sumIndex] = "yellow";
-    }
-    if (diffIndex > 0 && diffIndex < newColors.length - 1) {
-      newColors[diffIndex] = "yellow";
-    }
-    if (sumIndex <= 0 || diffIndex <= 0) {
-      newColors[0] = "yellow";
-      setGroundNorthColor("yellow");
-      setDisabledNorth(false);
-    } else {
-      setGroundNorthColor(null);
-      setDisabledNorth(true);
-    }
-    // Resaltar casilla 29 si el movimiento lleva a >= 29
-    if (sumIndex >= 29 || diffIndex >= 29) {
-      newColors[29] = "yellow";
-      setGroundSouthColor("yellow");
-      setDisabledSouth(false);
-    } else {
-      setGroundSouthColor(null);
-      setDisabledSouth(true);
-    }
-    return newColors;
-  });
-};
+  const [computerPosition, setComputerPosition] = useState(null);
+  const [turn, setTurn] = useState(null);
   
 useEffect(() => {
-  playRainSound();
-    const fetchPlayer = async () => {
-      try {
-        const storedPlayer = await getPlayer();        
-        if (playersMap[storedPlayer]) {
-          setPlayerImage(playersMap[storedPlayer]); // Esto funcionará con los IDs
-        }
-      } catch (error) {
-        console.error("Error:", error);
-      }
-    };
 
+  getTurn().then(value => {
+      if (value) {
+        setTurn(value);
+        if (value === 'player'){  
+          fetchPosition();
+        } else {  
+          fetchComputerPosition();
+        }
+      }
+    });
+  playRainSound();
   fetchPlayer();
   getPlayerData().then(value => {
       if (value) {
         setPlayerData(value);
       }
-    });
+  });
   getComputerData().then(value1 => {
+    console.log('computerData:', value1);
+        if (value1.floor === 'firstFloor'){
+          setIsVisible(true);
+          setStoneComputerOccuped(value1.position);
+        }
         if (value1) {
           setComputerData(value1);
         }
-      });
-}, []);
-  const toDiceRoll = () => {
-    playDiceSound();
-    router.push({ 
-      pathname: '/dice',
-      params: { floor, turn}
     });
-  };
+  
+  if (turn === 'computer'){
+    computerMovement();
+  }
+}, []);
   useEffect(() => {
     Audio.setAudioModeAsync({
       allowsRecordingIOS: false,
@@ -553,12 +1007,41 @@ useEffect(() => {
     loop.start();
     return () => loop.stop(); // Cleanup
   }, [activateLoop, bounceAnim]); // Depend on activateLoop to re-run when it changes
- useEffect(() => {
+  useEffect(() => {
+    getTurn().then(value => {
+      if (value) {
+        if (value === 'player'){  
+          if (position !== null && position !== undefined) {
+            // Hacer scroll cuando cambia la posición local
+            scrollToPlayerPosition(position);
+          }
+        } else {  
+          scrollToComputerPosition(computerPosition);
+        }
+      }
+    });
+  }, [position, computerPosition]);
+  const fetchPlayer = async () => {
+    try {
+      const storedPlayer = await getPlayer();   
+      if (storedPlayer === 'Nely') {
+        setComputerImage(playersMap['David']);
+       
+      } else if (storedPlayer === 'David') {
+        setComputerImage(playersMap['Nely']);
+      }
+      if (playersMap[storedPlayer]) {
+        setPlayerImage(playersMap[storedPlayer]); // Esto funcionará con los IDs
+      }
+    } catch (error) {
+      console.error("Error:", error);
+    }
+  };
   const fetchPosition = async () => {
     try {
-      const storedValue = await getPlayerPosition();
+      const storedValue = await getPlayerData();
       if (storedValue !== null) {
-        const playerIndex = parseInt(storedValue, 10);
+        const playerIndex = storedValue.position;
         setTimeout(() => {
           scrollToPlayerPosition(playerIndex);
         }, 100);
@@ -612,21 +1095,83 @@ useEffect(() => {
       console.error("Error fetching position:", error);
     }
   };
-
-  fetchPosition();
-}, [diceValue]);
-  useEffect(() => {
-    if (position !== null && position !== undefined) {
-      // Hacer scroll cuando cambia la posición local
-      scrollToPlayerPosition(position);
+  const fetchComputerPosition = async () => {
+    try {
+      const storedValue = await getComputerData();
+      console.log('storedValue computer:', storedValue);
+      if (storedValue !== null) {
+        const computerIndex = storedValue.position;
+        updateBorderColors(computerIndex, diceValue);
+        setTimeout(() => {
+          scrollToComputerPosition(computerIndex);
+        }, 500);
+        setComputerPosition(computerIndex);
+        setStoneComputerOccuped(computerIndex);
+      }
+    } catch (error) {
+      console.error("Error fetching computer position:", error);
     }
-  }, [position]);
+  };
+  const getPlayerData = async () => {
+    try {
+      const value = await AsyncStorage.getItem("playerData");
+      return value ? JSON.parse(value) : null;
+    } catch (e) {
+      console.log("error reading player data");
+      return null;
+    }
+  };
+  const updateBorderColors = (storedValue, diceValue) => {
+    setBorderColors((prevColors) => {
+      const newColors = [...prevColors]; // Crear una copia del arreglo
+      const sumIndex = Number(storedValue) + Number(diceValue);
+      const diffIndex = Number(storedValue) - Number(diceValue);
+      newColors.fill("black");
+      if (sumIndex > 0 && sumIndex < newColors.length - 1) {
+        newColors[sumIndex] = "yellow";
+      }
+      if (diffIndex > 0 && diffIndex < newColors.length - 1) {
+        newColors[diffIndex] = "yellow";
+      }
+      if (sumIndex <= 0 || diffIndex <= 0) {
+        newColors[0] = "yellow";
+        setGroundNorthColor("yellow");
+        setDisabledNorth(false);
+      } else {
+        setGroundNorthColor(null);
+        setDisabledNorth(true);
+      }
+      // Resaltar casilla 29 si el movimiento lleva a >= 29
+      if (sumIndex >= 29 || diffIndex >= 29) {
+        newColors[29] = "yellow";
+        setGroundSouthColor("yellow");
+        setDisabledSouth(false);
+      } else {
+        setGroundSouthColor(null);
+        setDisabledSouth(true);
+      }
+      return newColors;
+    });
+};
   const scrollToPlayerPosition = (playerIndex) => {
     if (!scrollRef.current || playerIndex === null || isNaN(playerIndex))
       return;
 
     const STONE_HEIGHT = 61;
     const targetOffset = playerIndex * STONE_HEIGHT;
+
+    // Obtener las medidas del ScrollView para centrar
+    scrollRef.current.getScrollResponder()?.scrollTo({
+      y: Math.max(0, targetOffset - 300), // 300px de "padding" superior para centrar
+      animated: true,
+    });
+  };
+  const scrollToComputerPosition = (computerIndex) => {
+    if (!scrollRef.current || computerIndex === null || isNaN(computerIndex))
+      return;
+
+    const STONE_HEIGHT = 61;
+    const targetOffset = computerIndex * STONE_HEIGHT;
 
     // Obtener las medidas del ScrollView para centrar
     scrollRef.current.getScrollResponder()?.scrollTo({
@@ -765,50 +1310,160 @@ useEffect(() => {
       return null;
     }
   };
-  const getPlayerPosition = async () => {
-    try {
-      const value = await AsyncStorage.getItem("position");
-      return Number(value);
-    } catch (e) {
-      console.log("error reading data");
-      return null;
-    }
-  };
   const storePlayerPosition = async (position) => {
     try {
       await AsyncStorage.setItem("position", position);
     } catch (e) {
-      console.log("error saving data");
+      console.log("error saving position");
     }
   };
-  const storeTurn = async (turn) => {
-    await AsyncStorage.setItem("turn", turn);
-  };
-  const getPlayerData = async () => {
+  const storeTurn = async (storeTurn) => {
     try {
-      const value = await AsyncStorage.getItem("playerData");
-      return value ? JSON.parse(value) : null;
+      await AsyncStorage.setItem("turn", storeTurn);
     } catch (e) {
-      console.log("error reading player data");
-      return null;
+      console.log("error saving turn");
     }
   };
+  
   const editPositionPlayer = async (index) => {
     if (!playerData) return;
     const updatedPlayerData = { ...playerData, position: index };
     await AsyncStorage.setItem("playerData", JSON.stringify(updatedPlayerData));
     setPlayerData(updatedPlayerData);
   }
-   const toComputerDiceRoll = (floorCompu, turnCompu) => {
+   const toComputerDiceRoll = () => {
       setComputerFloor(computerData.floor);
       playDiceSound();
       router.push({ 
-        pathname: '/dice',
-        params: { floorCompu, turnCompu } 
+        pathname: '/dice'
       });
     };
+  const getTurn = async () => {
+      try {
+        const turn = await AsyncStorage.getItem('turn');
+        if (turn === null) {
+          console.log('No turn found in AsyncStorage');
+          return null; // O un valor predeterminado, como 'player'
+        }
+        //setTurn(turn);
+        return turn;
+      } catch (e) {
+        console.log('❌ Error reading turn:', e);
+        return null; // O manejar el error de otra manera
+      }
+    };
+    const storeComputerPosition = async (position) => { //se guardan las cartas de la computadora
+    try {
+      const storedData = await AsyncStorage.getItem("computerData");
+      const currentData = storedData ? JSON.parse(storedData) : null;
+      if (!currentData) return;
+
+      const updatedComputer = { ...currentData, position: position };
+      await AsyncStorage.setItem(
+        "computerData",
+        JSON.stringify(updatedComputer)
+      );
+      setComputerData(updatedComputer);
+      console.log("✅ ComputerData updated:", updatedComputer);
+    } catch (e) {
+      console.log("❌ Error updating data:", e);
+    }
+  };
+  const computerMovement = () => {
+    if (computerData.roomToGo === 'Laboratorio'){ // si la computadora tiene que ir al laboratorio
+      if (computerData.position <= 5 && computerData.position + Number(diceValue) > 5){
+        setTimeout(() => {
+          roomClicked("Laboratorio");
+        }, 1000);
+        return;
+      }else if (computerData.position < 5 && computerData.position + Number(diceValue) < 5){
+        setStoneComputerOccuped(computerData.position + Number(diceValue));
+        storeComputerPosition(computerData.position + Number(diceValue));
+        setTimeout(() => {
+          scrollToComputerPosition(computerData.position + Number(diceValue));
+        }, 500);  
+        setInstructionsText("Pulsa el dado para tirar");
+      }else if (computerData.position > 5 && computerData.position - Number(diceValue) > 5){
+        setStoneComputerOccuped(computerData.position - Number(diceValue));
+        storeComputerPosition(computerData.position - Number(diceValue));
+        setTimeout(() => {
+          scrollToComputerPosition(computerData.position - Number(diceValue));
+        }, 500);  
+        setInstructionsText("Pulsa el dado para tirar");
+      }
+        setInstructionsText("Pulsa el dado para tirar");
+    }
+    if (computerData.roomToGo === 'Salón'){ // si la computadora tiene que ir al salón
+      if (computerData.position <= 13 && computerData.position + Number(diceValue) > 13){
+        setTimeout(() => {
+          roomClicked("Laboratorio");
+        }, 1000);
+        return;
+      }else if (computerData.position < 13 && computerData.position + Number(diceValue) < 13){
+        setStoneComputerOccuped(computerData.position + Number(diceValue));
+        storeComputerPosition(computerData.position + Number(diceValue));
+        setTimeout(() => {
+          scrollToComputerPosition(computerData.position + Number(diceValue));
+        }, 500);  
+        setInstructionsText("Pulsa el dado para tirar");
+      }else if (computerData.position > 13 && computerData.position - Number(diceValue) > 13){
+        setStoneComputerOccuped(computerData.position - Number(diceValue));
+        storeComputerPosition(computerData.position - Number(diceValue));
+        setTimeout(() => {
+          scrollToComputerPosition(computerData.position - Number(diceValue));
+        }, 500);  
+        setInstructionsText("Pulsa el dado para tirar");
+      }
+        setInstructionsText("Pulsa el dado para tirar");
+    }
+    if (computerData.roomToGo === 'Biblioteca'){ // si la computadora tiene que ir a la biblioteca
+      if (computerData.position <= 22 && computerData.position + Number(diceValue) > 22){
+        setTimeout(() => {
+          roomClicked("Laboratorio");
+        }, 1000);
+        return;
+      }else if (computerData.position < 22 && computerData.position + Number(diceValue) < 22){
+        setStoneComputerOccuped(computerData.position + Number(diceValue));
+        storeComputerPosition(computerData.position + Number(diceValue));
+        setTimeout(() => {
+          scrollToComputerPosition(computerData.position + Number(diceValue));
+        }, 500);  
+        setInstructionsText("Pulsa el dado para tirar");
+      }else if (computerData.position > 22 && computerData.position - Number(diceValue) > 22){
+        setStoneComputerOccuped(computerData.position - Number(diceValue));
+        storeComputerPosition(computerData.position - Number(diceValue));
+        setTimeout(() => {
+          scrollToComputerPosition(computerData.position - Number(diceValue));
+        }, 500);  
+        setInstructionsText("Pulsa el dado para tirar");
+      }
+        setInstructionsText("Pulsa el dado para tirar");
+    }
+    if (computerData.roomToGo === 'Biblioteca'){ // si la computadora tiene que ir a la alcoba
+      if (computerData.position <= 28 && computerData.position + Number(diceValue) > 28){
+        setTimeout(() => {
+          roomClicked("Laboratorio");
+        }, 1000);
+        return;
+      }else if (computerData.position < 28 && computerData.position + Number(diceValue) < 28){
+        setStoneComputerOccuped(computerData.position + Number(diceValue));
+        storeComputerPosition(computerData.position + Number(diceValue));
+        setTimeout(() => {
+          scrollToComputerPosition(computerData.position + Number(diceValue));
+        }, 500);  
+        setInstructionsText("Pulsa el dado para tirar");
+      }else if (computerData.position > 28 && computerData.position - Number(diceValue) > 28){
+        setStoneComputerOccuped(computerData.position - Number(diceValue));
+        storeComputerPosition(computerData.position - Number(diceValue));
+        setTimeout(() => {
+          scrollToComputerPosition(computerData.position - Number(diceValue));
+        }, 500);  
+        setInstructionsText("Pulsa el dado para tirar");
+      }
+        setInstructionsText("Pulsa el dado para tirar");
+    }
+    }
   const stoneClicked = (index) => {
-    setTurn('computer'); 
     storeTurn('computer');
     setStoneOccuped(index);
     if (index === 6 || index === 26){
@@ -818,9 +1473,9 @@ useEffect(() => {
     }else{
       playFootSteps();
     }
-    setInstructionsText("Tira el dado para continuar");
+    setInstructionsText("Turno para otro investigador");
     setPosition(index); 
-    //storePlayerPosition(index.toString());  hay que cambiarlo por editar el objeto playerData
+    storePlayerPosition(index.toString());  //hay que cambiarlo por editar el objeto playerData
     
     editPositionPlayer(index);
     setActivateLoop(true);
@@ -837,16 +1492,16 @@ useEffect(() => {
     }
     if (index === 6) {
       storePlayerPosition("26");
-      //setPosition(26);  hay que cambiarlo por editar el objeto playerData
+      setPosition(26);  //hay que cambiarlo por editar el objeto playerData
       setStoneOccuped(26);
     }
     if (index === 26) {
-      //storePlayerPosition("6");  hay que cambiarlo por editar el objeto playerData
+      storePlayerPosition("6");  //hay que cambiarlo por editar el objeto playerData
       setPosition(6);
       setStoneOccuped(6);
     }
     setTimeout(() => {
-      toComputerDiceRoll(computerData.floor, 'computer' );
+      toComputerDiceRoll();
     }, 1000)
   };
   const roomClicked = (room) => {
@@ -868,7 +1523,7 @@ useEffect(() => {
   };
   return (
     <>
-      <ShowCardsButton onPress={handleShowCardsPress} />
+      { turn === 'player' ? <ShowCardsButton onPress={handleShowCardsPress} /> : null }
       <ImageBackground
         style={[styles.superContainer, { opacity: opacityBack }]}
         source={require("../assets/images/boardImages/boardBack.png")}
@@ -877,7 +1532,7 @@ useEffect(() => {
         <View style={styles.instructionsCloud}>
           <Text style={styles.text}>{instructionsText}</Text>
         </View>
-        <Animated.View
+        { turn === 'player' ? <Animated.View
           style={{
             position: "absolute",
             bottom: 690,
@@ -903,7 +1558,7 @@ useEffect(() => {
               resizeMode="cover"
             />
           </Pressable>
-        </Animated.View>
+        </Animated.View> : null}
         <Animated.ScrollView
           ref={scrollRef}
           scrollEventThrottle={16}
@@ -993,6 +1648,11 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     marginTop: 20,
   },
+  playersContainer: {
+    flexDirection: "row",
+    zIndex: 2,
+    justifyContent: "space-evenly",
+  },
   stonesContainer: {
     marginBottom: 100,
     padding: 10,
@@ -1075,9 +1735,15 @@ const styles = StyleSheet.create({
   playerContainer: {
     borderRadius: 50,
     borderWidth: 2,
-    borderColor: 'blue',
+    borderColor: 'lightgreen',
     width: 50,
     height: 50
-
-  }
+  },
+  computerContainer: {
+    borderRadius: 50,
+    borderWidth: 2,
+    borderColor: 'blue',
+    width: 50,
+    height: 50,
+  },
 });

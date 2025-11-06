@@ -62,47 +62,17 @@ export function ChoosePlayer() {
         console.error("Error al reproducir start:", error);
       }
     }
- 
-  //computer data
 
-  // ✅ 2. FUNCIÓN para SUBIR POSITION
-  //con una const [computerData, setComputerData] = useState(null)
-  /*const changePosition = async () => {
-    if (!computerData) return;
-    
-    // Crear nuevo player con level +1
-    const updatedComputerData = { ...computerData, level: computerData.position + 1 };
-    
-    // Guardar en AsyncStorage
-    await AsyncStorage.setItem("computerData", JSON.stringify(updatedComputerData));
-    
-    // Actualizar estado
-    setPlayer(updatedComputerData);
-    
-    console.log('✅ Level UP:', updatedComputerData.position);
-  };*/
-  const getComputerData = async () => {
-    try {
-      const value = await AsyncStorage.getItem("computerData");
-      return value ? JSON.parse(value) : null;
-    } catch (e) {
-      console.log("error reading computer data");
-      return null;
-    }
-  };
   const storeComputerData = async (name) => { //se crea el computer data
     const computerData = { id: 1, name: name, position: 0, floor: '', computerCards: [], discardedCards: [], roomToGo: '' };
     await AsyncStorage.setItem("computerData", JSON.stringify(computerData));
-    console.log('✅ computer data saved:', computerData);
   };
   const storePlayerData = async (name) => {
     const playerData = { id: 0, name: name, position: 0, floor: '', playerCards: [], discardedCards: []  };
     await AsyncStorage.setItem("playerData", JSON.stringify(playerData));
-    console.log('✅ player data saved:', playerData);
   };
   const storeTurn = async (turn) => {
     await AsyncStorage.setItem("turn", turn);
-    console.log('✅ turn saved:', turn);
   };
   async function playButtonPress() {
     try {

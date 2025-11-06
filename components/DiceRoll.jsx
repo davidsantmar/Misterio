@@ -11,7 +11,7 @@ import { Audio } from "expo-av";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 
-export function DiceRoll({ turn }) {
+export function DiceRoll() {
   const [diceValue, setDiceValue] = useState(0);
   const [rotation] = useState(new Animated.Value(0));
   const [diceRoll, setDiceRoll] = useState(null);  
@@ -20,11 +20,32 @@ export function DiceRoll({ turn }) {
   const [computerData, setComputerData] = useState({});
   const [playerData, setPlayerData] = useState({});
   const [floorToGo, setFloorToGo] = useState(null);
+  const [turn, setTurn] = useState(null);
   const router = useRouter();
   useEffect(() => {
       if (diceValue === 0) return; // Ignora el valor inicial
+      fetchData();
     }, [diceValue]);
- const getPlayerData = async () => {
+  useEffect(() => {
+    rollDice();
+    diceRollSound();
+  }, []);
+  useEffect(() => { //audio
+      Audio.setAudioModeAsync({
+        allowsRecordingIOS: false,
+        playsInSilentModeIOS: true,
+        staysActiveInBackground: false,
+        shouldDuckAndroid: true,
+      });
+  
+      // Liberación de sonidos al desmontar el componente
+      return () => {
+        if (diceRoll) {
+          diceRoll.unloadAsync();
+        }
+      };
+    },[diceRoll]);
+     const getPlayerData = async () => {
     try {
       const value = await AsyncStorage.getItem("playerData");
       return value ? JSON.parse(value) : null;
@@ -42,57 +63,19 @@ export function DiceRoll({ turn }) {
       return null;
     }
   };
-  useEffect(() => {
-    console.log('turn en diceRoll', turn);
-    getComputerData().then(value1 => {
-        if (value1) {
-          console.log('computerData en useEffect diceRoll', value1);
-          setComputerData(value1);
-        }
-      });
-      getPlayerData().then(value => {
-        if (value) {
-          console.log('playerData en useEffect diceRoll', value);
-          setPlayerData(value);;
-        }
-      });
-      setPlayerToShow(turn === 'player' ? playerData.name : computerData.name);
-      if (turn === 'player'){
-        const timer = setTimeout(() => {
-          router.push({
-            pathname: "/board",
-            params: { diceValue: diceValue.toString(), floor: playerData.floor }, // Usar el floor del jugador
-          });
-        }, 2000);
-        return () => clearTimeout(timer);
-      } else if (turn === 'computer'){
-        const timer = setTimeout(() => {
-          computerMovement(computerData);
-        }, 3000);
-        return () => clearTimeout(timer);
+  const getTurn = async () => {
+    try {
+      const turn = await AsyncStorage.getItem('turn');
+      if (turn === null) {
+        console.log('No turn found in AsyncStorage');
+        return null; // O un valor predeterminado, como 'player'
       }
-  }, [turn]);
-  useEffect(() => {
-    rollDice();
-    diceRollSound();
-  }, []);
-
-
-  useEffect(() => { //audio
-      Audio.setAudioModeAsync({
-        allowsRecordingIOS: false,
-        playsInSilentModeIOS: true,
-        staysActiveInBackground: false,
-        shouldDuckAndroid: true,
-      });
-  
-      // Liberación de sonidos al desmontar el componente
-      return () => {
-        if (diceRoll) {
-          diceRoll.unloadAsync();
-        }
-      };
-    },[diceRoll]);
+      return turn;
+    } catch (e) {
+      console.log('❌ Error reading turn:', e);
+      //return null; // O manejar el error de otra manera
+    }
+  };
     async function diceRollSound() {
       try {
         if (diceRoll) {
@@ -109,6 +92,56 @@ export function DiceRoll({ turn }) {
         console.error("Error al reproducir diceRoll:", error);
       }
     }
+    const fetchData = async () => {
+      let playerTimer;
+      let computerTimer;
+    try {
+      const [turnValue, computerValue, playerValue] = await Promise.all([
+        getTurn(),
+        getComputerData(),
+        getPlayerData()
+      ]);
+
+      if (turnValue) {
+        setTurn(turnValue);
+      }
+
+      if (computerValue) {
+        setComputerData(computerValue);
+      }
+
+      if (playerValue) {
+        setPlayerData(playerValue);
+
+        // Usar los valores frescos directamente
+        const currentPlayerName = turnValue === 'player' ? playerValue.name : computerValue.name;
+        setPlayerToShow(currentPlayerName);
+
+        if (turnValue === 'player') {
+          console.log('Usando floor del jugador:', playerValue.floor);
+          playerTimer = setTimeout(() => {
+            router.push({
+              pathname: "/board",
+              params: { 
+                diceValue: diceValue.toString(), 
+                floor: playerValue.floor.toString()
+              },
+            });
+          }, 2000);
+        } else if (turnValue === 'computer') {
+          computerTimer = setTimeout(() => {
+            computerMovement(computerValue);
+          }, 3000);
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    }
+    return () => {
+      if (playerTimer) clearTimeout(playerTimer);
+      if (computerTimer) clearTimeout(computerTimer);
+    };
+  };
   const rollDice = () => {
     const newValue = Math.floor(Math.random() * 6) + 1;
     setDiceValue(newValue);
@@ -156,7 +189,6 @@ export function DiceRoll({ turn }) {
     }
   };
 const computerRoomToGo = async (data) => {
-  console.log('Starting computerRoomToGo with data:', data);
   if (data.roomToGo === "") {
     const compare = (rooms || []).filter(
       (elemento) => !(data.computerCards || []).includes(elemento)
@@ -164,7 +196,6 @@ const computerRoomToGo = async (data) => {
     const randomRoomToGo = compare.length > 0
       ? compare[Math.floor(Math.random() * compare.length)]
       : null;
-    console.log('Selected randomRoomToGo:', randomRoomToGo);
 
     if (randomRoomToGo) {
       await editRoomToGo(randomRoomToGo);
@@ -186,10 +217,8 @@ const computerRoomToGo = async (data) => {
         floor = 'ground';
         setFloorToGo('ground');
       }
-      console.log('Set floor to:', floor);
     }
 
-    console.log('computer data after roomToGo:', data);
     return { roomToGo: randomRoomToGo, floor };
   }
   return { roomToGo: data.roomToGo, floor: data.floor };
@@ -278,7 +307,7 @@ const computerMovement = async (computerData) => {
       </Animated.View>
     </ImageBackground>
   );
-}
+  }
 
 const styles = StyleSheet.create({
   container: { flex: 1, alignItems: "center" },

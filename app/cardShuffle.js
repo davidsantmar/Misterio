@@ -105,7 +105,6 @@ export default function CardShuffle() {
         JSON.stringify(updatedPlayerData)
       );
       setComputerData(updatedPlayerData);
-      console.log("✅ PlayerData updated:", updatedPlayerData);
     } catch (e) {
       console.log("❌ Error updating data:", e);
     }
@@ -122,7 +121,6 @@ export default function CardShuffle() {
         JSON.stringify(updatedComputer)
       );
       setComputerData(updatedComputer);
-      console.log("✅ ComputerData updated:", updatedComputer);
     } catch (e) {
       console.log("❌ Error updating data:", e);
     }
@@ -196,9 +194,7 @@ export default function CardShuffle() {
       console.error("Error al guardar en AsyncStorage:", error);
     }
     // Imprimir resultados
-    console.log("Player cards:", playerCards);
-    console.log("Computer cards:", computerCards);
-    console.log("Envelope:", envelope);
+   
     storeComputerCards(computerCards);
     storePlayerCards(playerCards);
   };

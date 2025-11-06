@@ -479,10 +479,7 @@ useEffect(() => {
     const fetchPlayer = async () => {
     try {
       const storedPlayer = await getPlayer();
-      
-      console.log('Players available:', Object.keys(playersMap));
-      console.log(`Image for ${storedPlayer}:`, playersMap[storedPlayer]);
-      
+      console.log(`Image for ${storedPlayer}:`, playersMap[storedPlayer]);      
       if (playersMap[storedPlayer]) {
         setPlayerImage(playersMap[storedPlayer]); // Esto funcionará con los IDs
         console.log(playerImage)
