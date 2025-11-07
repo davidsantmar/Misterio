@@ -22,13 +22,11 @@ import { useState, useEffect, useRef } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { ShowCardsButton } from "./ShowCardsButton";
 import { Audio } from "expo-av";
-import fichaNely from '../assets/images/fichaNely.png';
-import fichaDavid from '../assets/images/fichaDavid.png';
-
+import { store } from "expo-router/build/global-state/router-store";
 
 const playersMap = {
-  Nely: require('../assets/images/fichaNely.png'),
-  David: require('../assets/images/fichaDavid.png'),
+  Nely: require("../assets/images/fichaNely.png"),
+  David: require("../assets/images/fichaDavid.png"),
 };
 
 export function FirstFloor({ diceValue }) {
@@ -52,7 +50,7 @@ export function FirstFloor({ diceValue }) {
   const [room2Color, setRoom2Color] = useState(null);
   const [room3Color, setRoom3Color] = useState(null);
   const [room4Color, setRoom4Color] = useState(null);
-  const [disabledDice, setDisabledDice] = useState(true); // Estado para activar/desactivar el botón
+  const [disabledDice, setDisabledDice] = useState(false); // Estado para activar/desactivar el botón
   const [disabledRoom1, setDisabledRoom1] = useState(true);
   const [disabledRoom2, setDisabledRoom2] = useState(true);
   const [disabledRoom3, setDisabledRoom3] = useState(true);
@@ -66,15 +64,14 @@ export function FirstFloor({ diceValue }) {
   const [stoneComputerOccuped, setStoneComputerOccuped] = useState(null);
   const [computerData, setComputerData] = useState({});
   const [computerFloor, setComputerFloor] = useState(null);
-  //const [turn, setTurn] = useState(null);
   const [isVisible, setIsVisible] = useState(false);
   const scrollRef = useRef(null);
   const router = useRouter();
-  const board = [ 
+  const board = [
     {
       content: (
         <>
-          {(stoneOccuped === 0 || stoneComputerOccuped === 0) ? (
+          {stoneOccuped === 0 || stoneComputerOccuped === 0 ? (
             <View style={styles.playersContainer}>
               {/* Jugador */}
               {stoneOccuped === 0 && (
@@ -88,7 +85,7 @@ export function FirstFloor({ diceValue }) {
               {/* Computadora */}
               {stoneComputerOccuped === 0 && isVisible && computerImage && (
                 <Image
-                  style={styles.computerContainer}
+                  style={[styles.computerContainer, { marginLeft: leftDisplacement }]}
                   source={computerImage}
                   resizeMode="cover"
                 />
@@ -103,9 +100,10 @@ export function FirstFloor({ diceValue }) {
         </>
       ),
     },
-    { content: (
+    {
+      content: (
         <>
-          {(stoneOccuped === 1 || stoneComputerOccuped === 1) ? (
+          {stoneOccuped === 1 || stoneComputerOccuped === 1 ? (
             <View style={styles.playersContainer}>
               {/* Jugador */}
               {stoneOccuped === 1 && (
@@ -119,21 +117,20 @@ export function FirstFloor({ diceValue }) {
               {/* Computadora */}
               {stoneComputerOccuped === 1 && isVisible && computerImage && (
                 <Image
-                  style={styles.computerContainer}
+                  style={[styles.computerContainer, { marginLeft: leftDisplacement }]}
                   source={computerImage}
                   resizeMode="cover"
                 />
               )}
             </View>
-          ) : (
-            null
-          )}
+          ) : null}
         </>
       ),
     },
-    { content: (
+    {
+      content: (
         <>
-          {(stoneOccuped === 2 || stoneComputerOccuped === 2) ? (
+          {stoneOccuped === 2 || stoneComputerOccuped === 2 ? (
             <View style={styles.playersContainer}>
               {/* Jugador */}
               {stoneOccuped === 2 && (
@@ -147,20 +144,20 @@ export function FirstFloor({ diceValue }) {
               {/* Computadora */}
               {stoneComputerOccuped === 2 && isVisible && computerImage && (
                 <Image
-                  style={styles.computerContainer}
+                  style={[styles.computerContainer, { marginLeft: leftDisplacement }]}
                   source={computerImage}
                   resizeMode="cover"
                 />
               )}
             </View>
-          ) : (
-            null
-          )}
+          ) : null}
         </>
-      ), },
-    { content: (
+      ),
+    },
+    {
+      content: (
         <>
-          {(stoneOccuped === 3 || stoneComputerOccuped === 3) ? (
+          {stoneOccuped === 3 || stoneComputerOccuped === 3 ? (
             <View style={styles.playersContainer}>
               {/* Jugador */}
               {stoneOccuped === 3 && (
@@ -174,20 +171,20 @@ export function FirstFloor({ diceValue }) {
               {/* Computadora */}
               {stoneComputerOccuped === 3 && isVisible && computerImage && (
                 <Image
-                  style={styles.computerContainer}
+                  style={[styles.computerContainer, { marginLeft: leftDisplacement }]}
                   source={computerImage}
                   resizeMode="cover"
                 />
               )}
             </View>
-          ) : (
-            null
-          )}
+          ) : null}
         </>
-      ),},
-    {content: (
+      ),
+    },
+    {
+      content: (
         <>
-          {(stoneOccuped === 4 || stoneComputerOccuped === 4) ? (
+          {stoneOccuped === 4 || stoneComputerOccuped === 4 ? (
             <View style={styles.playersContainer}>
               {/* Jugador */}
               {stoneOccuped === 4 && (
@@ -201,7 +198,7 @@ export function FirstFloor({ diceValue }) {
               {/* Computadora */}
               {stoneComputerOccuped === 4 && isVisible && computerImage && (
                 <Image
-                  style={styles.computerContainer}
+                  style={[styles.computerContainer, { marginLeft: leftDisplacement }]}
                   source={computerImage}
                   resizeMode="cover"
                 />
@@ -209,17 +206,17 @@ export function FirstFloor({ diceValue }) {
             </View>
           ) : (
             <>
-          <Text style={styles.stoneText}>Laboratorio</Text>
-          <LeftArrow />
-        </>
+              <Text style={styles.stoneText}>Laboratorio</Text>
+              <LeftArrow />
+            </>
           )}
         </>
       ),
-       
     },
-    { content: (
+    {
+      content: (
         <>
-          {(stoneOccuped === 5 || stoneComputerOccuped === 5) ? (
+          {stoneOccuped === 5 || stoneComputerOccuped === 5 ? (
             <View style={styles.playersContainer}>
               {/* Jugador */}
               {stoneOccuped === 5 && (
@@ -233,20 +230,20 @@ export function FirstFloor({ diceValue }) {
               {/* Computadora */}
               {stoneComputerOccuped === 5 && isVisible && computerImage && (
                 <Image
-                  style={styles.computerContainer}
+                  style={[styles.computerContainer, { marginLeft: leftDisplacement }]}
                   source={computerImage}
                   resizeMode="cover"
                 />
               )}
             </View>
-          ) : (
-            null
-          )}
+          ) : null}
         </>
-      ), },
-    { content: (
+      ),
+    },
+    {
+      content: (
         <>
-          {(stoneOccuped === 6 || stoneComputerOccuped === 6) ? (
+          {stoneOccuped === 6 || stoneComputerOccuped === 6 ? (
             <View style={styles.playersContainer}>
               {/* Jugador */}
               {stoneOccuped === 6 && (
@@ -260,7 +257,7 @@ export function FirstFloor({ diceValue }) {
               {/* Computadora */}
               {stoneComputerOccuped === 6 && isVisible && computerImage && (
                 <Image
-                  style={styles.computerContainer}
+                  style={[styles.computerContainer, { marginLeft: leftDisplacement }]}
                   source={computerImage}
                   resizeMode="cover"
                 />
@@ -270,10 +267,12 @@ export function FirstFloor({ diceValue }) {
             <SpiderIcon />
           )}
         </>
-      ),  },
-    { content: (
+      ),
+    },
+    {
+      content: (
         <>
-          {(stoneOccuped === 7 || stoneComputerOccuped === 7) ? (
+          {stoneOccuped === 7 || stoneComputerOccuped === 7 ? (
             <View style={styles.playersContainer}>
               {/* Jugador */}
               {stoneOccuped === 7 && (
@@ -287,20 +286,20 @@ export function FirstFloor({ diceValue }) {
               {/* Computadora */}
               {stoneComputerOccuped === 7 && isVisible && computerImage && (
                 <Image
-                  style={styles.computerContainer}
+                  style={[styles.computerContainer, { marginLeft: leftDisplacement }]}
                   source={computerImage}
                   resizeMode="cover"
                 />
               )}
             </View>
-          ) : (
-            null
-          )}
+          ) : null}
         </>
-      ), },
-    { content: (
+      ),
+    },
+    {
+      content: (
         <>
-          {(stoneOccuped === 8 || stoneComputerOccuped === 8) ? (
+          {stoneOccuped === 8 || stoneComputerOccuped === 8 ? (
             <View style={styles.playersContainer}>
               {/* Jugador */}
               {stoneOccuped === 8 && (
@@ -314,20 +313,20 @@ export function FirstFloor({ diceValue }) {
               {/* Computadora */}
               {stoneComputerOccuped === 8 && isVisible && computerImage && (
                 <Image
-                  style={styles.computerContainer}
+                  style={[styles.computerContainer, { marginLeft: leftDisplacement }]}
                   source={computerImage}
                   resizeMode="cover"
                 />
               )}
             </View>
-          ) : (
-            null
-          )}
+          ) : null}
         </>
-      ), },
-    { content: (
+      ),
+    },
+    {
+      content: (
         <>
-          {(stoneOccuped === 9 || stoneComputerOccuped === 9) ? (
+          {stoneOccuped === 9 || stoneComputerOccuped === 9 ? (
             <View style={styles.playersContainer}>
               {/* Jugador */}
               {stoneOccuped === 9 && (
@@ -341,20 +340,20 @@ export function FirstFloor({ diceValue }) {
               {/* Computadora */}
               {stoneComputerOccuped === 9 && isVisible && computerImage && (
                 <Image
-                  style={styles.computerContainer}
+                  style={[styles.computerContainer, { marginLeft: leftDisplacement }]}
                   source={computerImage}
                   resizeMode="cover"
                 />
               )}
             </View>
-          ) : (
-            null
-          )}
+          ) : null}
         </>
-      ), },
-    { content: (
+      ),
+    },
+    {
+      content: (
         <>
-          {(stoneOccuped === 10 || stoneComputerOccuped === 10) ? (
+          {stoneOccuped === 10 || stoneComputerOccuped === 10 ? (
             <View style={styles.playersContainer}>
               {/* Jugador */}
               {stoneOccuped === 10 && (
@@ -368,20 +367,20 @@ export function FirstFloor({ diceValue }) {
               {/* Computadora */}
               {stoneComputerOccuped === 10 && isVisible && computerImage && (
                 <Image
-                  style={styles.computerContainer}
+                  style={[styles.computerContainer, { marginLeft: leftDisplacement }]}
                   source={computerImage}
                   resizeMode="cover"
                 />
               )}
             </View>
-          ) : (
-            null
-          )}
+          ) : null}
         </>
-      ), },
-    { content: (
+      ),
+    },
+    {
+      content: (
         <>
-          {(stoneOccuped === 11 || stoneComputerOccuped === 11) ? (
+          {stoneOccuped === 11 || stoneComputerOccuped === 11 ? (
             <View style={styles.playersContainer}>
               {/* Jugador */}
               {stoneOccuped === 11 && (
@@ -395,20 +394,20 @@ export function FirstFloor({ diceValue }) {
               {/* Computadora */}
               {stoneComputerOccuped === 11 && isVisible && computerImage && (
                 <Image
-                  style={styles.computerContainer}
+                  style={[styles.computerContainer, { marginLeft: leftDisplacement }]}
                   source={computerImage}
                   resizeMode="cover"
                 />
               )}
             </View>
-          ) : (
-            null
-          )}
+          ) : null}
         </>
-      ), },
-    {content: (
+      ),
+    },
+    {
+      content: (
         <>
-          {(stoneOccuped === 12 || stoneComputerOccuped === 12) ? (
+          {stoneOccuped === 12 || stoneComputerOccuped === 12 ? (
             <View style={styles.playersContainer}>
               {/* Jugador */}
               {stoneOccuped === 12 && (
@@ -422,7 +421,7 @@ export function FirstFloor({ diceValue }) {
               {/* Computadora */}
               {stoneComputerOccuped === 12 && isVisible && computerImage && (
                 <Image
-                  style={styles.computerContainer}
+                  style={[styles.computerContainer, { marginLeft: leftDisplacement }]}
                   source={computerImage}
                   resizeMode="cover"
                 />
@@ -430,18 +429,17 @@ export function FirstFloor({ diceValue }) {
             </View>
           ) : (
             <>
-          <Text style={styles.stoneText}>Salón</Text>
-          <RightArrow />
-        </>
+              <Text style={styles.stoneText}>Salón</Text>
+              <RightArrow />
+            </>
           )}
         </>
-      )
-          
-        
+      ),
     },
-    { content: (
+    {
+      content: (
         <>
-          {(stoneOccuped === 13 || stoneComputerOccuped === 13) ? (
+          {stoneOccuped === 13 || stoneComputerOccuped === 13 ? (
             <View style={styles.playersContainer}>
               {/* Jugador */}
               {stoneOccuped === 13 && (
@@ -455,20 +453,20 @@ export function FirstFloor({ diceValue }) {
               {/* Computadora */}
               {stoneComputerOccuped === 13 && isVisible && computerImage && (
                 <Image
-                  style={styles.computerContainer}
+                  style={[styles.computerContainer, { marginLeft: leftDisplacement }]}
                   source={computerImage}
                   resizeMode="cover"
                 />
               )}
             </View>
-          ) : (
-            null
-          )}
+          ) : null}
         </>
-      ), },
-    { content: (
+      ),
+    },
+    {
+      content: (
         <>
-          {(stoneOccuped === 14 || stoneComputerOccuped === 14) ? (
+          {stoneOccuped === 14 || stoneComputerOccuped === 14 ? (
             <View style={styles.playersContainer}>
               {/* Jugador */}
               {stoneOccuped === 14 && (
@@ -482,20 +480,20 @@ export function FirstFloor({ diceValue }) {
               {/* Computadora */}
               {stoneComputerOccuped === 14 && isVisible && computerImage && (
                 <Image
-                  style={styles.computerContainer}
+                  style={[styles.computerContainer, { marginLeft: leftDisplacement }]}
                   source={computerImage}
                   resizeMode="cover"
                 />
               )}
             </View>
-          ) : (
-            null
-          )}
+          ) : null}
         </>
-      ), },
-    { content: (
+      ),
+    },
+    {
+      content: (
         <>
-          {(stoneOccuped === 15 || stoneComputerOccuped === 15) ? (
+          {stoneOccuped === 15 || stoneComputerOccuped === 15 ? (
             <View style={styles.playersContainer}>
               {/* Jugador */}
               {stoneOccuped === 15 && (
@@ -509,20 +507,20 @@ export function FirstFloor({ diceValue }) {
               {/* Computadora */}
               {stoneComputerOccuped === 15 && isVisible && computerImage && (
                 <Image
-                  style={styles.computerContainer}
+                  style={[styles.computerContainer, { marginLeft: leftDisplacement }]}
                   source={computerImage}
                   resizeMode="cover"
                 />
               )}
             </View>
-          ) : (
-            null
-          )}
+          ) : null}
         </>
-      ), },
-    { content: (
+      ),
+    },
+    {
+      content: (
         <>
-          {(stoneOccuped === 16 || stoneComputerOccuped === 16) ? (
+          {stoneOccuped === 16 || stoneComputerOccuped === 16 ? (
             <View style={styles.playersContainer}>
               {/* Jugador */}
               {stoneOccuped === 16 && (
@@ -536,20 +534,20 @@ export function FirstFloor({ diceValue }) {
               {/* Computadora */}
               {stoneComputerOccuped === 16 && isVisible && computerImage && (
                 <Image
-                  style={styles.computerContainer}
+                  style={[styles.computerContainer, { marginLeft: leftDisplacement }]}
                   source={computerImage}
                   resizeMode="cover"
                 />
               )}
             </View>
-          ) : (
-            null
-          )}
+          ) : null}
         </>
-      ), },
-    { content: (
+      ),
+    },
+    {
+      content: (
         <>
-          {(stoneOccuped === 17 || stoneComputerOccuped === 17) ? (
+          {stoneOccuped === 17 || stoneComputerOccuped === 17 ? (
             <View style={styles.playersContainer}>
               {/* Jugador */}
               {stoneOccuped === 17 && (
@@ -563,20 +561,20 @@ export function FirstFloor({ diceValue }) {
               {/* Computadora */}
               {stoneComputerOccuped === 17 && isVisible && computerImage && (
                 <Image
-                  style={styles.computerContainer}
+                  style={[styles.computerContainer, { marginLeft: leftDisplacement }]}
                   source={computerImage}
                   resizeMode="cover"
                 />
               )}
             </View>
-          ) : (
-            null
-          )}
+          ) : null}
         </>
-      ), },
-    { content: (
+      ),
+    },
+    {
+      content: (
         <>
-          {(stoneOccuped === 18 || stoneComputerOccuped === 18) ? (
+          {stoneOccuped === 18 || stoneComputerOccuped === 18 ? (
             <View style={styles.playersContainer}>
               {/* Jugador */}
               {stoneOccuped === 18 && (
@@ -590,20 +588,20 @@ export function FirstFloor({ diceValue }) {
               {/* Computadora */}
               {stoneComputerOccuped === 18 && isVisible && computerImage && (
                 <Image
-                  style={styles.computerContainer}
+                  style={[styles.computerContainer, { marginLeft: leftDisplacement }]}
                   source={computerImage}
                   resizeMode="cover"
                 />
               )}
             </View>
-          ) : (
-            null
-          )}
+          ) : null}
         </>
-      ), },
-    { content: (
+      ),
+    },
+    {
+      content: (
         <>
-          {(stoneOccuped === 19 || stoneComputerOccuped === 19) ? (
+          {stoneOccuped === 19 || stoneComputerOccuped === 19 ? (
             <View style={styles.playersContainer}>
               {/* Jugador */}
               {stoneOccuped === 19 && (
@@ -617,20 +615,20 @@ export function FirstFloor({ diceValue }) {
               {/* Computadora */}
               {stoneComputerOccuped === 19 && isVisible && computerImage && (
                 <Image
-                  style={styles.computerContainer}
+                  style={[styles.computerContainer, { marginLeft: leftDisplacement }]}
                   source={computerImage}
                   resizeMode="cover"
                 />
               )}
             </View>
-          ) : (
-            null
-          )}
+          ) : null}
         </>
-      ), },
-    { content: (
+      ),
+    },
+    {
+      content: (
         <>
-          {(stoneOccuped === 20 || stoneComputerOccuped === 20) ? (
+          {stoneOccuped === 20 || stoneComputerOccuped === 20 ? (
             <View style={styles.playersContainer}>
               {/* Jugador */}
               {stoneOccuped === 20 && (
@@ -644,20 +642,20 @@ export function FirstFloor({ diceValue }) {
               {/* Computadora */}
               {stoneComputerOccuped === 20 && isVisible && computerImage && (
                 <Image
-                  style={styles.computerContainer}
+                  style={[styles.computerContainer, { marginLeft: leftDisplacement }]}
                   source={computerImage}
                   resizeMode="cover"
                 />
               )}
             </View>
-          ) : (
-            null
-          )}
+          ) : null}
         </>
-      ), },
-    {content: (
+      ),
+    },
+    {
+      content: (
         <>
-          {(stoneOccuped === 21 || stoneComputerOccuped === 21) ? (
+          {stoneOccuped === 21 || stoneComputerOccuped === 21 ? (
             <View style={styles.playersContainer}>
               {/* Jugador */}
               {stoneOccuped === 21 && (
@@ -671,7 +669,7 @@ export function FirstFloor({ diceValue }) {
               {/* Computadora */}
               {stoneComputerOccuped === 21 && isVisible && computerImage && (
                 <Image
-                  style={styles.computerContainer}
+                  style={[styles.computerContainer, { marginLeft: leftDisplacement }]}
                   source={computerImage}
                   resizeMode="cover"
                 />
@@ -679,16 +677,17 @@ export function FirstFloor({ diceValue }) {
             </View>
           ) : (
             <>
-           <Text style={styles.stoneText}>Biblioteca</Text>
-          <LeftArrow />
-        </>
+              <Text style={styles.stoneText}>Biblioteca</Text>
+              <LeftArrow />
+            </>
           )}
         </>
-      )
+      ),
     },
-    { content: (
+    {
+      content: (
         <>
-          {(stoneOccuped === 22 || stoneComputerOccuped === 22) ? (
+          {stoneOccuped === 22 || stoneComputerOccuped === 22 ? (
             <View style={styles.playersContainer}>
               {/* Jugador */}
               {stoneOccuped === 22 && (
@@ -702,20 +701,20 @@ export function FirstFloor({ diceValue }) {
               {/* Computadora */}
               {stoneComputerOccuped === 22 && isVisible && computerImage && (
                 <Image
-                  style={styles.computerContainer}
+                  style={[styles.computerContainer, { marginLeft: leftDisplacement }]}
                   source={computerImage}
                   resizeMode="cover"
                 />
               )}
             </View>
-          ) : (
-            null
-          )}
+          ) : null}
         </>
-      ), },
-    { content: (
+      ),
+    },
+    {
+      content: (
         <>
-          {(stoneOccuped === 23 || stoneComputerOccuped === 23) ? (
+          {stoneOccuped === 23 || stoneComputerOccuped === 23 ? (
             <View style={styles.playersContainer}>
               {/* Jugador */}
               {stoneOccuped === 23 && (
@@ -729,20 +728,20 @@ export function FirstFloor({ diceValue }) {
               {/* Computadora */}
               {stoneComputerOccuped === 23 && isVisible && computerImage && (
                 <Image
-                  style={styles.computerContainer}
+                  style={[styles.computerContainer, { marginLeft: leftDisplacement }]}
                   source={computerImage}
                   resizeMode="cover"
                 />
               )}
             </View>
-          ) : (
-            null
-          )}
+          ) : null}
         </>
-      ), },
-    { content: (
+      ),
+    },
+    {
+      content: (
         <>
-          {(stoneOccuped === 24 || stoneComputerOccuped === 24) ? (
+          {stoneOccuped === 24 || stoneComputerOccuped === 24 ? (
             <View style={styles.playersContainer}>
               {/* Jugador */}
               {stoneOccuped === 24 && (
@@ -756,20 +755,20 @@ export function FirstFloor({ diceValue }) {
               {/* Computadora */}
               {stoneComputerOccuped === 24 && isVisible && computerImage && (
                 <Image
-                  style={styles.computerContainer}
+                  style={[styles.computerContainer, { marginLeft: leftDisplacement }]}
                   source={computerImage}
                   resizeMode="cover"
                 />
               )}
             </View>
-          ) : (
-            null
-          )}
+          ) : null}
         </>
-      ), },
-    { content: (
+      ),
+    },
+    {
+      content: (
         <>
-          {(stoneOccuped === 25 || stoneComputerOccuped === 25) ? (
+          {stoneOccuped === 25 || stoneComputerOccuped === 25 ? (
             <View style={styles.playersContainer}>
               {/* Jugador */}
               {stoneOccuped === 25 && (
@@ -783,20 +782,20 @@ export function FirstFloor({ diceValue }) {
               {/* Computadora */}
               {stoneComputerOccuped === 25 && isVisible && computerImage && (
                 <Image
-                  style={styles.computerContainer}
+                  style={[styles.computerContainer, { marginLeft: leftDisplacement }]}
                   source={computerImage}
                   resizeMode="cover"
                 />
               )}
             </View>
-          ) : (
-            null
-          )}
+          ) : null}
         </>
-      ), },
-    { content: (
+      ),
+    },
+    {
+      content: (
         <>
-          {(stoneOccuped === 26 || stoneComputerOccuped === 26) ? (
+          {stoneOccuped === 26 || stoneComputerOccuped === 26 ? (
             <View style={styles.playersContainer}>
               {/* Jugador */}
               {stoneOccuped === 26 && (
@@ -810,7 +809,7 @@ export function FirstFloor({ diceValue }) {
               {/* Computadora */}
               {stoneComputerOccuped === 26 && isVisible && computerImage && (
                 <Image
-                  style={styles.computerContainer}
+                  style={[styles.computerContainer, { marginLeft: leftDisplacement }]}
                   source={computerImage}
                   resizeMode="cover"
                 />
@@ -820,10 +819,12 @@ export function FirstFloor({ diceValue }) {
             <SpiderIcon />
           )}
         </>
-      )},
-    {content: (
+      ),
+    },
+    {
+      content: (
         <>
-          {(stoneOccuped === 27 || stoneComputerOccuped === 27) ? (
+          {stoneOccuped === 27 || stoneComputerOccuped === 27 ? (
             <View style={styles.playersContainer}>
               {/* Jugador */}
               {stoneOccuped === 27 && (
@@ -837,7 +838,7 @@ export function FirstFloor({ diceValue }) {
               {/* Computadora */}
               {stoneComputerOccuped === 27 && isVisible && computerImage && (
                 <Image
-                  style={styles.computerContainer}
+                  style={[styles.computerContainer, { marginLeft: leftDisplacement }]}
                   source={computerImage}
                   resizeMode="cover"
                 />
@@ -845,16 +846,17 @@ export function FirstFloor({ diceValue }) {
             </View>
           ) : (
             <>
-          <Text style={styles.stoneText}>Alcoba</Text>
-          <RightArrow />
-        </>
+              <Text style={styles.stoneText}>Alcoba</Text>
+              <RightArrow />
+            </>
           )}
         </>
-      )
+      ),
     },
-    { content: (
+    {
+      content: (
         <>
-          {(stoneOccuped === 28 || stoneComputerOccuped === 28) ? (
+          {stoneOccuped === 28 || stoneComputerOccuped === 28 ? (
             <View style={styles.playersContainer}>
               {/* Jugador */}
               {stoneOccuped === 28 && (
@@ -868,20 +870,20 @@ export function FirstFloor({ diceValue }) {
               {/* Computadora */}
               {stoneComputerOccuped === 28 && isVisible && computerImage && (
                 <Image
-                  style={styles.computerContainer}
+                  style={[styles.computerContainer, { marginLeft: leftDisplacement }]}
                   source={computerImage}
                   resizeMode="cover"
                 />
               )}
             </View>
-          ) : (
-            null
-          )}
+          ) : null}
         </>
-      ), },
-    { content: (
+      ),
+    },
+    {
+      content: (
         <>
-          {(stoneOccuped === 29 || stoneComputerOccuped === 29) ? (
+          {stoneOccuped === 29 || stoneComputerOccuped === 29 ? (
             <View style={styles.playersContainer}>
               {/* Jugador */}
               {stoneOccuped === 29 && (
@@ -895,7 +897,7 @@ export function FirstFloor({ diceValue }) {
               {/* Computadora */}
               {stoneComputerOccuped === 29 && isVisible && computerImage && (
                 <Image
-                  style={styles.computerContainer}
+                  style={[styles.computerContainer, { marginLeft: leftDisplacement }]}
                   source={computerImage}
                   resizeMode="cover"
                 />
@@ -905,11 +907,11 @@ export function FirstFloor({ diceValue }) {
             <>
               <ForwardArrow size={24} />
               <Text style={styles.stoneText}>Planta baja</Text>
-          </>
+            </>
           )}
         </>
-      )
-    }
+      ),
+    },
   ];
   const [colors, setColors] = useState(board.map(() => "#808080")); // Color inicial para cada stone
   const [borderColors, setBorderColors] = useState(board.map(() => "black"));
@@ -924,41 +926,61 @@ export function FirstFloor({ diceValue }) {
   const [cardsDeployed, setCardsDeployed] = useState(null);
   const [computerPosition, setComputerPosition] = useState(null);
   const [turn, setTurn] = useState(null);
-  
-useEffect(() => {
+  const [leftDisplacement, setLeftDisplacement] = useState(0);
 
-  getTurn().then(value => {
-      if (value) {
-        setTurn(value);
-        if (value === 'player'){  
+  useEffect(() => {
+    const init = async () => {
+      try {
+        const turnValue = await getTurn();
+        if (!turnValue) return;
+
+        setTurn(turnValue);
+
+        // Cargar datos del jugador y computadora en paralelo
+        const [playerValue, computerValue] = await Promise.all([
+          getPlayerData(),
+          getComputerData(),
+        ]);
+
+        // === Jugador ===
+        if (playerValue?.position !== undefined) {
+          setPlayerData(playerValue);
+          setPosition(playerValue.position);
+          setStoneOccuped(playerValue.position);
+          scrollToPlayerPosition(playerValue.position);
+        }
+        // === Computadora ===
+        let computerIndex = null;
+        console.log("computerValue en FirstFloor useEffect:", computerValue);
+        if (computerValue) {
+          setComputerData(computerValue);  
+          if (computerValue.floor === 'firstFloor') {
+            computerIndex = computerValue.position;
+            setIsVisible(true);
+            setStoneComputerOccuped(computerIndex);
+            setComputerPosition(computerIndex);
+            scrollToComputerPosition(computerIndex);
+          }
+        }
+        if (!diceValue) return;
+        console.log("turnValue:", turnValue);
+        if (turnValue === 'player' && playerValue?.position !== undefined) {
+          updateBorderColors(playerValue.position, diceValue);
+          setInstructionsText("Selecciona una casilla amarilla para moverte");
           fetchPosition();
-        } else {  
-          fetchComputerPosition();
+        } else if (turnValue === 'computer' && computerIndex !== null) {
+          setTimeout(() => computerMovement(computerValue), 800);
+          setInstructionsText(`${computerValue.name} está moviendo...`);
         }
+        playRainSound();
+        fetchPlayer(playerValue)
+      } catch (error) {
+        console.error("Error en init FirstFloor:", error);
       }
-    });
-  playRainSound();
-  fetchPlayer();
-  getPlayerData().then(value => {
-      if (value) {
-        setPlayerData(value);
-      }
-  });
-  getComputerData().then(value1 => {
-    console.log('computerData:', value1);
-        if (value1.floor === 'firstFloor'){
-          setIsVisible(true);
-          setStoneComputerOccuped(value1.position);
-        }
-        if (value1) {
-          setComputerData(value1);
-        }
-    });
-  
-  if (turn === 'computer'){
-    computerMovement();
-  }
-}, []);
+    };
+
+    init();
+  }, [diceValue]); // ← Solo se ejecuta cuando llega el dado
   useEffect(() => {
     Audio.setAudioModeAsync({
       allowsRecordingIOS: false,
@@ -1007,37 +1029,34 @@ useEffect(() => {
     loop.start();
     return () => loop.stop(); // Cleanup
   }, [activateLoop, bounceAnim]); // Depend on activateLoop to re-run when it changes
-  useEffect(() => {
-    getTurn().then(value => {
-      if (value) {
-        if (value === 'player'){  
-          if (position !== null && position !== undefined) {
-            // Hacer scroll cuando cambia la posición local
-            scrollToPlayerPosition(position);
-          }
-        } else {  
-          scrollToComputerPosition(computerPosition);
-        }
-      }
-    });
-  }, [position, computerPosition]);
-  const fetchPlayer = async () => {
+ /*useEffect(() => { //para desplazar la ficha de la computadora si coincide con la del jugador... No funciona pero queda bien
+  if (
+    stoneOccuped != null &&
+    stoneComputerOccuped != null &&
+    stoneOccuped === stoneComputerOccuped
+  ) {
+    setLeftDisplacement(-23); // ← Desplaza computadora a la izquierda
+  } else {
+    setLeftDisplacement(0);   // ← Vuelve a posición normal
+  }
+}, [stoneOccuped, stoneComputerOccuped]);*/
+  const fetchPlayer = async (data) => {
     try {
-      const storedPlayer = await getPlayer();   
-      if (storedPlayer === 'Nely') {
-        setComputerImage(playersMap['David']);
-       
-      } else if (storedPlayer === 'David') {
-        setComputerImage(playersMap['Nely']);
+      if (!data?.name) return;
+      if (data.name === "Detective Nely") {
+        setComputerImage(playersMap["David"]);
+      } else if (data.name === "Inspector David") {
+        setComputerImage(playersMap["Nely"]);
       }
-      if (playersMap[storedPlayer]) {
-        setPlayerImage(playersMap[storedPlayer]); // Esto funcionará con los IDs
+      const playerKey = data.name === "Detective Nely" ? "Nely" : "David";
+      if (playersMap[playerKey]) {
+        setPlayerImage(playersMap[playerKey]);
       }
     } catch (error) {
-      console.error("Error:", error);
+      console.error("Error en fetchPlayer:", error);
     }
   };
-  const fetchPosition = async () => {
+ const fetchPosition = async () => {
     try {
       const storedValue = await getPlayerData();
       if (storedValue !== null) {
@@ -1048,7 +1067,7 @@ useEffect(() => {
         setPosition(playerIndex);
         setStoneOccuped(playerIndex);
         // Actualizar colores de los bordes
-        updateBorderColors(playerIndex, diceValue);
+        //updateBorderColors(playerIndex, diceValue);
         // Lógica de habitaciones
         if (
           (playerIndex <= 4 && playerIndex + Number(diceValue) > 4) ||
@@ -1095,23 +1114,62 @@ useEffect(() => {
       console.error("Error fetching position:", error);
     }
   };
-  const fetchComputerPosition = async () => {
+  /*const fetchComputerPosition = async () => {
     try {
       const storedValue = await getComputerData();
-      console.log('storedValue computer:', storedValue);
       if (storedValue !== null) {
-        const computerIndex = storedValue.position;
-        updateBorderColors(computerIndex, diceValue);
+        const computerIndex = Number(storedValue.position);
         setTimeout(() => {
           scrollToComputerPosition(computerIndex);
         }, 500);
+        //setPosition(computerIndex);
         setComputerPosition(computerIndex);
         setStoneComputerOccuped(computerIndex);
+        if (
+          (computerIndex <= 4 && computerIndex + Number(diceValue) > 4) ||
+          (computerIndex >= 4 && computerIndex - Number(diceValue) < 4)
+        ) {
+          setRoom1Color("yellow");
+          setDisabledRoom1(false);
+        } else {
+          setRoom1Color(null);
+          setDisabledRoom1(true);
+        }
+        if (
+          (computerIndex <= 21 && computerIndex + Number(diceValue) > 21) ||
+          (computerIndex >= 21 && computerIndex - Number(diceValue) < 21)
+        ) {
+          setRoom2Color("yellow");
+          setDisabledRoom2(false);
+        } else {
+          setRoom2Color(null);
+          setDisabledRoom2(true);
+        }
+        if (
+          (computerIndex <= 12 && computerIndex + Number(diceValue) > 12) ||
+          (computerIndex >= 12 && computerIndex - Number(diceValue) < 12)
+        ) {
+          setRoom3Color("yellow");
+          setDisabledRoom3(false);
+        } else {
+          setRoom3Color(null);
+          setDisabledRoom3(true);
+        }
+        if (
+          (computerIndex <= 27 && computerIndex + Number(diceValue) > 27) ||
+          (computerIndex >= 27 && computerIndex - Number(diceValue) < 27)
+        ) {
+          setRoom4Color("yellow");
+          setDisabledRoom4(false);
+        } else {
+          setRoom4Color(null);
+          setDisabledRoom4(true);
+        }
       }
     } catch (error) {
       console.error("Error fetching computer position:", error);
     }
-  };
+  };*/
   const getPlayerData = async () => {
     try {
       const value = await AsyncStorage.getItem("playerData");
@@ -1152,7 +1210,7 @@ useEffect(() => {
       }
       return newColors;
     });
-};
+  };
   const scrollToPlayerPosition = (playerIndex) => {
     if (!scrollRef.current || playerIndex === null || isNaN(playerIndex))
       return;
@@ -1181,7 +1239,7 @@ useEffect(() => {
   };
   async function playRainSound() {
     try {
-      if (rainSound) {     
+      if (rainSound) {
         await rainSound.replayAsync();
         return;
       }
@@ -1190,21 +1248,21 @@ useEffect(() => {
         require("../assets/sounds/wolf-howl.mp3")
       );
       setRainSound(sound);
-   
+
       await sound.playAsync();
     } catch (error) {
       console.error("Error al reproducir rainSound:", error);
     }
   }
-   const getComputerData = async () => {
-      try {
-        const value = await AsyncStorage.getItem("computerData");
-        return value ? JSON.parse(value) : null;
-      } catch (e) {
-        console.log("error reading computer data");
-        return null;
-      }
-    };
+  const getComputerData = async () => {
+    try {
+      const value = await AsyncStorage.getItem("computerData");
+      return value ? JSON.parse(value) : null;
+    } catch (e) {
+      console.log("error reading computer data");
+      return null;
+    }
+  };
   async function playFootSteps() {
     try {
       if (footSteps) {
@@ -1233,7 +1291,7 @@ useEffect(() => {
         require("../assets/sounds/open-door.mp3")
       );
       setOpenDoor(sound);
-  
+
       await sound.playAsync();
     } catch (error) {
       console.error("Error al reproducir openDoor:", error);
@@ -1257,7 +1315,7 @@ useEffect(() => {
   async function playShowcards() {
     setCardsDeployed(true);
     try {
-      if (showcards) {    
+      if (showcards) {
         await showcards.replayAsync();
         return;
       }
@@ -1301,15 +1359,6 @@ useEffect(() => {
       console.error("Error al reproducir diceSound:", error);
     }
   }
-  const getPlayer = async () => {
-    try {
-      const value = await AsyncStorage.getItem("player");
-      return value;
-    } catch (e) {
-      console.log("error reading data");
-      return null;
-    }
-  };
   const storePlayerPosition = async (position) => {
     try {
       await AsyncStorage.setItem("position", position);
@@ -1317,42 +1366,48 @@ useEffect(() => {
       console.log("error saving position");
     }
   };
-  const storeTurn = async (storeTurn) => {
+  const storeTurn = async (item) => {
     try {
-      await AsyncStorage.setItem("turn", storeTurn);
+      await AsyncStorage.setItem("turn", item);
     } catch (e) {
       console.log("error saving turn");
     }
   };
-  
   const editPositionPlayer = async (index) => {
     if (!playerData) return;
     const updatedPlayerData = { ...playerData, position: index };
     await AsyncStorage.setItem("playerData", JSON.stringify(updatedPlayerData));
     setPlayerData(updatedPlayerData);
-  }
-   const toComputerDiceRoll = () => {
-      setComputerFloor(computerData.floor);
-      playDiceSound();
-      router.push({ 
-        pathname: '/dice'
-      });
-    };
+  };
+  const toComputerDiceRoll = () => {
+    setComputerFloor(computerData.floor);
+    playDiceSound();
+    router.push({
+      pathname: "/dice",
+    });
+  };
+  const toDiceRoll = () => {
+    playDiceSound();
+    router.push({
+      pathname: "/dice",
+    });
+  };
   const getTurn = async () => {
-      try {
-        const turn = await AsyncStorage.getItem('turn');
-        if (turn === null) {
-          console.log('No turn found in AsyncStorage');
-          return null; // O un valor predeterminado, como 'player'
-        }
-        //setTurn(turn);
-        return turn;
-      } catch (e) {
-        console.log('❌ Error reading turn:', e);
-        return null; // O manejar el error de otra manera
+    try {
+      const turn = await AsyncStorage.getItem("turn");
+      if (turn === null) {
+        console.log("No turn found in AsyncStorage");
+        return null; // O un valor predeterminado, como 'player'
       }
-    };
-    const storeComputerPosition = async (position) => { //se guardan las cartas de la computadora
+      //setTurn(turn);
+      return turn;
+    } catch (e) {
+      console.log("❌ Error reading turn:", e);
+      return null; // O manejar el error de otra manera
+    }
+  };
+  const storeComputerPosition = async (position) => {
+    //se guardan las cartas de la computadora
     try {
       const storedData = await AsyncStorage.getItem("computerData");
       const currentData = storedData ? JSON.parse(storedData) : null;
@@ -1364,122 +1419,116 @@ useEffect(() => {
         JSON.stringify(updatedComputer)
       );
       setComputerData(updatedComputer);
-      console.log("✅ ComputerData updated:", updatedComputer);
     } catch (e) {
       console.log("❌ Error updating data:", e);
     }
   };
-  const computerMovement = () => {
-    if (computerData.roomToGo === 'Laboratorio'){ // si la computadora tiene que ir al laboratorio
-      if (computerData.position <= 5 && computerData.position + Number(diceValue) > 5){
-        setTimeout(() => {
-          roomClicked("Laboratorio");
-        }, 1000);
-        return;
-      }else if (computerData.position < 5 && computerData.position + Number(diceValue) < 5){
-        setStoneComputerOccuped(computerData.position + Number(diceValue));
-        storeComputerPosition(computerData.position + Number(diceValue));
-        setTimeout(() => {
-          scrollToComputerPosition(computerData.position + Number(diceValue));
-        }, 500);  
-        setInstructionsText("Pulsa el dado para tirar");
-      }else if (computerData.position > 5 && computerData.position - Number(diceValue) > 5){
-        setStoneComputerOccuped(computerData.position - Number(diceValue));
-        storeComputerPosition(computerData.position - Number(diceValue));
-        setTimeout(() => {
-          scrollToComputerPosition(computerData.position - Number(diceValue));
-        }, 500);  
-        setInstructionsText("Pulsa el dado para tirar");
-      }
-        setInstructionsText("Pulsa el dado para tirar");
+  const computerMovement = (data) => {
+    console.log("Iniciando movimiento de computadora con data:", data);    
+    const currentPos = Number(data.position);
+    const dice = Number(diceValue);
+    const forward = currentPos + dice;
+    const backward = currentPos - dice;
+
+    let targetIndex = currentPos; // por defecto no se mueve
+
+    console.log("Computadora en:", currentPos, "Dado:", dice);
+
+    // === LÓGICA POR HABITACIÓN ===r
+    if (
+      data.roomToGo === "Laboratorio" &&
+      currentPos <= 4 &&
+      forward > 4
+    ) {
+      setTimeout(() => roomClicked("Laboratorio"), 1500);
+      return;
     }
-    if (computerData.roomToGo === 'Salón'){ // si la computadora tiene que ir al salón
-      if (computerData.position <= 13 && computerData.position + Number(diceValue) > 13){
-        setTimeout(() => {
-          roomClicked("Laboratorio");
-        }, 1000);
-        return;
-      }else if (computerData.position < 13 && computerData.position + Number(diceValue) < 13){
-        setStoneComputerOccuped(computerData.position + Number(diceValue));
-        storeComputerPosition(computerData.position + Number(diceValue));
-        setTimeout(() => {
-          scrollToComputerPosition(computerData.position + Number(diceValue));
-        }, 500);  
-        setInstructionsText("Pulsa el dado para tirar");
-      }else if (computerData.position > 13 && computerData.position - Number(diceValue) > 13){
-        setStoneComputerOccuped(computerData.position - Number(diceValue));
-        storeComputerPosition(computerData.position - Number(diceValue));
-        setTimeout(() => {
-          scrollToComputerPosition(computerData.position - Number(diceValue));
-        }, 500);  
-        setInstructionsText("Pulsa el dado para tirar");
-      }
-        setInstructionsText("Pulsa el dado para tirar");
+    if (data.roomToGo === "Salón" && currentPos <= 12 && forward > 12) {
+      setTimeout(() => roomClicked("Salón"), 1500);
+      return;
     }
-    if (computerData.roomToGo === 'Biblioteca'){ // si la computadora tiene que ir a la biblioteca
-      if (computerData.position <= 22 && computerData.position + Number(diceValue) > 22){
-        setTimeout(() => {
-          roomClicked("Laboratorio");
-        }, 1000);
-        return;
-      }else if (computerData.position < 22 && computerData.position + Number(diceValue) < 22){
-        setStoneComputerOccuped(computerData.position + Number(diceValue));
-        storeComputerPosition(computerData.position + Number(diceValue));
-        setTimeout(() => {
-          scrollToComputerPosition(computerData.position + Number(diceValue));
-        }, 500);  
-        setInstructionsText("Pulsa el dado para tirar");
-      }else if (computerData.position > 22 && computerData.position - Number(diceValue) > 22){
-        setStoneComputerOccuped(computerData.position - Number(diceValue));
-        storeComputerPosition(computerData.position - Number(diceValue));
-        setTimeout(() => {
-          scrollToComputerPosition(computerData.position - Number(diceValue));
-        }, 500);  
-        setInstructionsText("Pulsa el dado para tirar");
-      }
-        setInstructionsText("Pulsa el dado para tirar");
+    if (
+      data.roomToGo === "Biblioteca" &&
+      currentPos <= 21 &&
+      forward > 21
+    ) {
+      setTimeout(() => roomClicked("Biblioteca"), 1500);
+      return;
     }
-    if (computerData.roomToGo === 'Biblioteca'){ // si la computadora tiene que ir a la alcoba
-      if (computerData.position <= 28 && computerData.position + Number(diceValue) > 28){
-        setTimeout(() => {
-          roomClicked("Laboratorio");
-        }, 1000);
-        return;
-      }else if (computerData.position < 28 && computerData.position + Number(diceValue) < 28){
-        setStoneComputerOccuped(computerData.position + Number(diceValue));
-        storeComputerPosition(computerData.position + Number(diceValue));
-        setTimeout(() => {
-          scrollToComputerPosition(computerData.position + Number(diceValue));
-        }, 500);  
-        setInstructionsText("Pulsa el dado para tirar");
-      }else if (computerData.position > 28 && computerData.position - Number(diceValue) > 28){
-        setStoneComputerOccuped(computerData.position - Number(diceValue));
-        storeComputerPosition(computerData.position - Number(diceValue));
-        setTimeout(() => {
-          scrollToComputerPosition(computerData.position - Number(diceValue));
-        }, 500);  
-        setInstructionsText("Pulsa el dado para tirar");
-      }
-        setInstructionsText("Pulsa el dado para tirar");
+    if (
+      data.roomToGo === "Alcoba" &&
+      currentPos <= 27 &&
+      forward > 27
+    ) {
+      setTimeout(() => roomClicked("Alcoba"), 1500);
+      return;
     }
+
+    // === MOVIMIENTO NORMAL ===
+    if (forward < 30) {
+      targetIndex = forward;
+    } else if (backward > 0) {
+      targetIndex = backward;
     }
+
+    // === EJECUTAR MOVIMIENTO ===
+    stoneClickedByComputer(targetIndex);
+
+    setTimeout(() => {
+      scrollToComputerPosition(targetIndex);
+    }, 600);
+
+    setInstructionsText("Te toca tirar el dado!");
+  };
+  const stoneClickedByComputer = (index) => {
+    console.log("Computadora se mueve a:", index);
+    setStoneComputerOccuped(index);
+    if (index === 6 || index === 26) {
+      setTimeout(() => playJump(), 100);
+    } else {
+      playFootSteps();
+    }
+    storeComputerPosition(index);
+    setActivateLoop(true);
+    setDisabledSquare(true);
+    setDisabledDice(false); // Enable dice for player
+    // Teletransporte araña
+    if (index === 6) {
+      setTimeout(() => {
+        setStoneComputerOccuped(26);
+        storeComputerPosition(26);
+        scrollToComputerPosition(26);
+      }, 1200);
+    }
+    if (index === 26) {
+      setTimeout(() => {
+        setStoneComputerOccuped(6);
+        storeComputerPosition(6);
+        scrollToComputerPosition(6);
+      }, 1200);
+    }
+
+    // Salir del tablero
+    if (index === 0 || index === 29) {
+    //setear cambio de planta y roomToGo en computerData...
+    }
+    storeTurn("player");
+  };
   const stoneClicked = (index) => {
-    storeTurn('computer');
+    storeTurn("computer");
     setStoneOccuped(index);
-    if (index === 6 || index === 26){
+    if (index === 6 || index === 26) {
       setTimeout(() => {
         playJump();
-      }, 100)
-    }else{
+      }, 100);
+    } else {
       playFootSteps();
     }
     setInstructionsText("Turno para otro investigador");
-    setPosition(index); 
-    storePlayerPosition(index.toString());  //hay que cambiarlo por editar el objeto playerData
-    
+    setPosition(index);
+    storePlayerPosition(index.toString()); //hay que cambiarlo por editar el objeto playerData
+
     editPositionPlayer(index);
-    setActivateLoop(true);
-    setDisabledDice(false); // Enable the button
     setDisabledSquare(true); // Disable squares after selection
     if (index === 0 || index === 29) {
       setGroundNorthColor(null);
@@ -1492,17 +1541,17 @@ useEffect(() => {
     }
     if (index === 6) {
       storePlayerPosition("26");
-      setPosition(26);  //hay que cambiarlo por editar el objeto playerData
+      setPosition(26); //hay que cambiarlo por editar el objeto playerData
       setStoneOccuped(26);
     }
     if (index === 26) {
-      storePlayerPosition("6");  //hay que cambiarlo por editar el objeto playerData
+      storePlayerPosition("6"); //hay que cambiarlo por editar el objeto playerData
       setPosition(6);
       setStoneOccuped(6);
     }
     setTimeout(() => {
       toComputerDiceRoll();
-    }, 1000)
+    }, 1000);
   };
   const roomClicked = (room) => {
     playOpenDoor();
@@ -1516,14 +1565,17 @@ useEffect(() => {
     setRoom4Color("white");
     setDisabledDice(true);
     setDisabledSquare(true); // Disable squares after selection
+
     router.push({
       pathname: "/room",
-      params: { room: room, floor: floor },
+      params: { room: room, floor: 'firstFloor', diceValue: diceValue  },
     });
   };
   return (
     <>
-      { turn === 'player' ? <ShowCardsButton onPress={handleShowCardsPress} /> : null }
+      {turn === "player" ? (
+        <ShowCardsButton onPress={handleShowCardsPress} />
+      ) : null}
       <ImageBackground
         style={[styles.superContainer, { opacity: opacityBack }]}
         source={require("../assets/images/boardImages/boardBack.png")}
@@ -1532,33 +1584,35 @@ useEffect(() => {
         <View style={styles.instructionsCloud}>
           <Text style={styles.text}>{instructionsText}</Text>
         </View>
-        { turn === 'player' ? <Animated.View
-          style={{
-            position: "absolute",
-            bottom: 690,
-            alignSelf: "center",
-            transform: [{ translateY: bounceAnim }],
-            zIndex: 1,
-            left: 20,
-          }}
-        >
-          <Pressable
-            disabled={disabledDice} // Disable button if not activated
+        {turn === "computer" ? (
+          <Animated.View
             style={{
-              backgroundColor: "#6200ee",
-              padding: 16,
-              borderRadius: 50,
-              elevation: 5,
+              position: "absolute",
+              bottom: 690,
+              alignSelf: "center",
+              transform: [{ translateY: bounceAnim }],
+              zIndex: 1,
+              left: 20,
             }}
-            //onPress={toDiceRoll}
           >
-            <Image
-              style={{ width: 50, height: 50, borderRadius: 50 }}
-              source={require("../assets/images/dice.png")}
-              resizeMode="cover"
-            />
-          </Pressable>
-        </Animated.View> : null}
+            <Pressable
+              disabled={disabledDice} // Disable button if not activated
+              style={{
+                backgroundColor: "#6200ee",
+                padding: 16,
+                borderRadius: 50,
+                elevation: 5,
+              }}
+              onPress={toDiceRoll}
+            >
+              <Image
+                style={{ width: 50, height: 50, borderRadius: 50 }}
+                source={require("../assets/images/dice.png")}
+                resizeMode="cover"
+              />
+            </Pressable>
+          </Animated.View>
+        ) : null}
         <Animated.ScrollView
           ref={scrollRef}
           scrollEventThrottle={16}
@@ -1735,15 +1789,17 @@ const styles = StyleSheet.create({
   playerContainer: {
     borderRadius: 50,
     borderWidth: 2,
-    borderColor: 'lightgreen',
+    borderColor: "lightgreen",
     width: 50,
-    height: 50
+    height: 50,
   },
   computerContainer: {
     borderRadius: 50,
     borderWidth: 2,
-    borderColor: 'blue',
+    borderColor: "blue",
     width: 50,
     height: 50,
+    zIndex: -2,
+    marginLeft: -23,
   },
 });

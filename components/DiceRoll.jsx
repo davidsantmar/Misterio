@@ -10,42 +10,51 @@ import { useRouter } from "expo-router";
 import { Audio } from "expo-av";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-
 export function DiceRoll() {
   const [diceValue, setDiceValue] = useState(0);
   const [rotation] = useState(new Animated.Value(0));
-  const [diceRoll, setDiceRoll] = useState(null);  
+  const [diceRoll, setDiceRoll] = useState(null);
   const [playerToShow, setPlayerToShow] = useState(null);
-  const [rooms, setRooms] = useState(['Laboratorio', 'Salón', 'Biblioteca', 'Alcoba', 'Cocheras', 'Vestíbulo', 'Panteón', 'Bodega']);
+  const [rooms, setRooms] = useState([
+    "Laboratorio",
+    "Salón",
+    "Biblioteca",
+    "Alcoba",
+    "Cocheras",
+    "Vestíbulo",
+    "Panteón",
+    "Bodega",
+  ]);
   const [computerData, setComputerData] = useState({});
   const [playerData, setPlayerData] = useState({});
   const [floorToGo, setFloorToGo] = useState(null);
   const [turn, setTurn] = useState(null);
   const router = useRouter();
   useEffect(() => {
-      if (diceValue === 0) return; // Ignora el valor inicial
-      fetchData();
-    }, [diceValue]);
+    if (diceValue === 0) return; // Ignora el valor inicial
+    fetchData();
+  }, [diceValue]);
   useEffect(() => {
     rollDice();
     diceRollSound();
   }, []);
-  useEffect(() => { //audio
-      Audio.setAudioModeAsync({
-        allowsRecordingIOS: false,
-        playsInSilentModeIOS: true,
-        staysActiveInBackground: false,
-        shouldDuckAndroid: true,
-      });
-  
-      // Liberación de sonidos al desmontar el componente
-      return () => {
-        if (diceRoll) {
-          diceRoll.unloadAsync();
-        }
-      };
-    },[diceRoll]);
-     const getPlayerData = async () => {
+  useEffect(() => {
+    //audio
+    Audio.setAudioModeAsync({
+      allowsRecordingIOS: false,
+      playsInSilentModeIOS: true,
+      staysActiveInBackground: false,
+      shouldDuckAndroid: true,
+    });
+
+    // Liberación de sonidos al desmontar el componente
+    return () => {
+      if (diceRoll) {
+        diceRoll.unloadAsync();
+      }
+    };
+  }, [diceRoll]);
+  const getPlayerData = async () => {
     try {
       const value = await AsyncStorage.getItem("playerData");
       return value ? JSON.parse(value) : null;
@@ -65,41 +74,41 @@ export function DiceRoll() {
   };
   const getTurn = async () => {
     try {
-      const turn = await AsyncStorage.getItem('turn');
+      const turn = await AsyncStorage.getItem("turn");
       if (turn === null) {
-        console.log('No turn found in AsyncStorage');
+        console.log("No turn found in AsyncStorage");
         return null; // O un valor predeterminado, como 'player'
       }
       return turn;
     } catch (e) {
-      console.log('❌ Error reading turn:', e);
+      console.log("❌ Error reading turn:", e);
       //return null; // O manejar el error de otra manera
     }
   };
-    async function diceRollSound() {
-      try {
-        if (diceRoll) {
-          // Si el sonido ya está cargado, reutilízalo
-          await diceRoll.replayAsync();
-          return;
-        }
-        const { sound } = await Audio.Sound.createAsync(
-          require("../assets/sounds/dice.mp3")
-        );
-        setDiceRoll(sound);
-        await sound.playAsync();
-      } catch (error) {
-        console.error("Error al reproducir diceRoll:", error);
+  async function diceRollSound() {
+    try {
+      if (diceRoll) {
+        // Si el sonido ya está cargado, reutilízalo
+        await diceRoll.replayAsync();
+        return;
       }
+      const { sound } = await Audio.Sound.createAsync(
+        require("../assets/sounds/dice.mp3")
+      );
+      setDiceRoll(sound);
+      await sound.playAsync();
+    } catch (error) {
+      console.error("Error al reproducir diceRoll:", error);
     }
-    const fetchData = async () => {
-      let playerTimer;
-      let computerTimer;
+  }
+  const fetchData = async () => {
+    let playerTimer;
+    let computerTimer;
     try {
       const [turnValue, computerValue, playerValue] = await Promise.all([
         getTurn(),
         getComputerData(),
-        getPlayerData()
+        getPlayerData(),
       ]);
 
       if (turnValue) {
@@ -114,28 +123,28 @@ export function DiceRoll() {
         setPlayerData(playerValue);
 
         // Usar los valores frescos directamente
-        const currentPlayerName = turnValue === 'player' ? playerValue.name : computerValue.name;
+        const currentPlayerName =
+          turnValue === "player" ? playerValue.name : computerValue.name;
         setPlayerToShow(currentPlayerName);
 
-        if (turnValue === 'player') {
-          console.log('Usando floor del jugador:', playerValue.floor);
+        if (turnValue === "player") {
           playerTimer = setTimeout(() => {
             router.push({
               pathname: "/board",
-              params: { 
-                diceValue: diceValue.toString(), 
-                floor: playerValue.floor.toString()
+              params: {
+                diceValue: diceValue.toString(),
+                floor: playerValue.floor.toString(),
               },
             });
           }, 2000);
-        } else if (turnValue === 'computer') {
+        } else if (turnValue === "computer") {
           computerTimer = setTimeout(() => {
             computerMovement(computerValue);
           }, 3000);
         }
       }
     } catch (error) {
-      console.error('Error fetching data:', error);
+      console.error("Error fetching data:", error);
     }
     return () => {
       if (playerTimer) clearTimeout(playerTimer);
@@ -172,8 +181,8 @@ export function DiceRoll() {
     } catch (e) {
       console.log("❌ Error updating data:", e);
     }
-  }
- const editRoomToGo = async (roomToGo) => {
+  };
+  const editRoomToGo = async (roomToGo) => {
     try {
       const storedData = await AsyncStorage.getItem("computerData");
       const currentData = storedData ? JSON.parse(storedData) : null;
@@ -188,57 +197,57 @@ export function DiceRoll() {
       console.log("❌ Error updating data:", e);
     }
   };
-const computerRoomToGo = async (data) => {
-  if (data.roomToGo === "") {
-    const compare = (rooms || []).filter(
-      (elemento) => !(data.computerCards || []).includes(elemento)
-    );
-    const randomRoomToGo = compare.length > 0
-      ? compare[Math.floor(Math.random() * compare.length)]
-      : null;
+  const computerRoomToGo = async (data) => {
+    if (data.roomToGo === "") {
+      const compare = (rooms || []).filter(
+        (elemento) => !(data.computerCards || []).includes(elemento)
+      );
+      const randomRoomToGo =
+        compare.length > 0
+          ? compare[Math.floor(Math.random() * compare.length)]
+          : null;
 
-    if (randomRoomToGo) {
-      await editRoomToGo(randomRoomToGo);
-    }
-
-    let floor = null;
-    if (data.floor === "") {
-      if (
-        randomRoomToGo === "Laboratorio" ||
-        randomRoomToGo === "Salón" ||
-        randomRoomToGo === "Biblioteca" ||
-        randomRoomToGo === "Alcoba"
-      ) {
-        await editFloor('firstFloor');
-        floor = 'firstFloor';
-        setFloorToGo('firstFloor');
-      } else {
-        await editFloor('ground');
-        floor = 'ground';
-        setFloorToGo('ground');
+      if (randomRoomToGo) {
+        await editRoomToGo(randomRoomToGo);
       }
+
+      let floor = null;
+      if (data.floor === "") {
+        if (
+          randomRoomToGo === "Laboratorio" ||
+          randomRoomToGo === "Salón" ||
+          randomRoomToGo === "Biblioteca" ||
+          randomRoomToGo === "Alcoba"
+        ) {
+          await editFloor("firstFloor");
+          floor = "firstFloor";
+          setFloorToGo("firstFloor");
+        } else {
+          await editFloor("ground");
+          floor = "ground";
+          setFloorToGo("ground");
+        }
+      }
+
+      return { roomToGo: randomRoomToGo, floor };
     }
+    return { roomToGo: data.roomToGo, floor: data.floor };
+  };
 
-    return { roomToGo: randomRoomToGo, floor };
-  }
-  return { roomToGo: data.roomToGo, floor: data.floor };
-};
-
-const storeTurn = async (turn) => {
+  const storeTurn = async (turn) => {
     try {
       await AsyncStorage.setItem("turn", turn);
     } catch (e) {
       console.log("error saving data");
     }
   };
-const computerMovement = async (computerData) => {
-  const { floor } = await computerRoomToGo(computerData); // Esperar los resultados
-  router.push({
-    pathname: "/board",
-    params: { diceValue: diceValue.toString(), floor: floor }, // Usar floor calculado
-  });
-  storeTurn("player");
-};
+  const computerMovement = async (computerData) => {
+    const { floor } = await computerRoomToGo(computerData); // Esperar los resultados
+    router.push({
+      pathname: "/board",
+      params: { diceValue: diceValue.toString(), floor: floor }, // Usar floor calculado
+    });
+  };
 
   const renderDiceFace = (value) => {
     switch (value) {
@@ -307,7 +316,7 @@ const computerMovement = async (computerData) => {
       </Animated.View>
     </ImageBackground>
   );
-  }
+}
 
 const styles = StyleSheet.create({
   container: { flex: 1, alignItems: "center" },
@@ -320,7 +329,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     marginTop: 300,
   },
-  header_text: { fontFamily: "Creepster-Regular", fontSize: 40},
+  header_text: { fontFamily: "Creepster-Regular", fontSize: 40 },
   dice: {
     width: 100,
     height: 100,

@@ -91,7 +91,7 @@ export function ChoosePlayer() {
   }
   const toEntry = () => {
     storeTurn('player');
-    storePlayerData(playerChoose)
+    storePlayerData(playerChoose);
     if (playerChoose === 'Detective Nely'){
       storeComputerData('Inspector David')
     }else{

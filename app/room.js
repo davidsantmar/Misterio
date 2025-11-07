@@ -46,6 +46,7 @@ const gifMap = {
 export default function Room() {
   const { room } = useLocalSearchParams();
   const { floor } = useLocalSearchParams();
+  const { diceValue } = useLocalSearchParams();
   const router = useRouter();
   const [killersOpacity, setKillersOpacity] = useState(0);
   const [charactersOpacity, setCharactersOpacity] = useState(0);
@@ -79,12 +80,18 @@ export default function Room() {
   const [showcards, setShowcards] = useState(null);
   const [hidecards, setHidecards] = useState(null);
   const [shine, setShine] = useState(null);
+  const [playerData, setPlayerData] = useState(null);
+  const [computerData, setComputerData] = useState(null);
+
   useEffect(() => {
     if (floor) {
       console.log('Valor de floor:', floor);
       // Aquí puedes usar el valor de 'floor' (que contiene el valor de 'floor')
     }
   }, [floor]);
+  useEffect(() => {
+    console.log('Valor de diceValue:', diceValue, typeof diceValue);
+  }, [diceValue]);
   useEffect(() => {
       Audio.setAudioModeAsync({
         allowsRecordingIOS: false,
@@ -114,7 +121,134 @@ export default function Room() {
         }
       };
     },[buttonPress, hidecards, showcards, shine]);
+  useEffect(()=> {
+    const misComputerCards = assumptionComputerCards.filter(elemento => killers.includes(elemento));
+    const teComputerCards = assumptionComputerCards.filter(elemento => victims.includes(elemento));
+    const rioComputerCards = assumptionComputerCards.filter(elemento => rooms.includes(elemento));
+    setComputerCardNameToShow(assumptionComputerCards[0]);
+    if (misComputerCards.length > 0) {
+      setBigCardText('MIS');
+      if (assumptionComputerCards[0] === 'Mr Hyde'){
+        assumptionComputerCards.splice(0, 1);
+        assumptionComputerCards.splice(0, 1, 'MrHyde');
+      }
+      if (assumptionComputerCards[0] === 'Hombre lobo'){
+        assumptionComputerCards.splice(0, 1);
+        assumptionComputerCards.splice(0, 1, 'Hombrelobo');
+      }
+      /* if (assumptionComputerCards[0] === 'Drácula'){
+        assumptionComputerCards.splice(0, 1);
+        assumptionComputerCards.splice(0, 1, 'Dracula');
+      }*/
+      setComputerCardCharacter(killersMap[assumptionComputerCards[0]])
+    } else if (teComputerCards.length > 0) {
+      setBigCardText('TE');
+      if (assumptionComputerCards[1] === 'Ama de llaves'){
+        assumptionComputerCards.splice(0, 1);
+        assumptionComputerCards.splice(0, 1, 'Amadellaves');
+      }
+      setComputerCardCharacter(victimsMap[assumptionComputerCards[0]])
+    } else if (rioComputerCards.length > 0) {
+      setBigCardText('RIO');
+      /*if (assumptionComputerCards[2] === 'Panteón'){
+        assumptionComputerCards.splice(0, 1);
+        assumptionComputerCards.splice(0, 1, 'Panteon');
+      }
+      if (assumptionComputerCards[2] === 'Salón'){
+        assumptionComputerCards.splice(0, 1);
+        assumptionComputerCards.splice(0, 1, 'Salon');
+      }
+      if (assumptionComputerCards[2] === 'Vestíbulo'){
+        assumptionComputerCards.splice(0, 1);
+        assumptionComputerCards.splice(0, 1, 'Vestibulo');
+      }*/
+      setComputerCardCharacter(roomsMap[assumptionComputerCards[0]])
+    }
+  }, [assumptionComputerCards, killers, victims, rooms]);
+  useEffect(() => {
+    getPlayer().then((player) => {
+      console.log('Player recuperado en room:', player);
+      setPlayer(player); // Actualizar el estado con el valor obtenido
+    });
+    if (room === 'Laboratorio'){
+      setRoomPrefix('el'); 
+      editPositionPlayer('4');
+    }
+    if (room === 'Alcoba'){
+      setRoomPrefix('la');
+      editPositionPlayer('27');
+    }
+    if (room === 'Cocheras'){
+      setRoomPrefix('las');
+      editPositionPlayer('4');
+    }
+    if (room === 'Panteón'){
+      setRoomPrefix('el');
+      editPositionPlayer('27');
+    }
+    if (room === 'Bodega'){
+      setRoomPrefix('la');
+      editPositionPlayer('21');
+    }
+    if (room === 'Salón'){
+      setRoomPrefix('el');
+       editPositionPlayer('12');
+    }
+    if (room === 'Vestíbulo'){
+      setRoomPrefix('el');
+      editPositionPlayer('12')
+    }
+    if (room === 'Biblioteca'){
+      setRoomPrefix('la');
+       editPositionPlayer('21');
+    }
+    getData('computerData').then((value) => {
+      setComputerCards(value.computerCards); // Actualizar el estado con el valor obtenido
+      setPlayerData(value);
+    });
+    getData('playerData').then((value) => {
+      setPlayerCards(value.playerCards); 
+      setComputerData(value);
+    });
+  }, []);
+  useEffect(() => {
+      // Define la animación de flotación
+      const animation = Animated.loop(
+        Animated.sequence([
+          Animated.timing(floatAnim, {
+            toValue: -20, // Equivalente a translateY(-20px)
+            duration: 1000, // 50% del ciclo (mitad de 2 segundos)
+            useNativeDriver: true, // Mejora el rendimiento
+          }),
+          Animated.timing(floatAnim, {
+            toValue: 0, // Vuelve a translateY(0)
+            duration: 1000, // Otra mitad del ciclo
+            useNativeDriver: true,
+          }),
+        ])
+      );
+      // Inicia la animación
+      animation.start();
+      // Limpia la animación al desmontar el componente
+      return () => animation.stop();
+    }, [floatAnim]);
+  useEffect(() => {
+    console.log("Room parameter:", room);
+    if (gifMap[room] && roomsMap[room]) {
+      setGifSource(gifMap[room]); // Establecer el GIF inicialmente
+      // Cambiar al PNG después de 5500ms
+      const timer = setTimeout(() => {
+        setGifSource(roomsMap[room]);
+      }, 5500);
 
+      // Limpiar el temporizador al desmontar o cuando cambie `room`
+      return () => clearTimeout(timer);
+    } else {
+      // Manejar caso de sala no encontrada
+      setGifSource(null);
+      console.warn(`No se encontraron recursos para la sala: ${room}`);
+    }
+  }, [room]);
   const handleShowCardsPress = () => {
     !cardsDeployed ? playShowcards() : playHidecards();
     setOpacityBack(opacityBack === 1 ? 0.5 : 1);
@@ -226,142 +360,13 @@ const getData = async (data) => {
       return null;
     }
   };
-  const storePlayerPosition = async (position) => {
-    try {
-        await AsyncStorage.setItem('position', position);
-    } catch (e) {
-        console.log('error saving data');
-    }
+  const editPositionPlayer = async (index) => {
+    if (!playerData) return;
+    const updatedPlayerData = { ...playerData, position: index };
+    await AsyncStorage.setItem("playerData", JSON.stringify(updatedPlayerData));
+    setPlayerData(updatedPlayerData);
   };
-  useEffect(()=> {
-    const misComputerCards = assumptionComputerCards.filter(elemento => killers.includes(elemento));
-    const teComputerCards = assumptionComputerCards.filter(elemento => victims.includes(elemento));
-    const rioComputerCards = assumptionComputerCards.filter(elemento => rooms.includes(elemento));
-    setComputerCardNameToShow(assumptionComputerCards[0]);
-    if (misComputerCards.length > 0) {
-      setBigCardText('MIS');
-      if (assumptionComputerCards[0] === 'Mr Hyde'){
-        assumptionComputerCards.splice(0, 1);
-        assumptionComputerCards.splice(0, 1, 'MrHyde');
-      }
-      if (assumptionComputerCards[0] === 'Hombre lobo'){
-        assumptionComputerCards.splice(0, 1);
-        assumptionComputerCards.splice(0, 1, 'Hombrelobo');
-      }
-      /* if (assumptionComputerCards[0] === 'Drácula'){
-        assumptionComputerCards.splice(0, 1);
-        assumptionComputerCards.splice(0, 1, 'Dracula');
-      }*/
-      setComputerCardCharacter(killersMap[assumptionComputerCards[0]])
-    } else if (teComputerCards.length > 0) {
-      setBigCardText('TE');
-      if (assumptionComputerCards[1] === 'Ama de llaves'){
-        assumptionComputerCards.splice(0, 1);
-        assumptionComputerCards.splice(0, 1, 'Amadellaves');
-      }
-      setComputerCardCharacter(victimsMap[assumptionComputerCards[0]])
-    } else if (rioComputerCards.length > 0) {
-      setBigCardText('RIO');
-      /*if (assumptionComputerCards[2] === 'Panteón'){
-        assumptionComputerCards.splice(0, 1);
-        assumptionComputerCards.splice(0, 1, 'Panteon');
-      }
-      if (assumptionComputerCards[2] === 'Salón'){
-        assumptionComputerCards.splice(0, 1);
-        assumptionComputerCards.splice(0, 1, 'Salon');
-      }
-      if (assumptionComputerCards[2] === 'Vestíbulo'){
-        assumptionComputerCards.splice(0, 1);
-        assumptionComputerCards.splice(0, 1, 'Vestibulo');
-      }*/
-      setComputerCardCharacter(roomsMap[assumptionComputerCards[0]])
-    }
-  }, [assumptionComputerCards, killers, victims, rooms]);
-  useEffect(() => {
-    getPlayer().then((player) => {
-      setPlayer(player); // Actualizar el estado con el valor obtenido
-    });
-    if (room === 'Laboratorio'){
-      setRoomPrefix('el'); 
-      storePlayerPosition('4');
-    }
-    if (room === 'Alcoba'){
-      setRoomPrefix('la');
-      storePlayerPosition('27');
-    }
-    if (room === 'Cocheras'){
-      setRoomPrefix('las');
-      storePlayerPosition('4');
-    }
-    if (room === 'Panteón'){
-      setRoomPrefix('el');
-      storePlayerPosition('27');
-    }
-    if (room === 'Bodega'){
-      setRoomPrefix('la');
-      storePlayerPosition('21');
-    }
-    if (room === 'Salón'){
-      setRoomPrefix('el');
-       storePlayerPosition('12');
-    }
-    if (room === 'Vestíbulo'){
-      setRoomPrefix('el');
-      storePlayerPosition('12')
-    }
-    if (room === 'Biblioteca'){
-      setRoomPrefix('la');
-       storePlayerPosition('21');
-    }
-  }, []);
-
-  useEffect(() => {
-    getData('computerCards').then((computerCards) => {
-      setComputerCards(computerCards); // Actualizar el estado con el valor obtenido
-    });
-    getData('playerCards').then((playerCards) => {
-      setPlayerCards(playerCards); 
-    });
-  }, []);
   
-  useEffect(() => {
-      // Define la animación de flotación
-      const animation = Animated.loop(
-        Animated.sequence([
-          Animated.timing(floatAnim, {
-            toValue: -20, // Equivalente a translateY(-20px)
-            duration: 1000, // 50% del ciclo (mitad de 2 segundos)
-            useNativeDriver: true, // Mejora el rendimiento
-          }),
-          Animated.timing(floatAnim, {
-            toValue: 0, // Vuelve a translateY(0)
-            duration: 1000, // Otra mitad del ciclo
-            useNativeDriver: true,
-          }),
-        ])
-      );
-      // Inicia la animación
-      animation.start();
-      // Limpia la animación al desmontar el componente
-      return () => animation.stop();
-    }, [floatAnim]);
-  useEffect(() => {
-    console.log("Room parameter:", room);
-    if (gifMap[room] && roomsMap[room]) {
-      setGifSource(gifMap[room]); // Establecer el GIF inicialmente
-      // Cambiar al PNG después de 5500ms
-      const timer = setTimeout(() => {
-        setGifSource(roomsMap[room]);
-      }, 5500);
-
-      // Limpiar el temporizador al desmontar o cuando cambie `room`
-      return () => clearTimeout(timer);
-    } else {
-      // Manejar caso de sala no encontrada
-      setGifSource(null);
-      console.warn(`No se encontraron recursos para la sala: ${room}`);
-    }
-  }, [room]);
   // Mostrar un componente de fallback si no hay recurso válido
   if (!gifSource) {
     return (
@@ -518,8 +523,6 @@ const getData = async (data) => {
       useNativeDriver: true,
     }).start();
   };
-
-  // Maneja el fin del toque (equivalente a salir del hover)
   const manejarPresionFin = () => {
     Animated.timing(rotacionAnimada, {
       toValue: 0, // Volver a 0 grados
@@ -563,41 +566,40 @@ Revisa bien tus cartas`)
       }
     console.log('assumption', assumption)
   } 
- 
-    const showOcurrences = () => {
-      if (assumptionComputerCards.length > 0) {
-        return(  
-          <View style={styles.containerOcurrence}>
-              <Pressable onPressIn={manejarPresionInicio} onPressOut={manejarPresionFin}>
-              <Animated.View style={{ transform: [{ rotateY: rotacion }] }}>
-                <Animated.View style={{ opacity: opacidadFrente }}>
-                  <ImageBackground style={styles.flipCardBack}>
-                    <Text style={styles.bigCardText}>{bigCardText}</Text>
-                  </ImageBackground>
-                </Animated.View>
-                <Animated.View style={[styles.flipCardFront, { opacity: opacidadTrasera, transform: [{ rotateY: '180deg' }] }]}>
-                  <View style={styles.computerCharacterContainer}>
-                    <Text style={styles.computerCharacterName}>{computerCardNameToShow}</Text> 
-                    <ImageBackground style={styles.computerCharacter} source={computerCardCharacter} /> 
-                  </View>
-                </Animated.View>
+  const showOcurrences = () => {
+    if (assumptionComputerCards.length > 0) {
+      return(  
+        <View style={styles.containerOcurrence}>
+            <Pressable onPressIn={manejarPresionInicio} onPressOut={manejarPresionFin}>
+            <Animated.View style={{ transform: [{ rotateY: rotacion }] }}>
+              <Animated.View style={{ opacity: opacidadFrente }}>
+                <ImageBackground style={styles.flipCardBack}>
+                  <Text style={styles.bigCardText}>{bigCardText}</Text>
+                </ImageBackground>
               </Animated.View>
-            </Pressable>
-            <View style={styles.pressCardContainer}>
-              <Animated.View style={[
-                styles.iconContainer,
-                { transform: [{ translateY: floatAnim }] }, // Aplica la animación
-              ]}>
-                <View style={styles.iconContainer}>
-                  <TouchIcon style={styles.iconStyles} />
-                  <Text style={styles.pressText} >Presiona la carta para descubrirla</Text>
+              <Animated.View style={[styles.flipCardFront, { opacity: opacidadTrasera, transform: [{ rotateY: '180deg' }] }]}>
+                <View style={styles.computerCharacterContainer}>
+                  <Text style={styles.computerCharacterName}>{computerCardNameToShow}</Text> 
+                  <ImageBackground style={styles.computerCharacter} source={computerCardCharacter} /> 
                 </View>
               </Animated.View>
-            </View>        
-        </View>
-        )
-      }
+            </Animated.View>
+          </Pressable>
+          <View style={styles.pressCardContainer}>
+            <Animated.View style={[
+              styles.iconContainer,
+              { transform: [{ translateY: floatAnim }] }, // Aplica la animación
+            ]}>
+              <View style={styles.iconContainer}>
+                <TouchIcon style={styles.iconStyles} />
+                <Text style={styles.pressText} >Presiona la carta para descubrirla</Text>
+              </View>
+            </Animated.View>
+          </View>        
+      </View>
+      )
     }
+  }
   const assumptionSection = () => {
     return(
         <View style={[styles.assumptionContainer, { opacity: assumptionOpacity }]}>
@@ -630,11 +632,19 @@ Revisa bien tus cartas`)
         params:  assumption , 
       });
   }
+  const storeTurn = async (item) => {
+    try {
+      await AsyncStorage.setItem("turn", item);
+    } catch (e) {
+      console.log("error saving turn");
+    }
+  };
   const toBoard = () => {
     router.push({ 
-      pathname: '/dice',
-      params: { floor }
+      pathname: '/board',
+      params: { diceValue: diceValue, floor: playerData.floor }, 
     });
+    storeTurn("computer");
   }
   return (
     <>
