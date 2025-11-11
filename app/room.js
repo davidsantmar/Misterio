@@ -161,13 +161,7 @@ export default function Room() {
     }
   }, [assumptionComputerCards, killers, victims, rooms]);
   useEffect(() => {
-    if (!gifSource) {
-    return (
-      <View style={styles.container}>
-        <Text>Sala no encontrada: {room}</Text>
-      </View>
-    );
-  }
+   
     getPlayer().then((player) => {
       setPlayer(player); // Actualizar el estado con el valor obtenido
     });
@@ -204,9 +198,14 @@ export default function Room() {
        editPositionPlayer('21');
     }
     getData('computerData').then((value) => {
-      setComputerCards(value.computerCards); // Actualizar el estado con el valor obtenido
-      setPlayerData(value);
-      //computerKillerToAssumption(value);
+      if (value && value.computerCards) {
+        setComputerCards(value.computerCards);
+        setPlayerData(value);
+        computerKillerToAssumption(value);
+        computerVictimToAssumption(value);
+      } else {
+        console.warn("⚠️ computerData no encontrado o malformado:", value);
+      }
     });
     getData('playerData').then((value) => {
       setPlayerCards(value.playerCards); 
@@ -235,6 +234,7 @@ export default function Room() {
       return () => animation.stop();
     }, [floatAnim]);
   useEffect(() => {
+    
     if (gifMap[room] && roomsMap[room]) {
       setGifSource(gifMap[room]); // Establecer el GIF inicialmente
       // Cambiar al PNG después de 5500ms
@@ -264,31 +264,42 @@ export default function Room() {
         return null; // O manejar el error de otra manera
       }
   };
-  const getComputerData = async () => {
-      try {
-        const value = await AsyncStorage.getItem("computerData");
-        const parsed = value ? JSON.parse(value) : null;
-        setComputerData(parsed);
-        //setComputerCards(parsed.computerCards);
-        return parsed;
-      } catch (e) {
-        console.log("❌ Error reading data:", e);
-        return null;
-      }
-    };
+  
   const computerKillerToAssumption = (data) => {
+    if (!data || !data.computerCards) {
+      console.warn("computerKillerToAssumption: datos inválidos:", data);
+      return;
+    }
+
     const firstThreeCards = data.computerCards.slice(0, 3);
-   
-      const availableKillers = (killers || []).filter(
-        (killer) => !firstThreeCards.includes(killer)
-      );
-      const killerToAssumption =
-        availableKillers.length > 0
-          ? availableKillers[Math.floor(Math.random() * availableKillers.length)]
-          : null;
-      console.log(killerToAssumption); 
-    
+    const discardedCards = data.discardedCards || [];
+    const availableKillers = (killers || []).filter(
+      (killer) => !firstThreeCards.includes(killer) && !discardedCards.includes(killer)  
+    );
+    const killerToAssumption =
+      availableKillers.length > 0
+        ? availableKillers[Math.floor(Math.random() * availableKillers.length)]
+        : null;
+    console.log("Killer elegido por el computador:", killerToAssumption);
   };
+  const computerVictimToAssumption = (data) => {
+    if (!data || !data.computerCards) {
+      console.warn("computerKillerToAssumption: datos inválidos:", data);
+      return;
+    }
+
+    const secondCards = data.computerCards.slice(3, 5);
+    const discardedCards = data.discardedCards || [];
+    const availableVictims = (victims || []).filter(
+      (victim) => !secondCards.includes(victim) && !discardedCards.includes(victim)  
+    );
+    const victimToAssumption =
+      availableVictims.length > 0
+        ? availableVictims[Math.floor(Math.random() * availableVictims.length)]
+        : null;
+    console.log("Victim elegido por el computador:", victimToAssumption);
+  };
+
   const handleShowCardsPress = () => {
     !cardsDeployed ? playShowcards() : playHidecards();
     setOpacityBack(opacityBack === 1 ? 0.5 : 1);
@@ -664,6 +675,14 @@ Revisa bien tus cartas`)
   }
   return (
     <>
+    {!gifSource ? (
+        <>
+        <View style={styles.container}>
+          <Text>Sala no encontrada: {room}</Text>
+        </View>
+        </>
+      ) : (
+        <>
       <ShowCardsButton onPress={handleShowCardsPress} />
       <ImageBackground style={[styles.container, { opacity: opacityBack }]} source={gifSource} resizeMode="cover">
         <View style={styles.boardButtonContainer}>
@@ -706,6 +725,9 @@ Revisa bien tus cartas`)
         {assumptionSection()}
       </ImageBackground>
       </>
+    
+    )}
+    </>
   );
 }
 
