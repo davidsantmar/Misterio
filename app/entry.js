@@ -60,10 +60,7 @@ export default function Entry() {
       };
       unloadSounds();
     };
-  }, []); // Solo se ejecuta una vez al montar
-
-  
-  
+  }, []); // Solo se ejecuta una vez al montar  
   useEffect(() => {
     Audio.setAudioModeAsync({
       allowsRecordingIOS: false,
@@ -74,15 +71,11 @@ export default function Entry() {
     setTurn('player')
     
   }, []);
-
-  // Opcional: Reproducir sonidos cuando se carguen completamente
   useEffect(() => {
     if (soundsLoaded && leak && rats) {
-      // Los sonidos ya se reprodujeron al cargar, pero puedes hacer replay si es necesario
       ("Todos los sonidos listos");
     }
   }, [soundsLoaded, leak, rats]);
-
   const handleShowCardsPress = () => {
     !cardsDeployed ? playShowcards() : playHidecards();
     setOpacityBack(opacityBack === 1 ? 0.5 : 1);
@@ -95,70 +88,69 @@ export default function Entry() {
     }
   };
   async function playShowcards() {
-        setCardsDeployed(true);
-        try {
-          if (showcards) {
-            await showcards.replayAsync();
-            return;
-          }
-    
-          const { sound } = await Audio.Sound.createAsync(
-            require("../assets/sounds/showcards.mp3")
-          );
-          setShowcards(sound);
-          await sound.playAsync();
-        } catch (error) {
-          console.error("Error al reproducir showcards:", error);
-        }
+    setCardsDeployed(true);
+    try {
+      if (showcards) {
+        await showcards.replayAsync();
+        return;
       }
-      async function playHidecards() {
-        setCardsDeployed(false);
-        try {
-          if (hidecards) {
-            await hidecards.replayAsync();
-            return;
-          }
-    
-          const { sound } = await Audio.Sound.createAsync(
-            require("../assets/sounds/hidecards.mp3")
-          );
-          setHidecards(sound);
-          await sound.playAsync();
-        } catch (error) {
-          console.error("Error al reproducir hidecards:", error);
-        }
+      const { sound } = await Audio.Sound.createAsync(
+        require("../assets/sounds/showcards.mp3")
+      );
+      setShowcards(sound);
+      await sound.playAsync();
+    } catch (error) {
+      console.error("Error al reproducir showcards:", error);
+    }
+  }
+  async function playHidecards() {
+    setCardsDeployed(false);
+    try {
+      if (hidecards) {
+        await hidecards.replayAsync();
+        return;
       }
+
+      const { sound } = await Audio.Sound.createAsync(
+        require("../assets/sounds/hidecards.mp3")
+      );
+      setHidecards(sound);
+      await sound.playAsync();
+    } catch (error) {
+      console.error("Error al reproducir hidecards:", error);
+    }
+  }
    async function playButtonPress() {
-        try {
-          if (buttonPress) {
-            await buttonPress.replayAsync();
-            return;
-          }
-          const { sound } = await Audio.Sound.createAsync(
-            require("../assets/sounds/button-press.mp3")
-          );
-          setButtonPress(sound);
-          await sound.playAsync();
-        } catch (error) {
-          console.error("Error al reproducir buttonPress:", error);
-        }
+    try {
+      if (buttonPress) {
+        await buttonPress.replayAsync();
+        return;
       }
+      const { sound } = await Audio.Sound.createAsync(
+        require("../assets/sounds/button-press.mp3")
+      );
+      setButtonPress(sound);
+      await sound.playAsync();
+    } catch (error) {
+      console.error("Error al reproducir buttonPress:", error);
+    }
+  }
   const storePlayerFloor = async (floor) => { //se guardan las cartas de la computadora
-      try {
-        const storedData = await AsyncStorage.getItem("playerData");
-        const currentData = storedData ? JSON.parse(storedData) : null;
-        if (!currentData) return;
-  
-        const updatedPlayerData = { ...currentData, floor: floor };
-        await AsyncStorage.setItem(
-          "playerData",
-          JSON.stringify(updatedPlayerData)
-        );
-      } catch (e) {
-        console.log("❌ Error updating data:", e);
-      }
-    };
-   const toDice = async (floor) => {
+    try {
+      const storedData = await AsyncStorage.getItem("playerData");
+      const currentData = storedData ? JSON.parse(storedData) : null;
+      if (!currentData) return;
+
+      const updatedPlayerData = { ...currentData, floor: floor };
+      await AsyncStorage.setItem(
+        "playerData",
+        JSON.stringify(updatedPlayerData)
+      );
+    } catch (e) {
+      console.log("❌ Error updating data:", e);
+    }
+  };
+  const toDice = async (floor) => {
     storeTurn('player');
     storePlayerFloor(floor);
     playButtonPress();

@@ -82,16 +82,32 @@ export default function Room() {
   const [shine, setShine] = useState(null);
   const [playerData, setPlayerData] = useState(null);
   const [computerData, setComputerData] = useState(null);
+  const [turn, setTurn] = useState(null);
+  /*useEffect(() => {
+    const fetchTurn = async () => {
+      const currentTurn = await getTurn();
+      setTurn(currentTurn);
+      console.log("Current turn:", currentTurn);
+      if (currentTurn !== 'computer') return;
+      const handleComputerTurn = async () => {
+        let isMounted = true;
+        try {
+          const computerData = await getComputerData();
+          if (!isMounted) return;
 
-  useEffect(() => {
-    if (floor) {
-      console.log('Valor de floor:', floor);
-      // Aquí puedes usar el valor de 'floor' (que contiene el valor de 'floor')
-    }
-  }, [floor]);
-  useEffect(() => {
-    console.log('Valor de diceValue:', diceValue, typeof diceValue);
-  }, [diceValue]);
+          computerKillerToAssumption(computerData);
+          
+        } catch (error) {
+          console.error("Error en turno del computador:", error);
+        }
+        
+      };
+      handleComputerTurn();
+    };
+    fetchTurn();
+    
+
+  }, []);*/
   useEffect(() => {
       Audio.setAudioModeAsync({
         allowsRecordingIOS: false,
@@ -102,21 +118,16 @@ export default function Room() {
   
       // Liberación de sonidos al desmontar el componente
       return () => {
-       
         if (buttonPress) {
-          console.log("Liberando buttonPress");
           buttonPress.unloadAsync();
         }
          if (hidecards) {
-          console.log("Liberando hidecards");
           hidecards.unloadAsync();
         }
         if (showcards) {
-          console.log("Liberando showcards");
           showcards.unloadAsync();
         }
         if (shine) {
-          console.log("Liberando shine");
           shine.unloadAsync();
         }
       };
@@ -136,10 +147,6 @@ export default function Room() {
         assumptionComputerCards.splice(0, 1);
         assumptionComputerCards.splice(0, 1, 'Hombrelobo');
       }
-      /* if (assumptionComputerCards[0] === 'Drácula'){
-        assumptionComputerCards.splice(0, 1);
-        assumptionComputerCards.splice(0, 1, 'Dracula');
-      }*/
       setComputerCardCharacter(killersMap[assumptionComputerCards[0]])
     } else if (teComputerCards.length > 0) {
       setBigCardText('TE');
@@ -150,24 +157,18 @@ export default function Room() {
       setComputerCardCharacter(victimsMap[assumptionComputerCards[0]])
     } else if (rioComputerCards.length > 0) {
       setBigCardText('RIO');
-      /*if (assumptionComputerCards[2] === 'Panteón'){
-        assumptionComputerCards.splice(0, 1);
-        assumptionComputerCards.splice(0, 1, 'Panteon');
-      }
-      if (assumptionComputerCards[2] === 'Salón'){
-        assumptionComputerCards.splice(0, 1);
-        assumptionComputerCards.splice(0, 1, 'Salon');
-      }
-      if (assumptionComputerCards[2] === 'Vestíbulo'){
-        assumptionComputerCards.splice(0, 1);
-        assumptionComputerCards.splice(0, 1, 'Vestibulo');
-      }*/
       setComputerCardCharacter(roomsMap[assumptionComputerCards[0]])
     }
   }, [assumptionComputerCards, killers, victims, rooms]);
   useEffect(() => {
+    if (!gifSource) {
+    return (
+      <View style={styles.container}>
+        <Text>Sala no encontrada: {room}</Text>
+      </View>
+    );
+  }
     getPlayer().then((player) => {
-      console.log('Player recuperado en room:', player);
       setPlayer(player); // Actualizar el estado con el valor obtenido
     });
     if (room === 'Laboratorio'){
@@ -205,6 +206,7 @@ export default function Room() {
     getData('computerData').then((value) => {
       setComputerCards(value.computerCards); // Actualizar el estado con el valor obtenido
       setPlayerData(value);
+      //computerKillerToAssumption(value);
     });
     getData('playerData').then((value) => {
       setPlayerCards(value.playerCards); 
@@ -233,7 +235,6 @@ export default function Room() {
       return () => animation.stop();
     }, [floatAnim]);
   useEffect(() => {
-    console.log("Room parameter:", room);
     if (gifMap[room] && roomsMap[room]) {
       setGifSource(gifMap[room]); // Establecer el GIF inicialmente
       // Cambiar al PNG después de 5500ms
@@ -249,17 +250,54 @@ export default function Room() {
       console.warn(`No se encontraron recursos para la sala: ${room}`);
     }
   }, [room]);
+  const getTurn = async () => {
+      try {
+        const turn = await AsyncStorage.getItem("turn");
+        if (turn === null) {
+          console.log("No turn found in AsyncStorage");
+          return null; // O un valor predeterminado, como 'player'
+        }
+        //setTurn(turn);
+        return turn;
+      } catch (e) {
+        console.log("❌ Error reading turn:", e);
+        return null; // O manejar el error de otra manera
+      }
+  };
+  const getComputerData = async () => {
+      try {
+        const value = await AsyncStorage.getItem("computerData");
+        const parsed = value ? JSON.parse(value) : null;
+        setComputerData(parsed);
+        //setComputerCards(parsed.computerCards);
+        return parsed;
+      } catch (e) {
+        console.log("❌ Error reading data:", e);
+        return null;
+      }
+    };
+  const computerKillerToAssumption = (data) => {
+    const firstThreeCards = data.computerCards.slice(0, 3);
+   
+      const availableKillers = (killers || []).filter(
+        (killer) => !firstThreeCards.includes(killer)
+      );
+      const killerToAssumption =
+        availableKillers.length > 0
+          ? availableKillers[Math.floor(Math.random() * availableKillers.length)]
+          : null;
+      console.log(killerToAssumption); 
+    
+  };
   const handleShowCardsPress = () => {
     !cardsDeployed ? playShowcards() : playHidecards();
     setOpacityBack(opacityBack === 1 ? 0.5 : 1);
   };
   async function playShowcards() {
     setCardsDeployed(true);
-    console.log("Cargando showcards");
     try {
       if (showcards) {
         // Si el sonido ya está cargado, reutilízalo
-        console.log("Reproduciendo showcards existente");
         await showcards.replayAsync();
         return;
       }
@@ -268,7 +306,6 @@ export default function Room() {
         require("../assets/sounds/showcards.mp3")
       );
       setShowcards(sound);
-      console.log("Reproduciendo showcards");
       await sound.playAsync();
     } catch (error) {
       console.error("Error al reproducir showcards:", error);
@@ -276,11 +313,9 @@ export default function Room() {
   }
   async function playHidecards() {
     setCardsDeployed(false);
-    console.log("Cargando hidecards");
     try {
       if (hidecards) {
         // Si el sonido ya está cargado, reutilízalo
-        console.log("Reproduciendo hidecards existente");
         await hidecards.replayAsync();
         return;
       }
@@ -289,68 +324,60 @@ export default function Room() {
         require("../assets/sounds/hidecards.mp3")
       );
       setHidecards(sound);
-      console.log("Reproduciendo hidecards");
       await sound.playAsync();
     } catch (error) {
       console.error("Error al reproducir hidecards:", error);
     }
   }
   async function playButtonPress() {
-  console.log("Cargando buttonPress");
-  try {
-    if (buttonPress) {
-      // Si el sonido ya está cargado, reutilízalo
-      console.log("Reproduciendo buttonPress existente");
-      await buttonPress.replayAsync();
-      return;
-    }
+    try {
+      if (buttonPress) {
+        // Si el sonido ya está cargado, reutilízalo
+        await buttonPress.replayAsync();
+        return;
+      }
 
-    const { sound } = await Audio.Sound.createAsync(
-      require("../assets/sounds/button-press.mp3")
-    );
-    setButtonPress(sound);
-    console.log("Reproduciendo buttonPress");
-    await sound.playAsync();
-  } catch (error) {
-    console.error("Error al reproducir buttonPress:", error);
-  }
-}
-async function playShine() {
-  console.log("Cargando shine");
-  try {
-    if (shine) {
-      // Si el sonido ya está cargado, reutilízalo
-      console.log("Reproduciendo shine existente");
-      await shine.replayAsync();
-      return;
+      const { sound } = await Audio.Sound.createAsync(
+        require("../assets/sounds/button-press.mp3")
+      );
+      setButtonPress(sound);
+      await sound.playAsync();
+    } catch (error) {
+      console.error("Error al reproducir buttonPress:", error);
     }
-
-    const { sound } = await Audio.Sound.createAsync(
-      require("../assets/sounds/card-appears.mp3")
-    );
-    setShine(sound);
-    console.log("Reproduciendo shine");
-    await sound.playAsync();
-  } catch (error) {
-    console.error("Error al reproducir shine:", error);
   }
-}
-const getData = async (data) => {
-  try {
-    const stringArray = await AsyncStorage.getItem(data); // Obtener la cadena
-    if (stringArray !== null) {
-      const array = JSON.parse(stringArray); // Convertir la cadena a array
-      console.log('Array recuperado:', array);
-      return array;
-    } else {
-      console.log('No se encontró el array');
+  async function playShine() {
+    try {
+      if (shine) {
+        // Si el sonido ya está cargado, reutilízalo
+        await shine.replayAsync();
+        return;
+      }
+
+      const { sound } = await Audio.Sound.createAsync(
+        require("../assets/sounds/card-appears.mp3")
+      );
+      setShine(sound);
+      await sound.playAsync();
+    } catch (error) {
+      console.error("Error al reproducir shine:", error);
+    }
+  }
+  const getData = async (data) => {
+    try {
+      const stringArray = await AsyncStorage.getItem(data); // Obtener la cadena
+      if (stringArray !== null) {
+        const array = JSON.parse(stringArray); // Convertir la cadena a array
+        return array;
+      } else {
+        console.log('No se encontró el array');
+        return null;
+      }
+    } catch (error) {
+      console.error('Error al recuperar el array:', error);
       return null;
     }
-  } catch (error) {
-    console.error('Error al recuperar el array:', error);
-    return null;
-  }
-};
+  };
   const getPlayer = async () => {
     try {
       const currentPlayer = await AsyncStorage.getItem('player'); // Obtener la cadena
@@ -367,14 +394,6 @@ const getData = async (data) => {
     setPlayerData(updatedPlayerData);
   };
   
-  // Mostrar un componente de fallback si no hay recurso válido
-  if (!gifSource) {
-    return (
-      <View style={styles.container}>
-        <Text>Sala no encontrada: {room}</Text>
-      </View>
-    );
-  }
   const rotacion = rotacionAnimada.interpolate({
     inputRange: [0, 180],
     outputRange: ['0deg', '180deg'],
@@ -388,7 +407,6 @@ const getData = async (data) => {
     outputRange: [0, 1],
   });
   const showSection = (section) => {
-    console.log('sectio', section)
     playButtonPress();
     setSelectedSection(section); // Update the selected section
     if (section === "killers") {
@@ -541,7 +559,6 @@ const getData = async (data) => {
     assumption.push(room);
     const ocurrences = assumption.filter(elemento => computerCards.includes(elemento));
       setAssumptionComputerCards(ocurrences);
-      console.log('ocurrences', ocurrences);
       if (ocurrences.length > 0){
         
         if (player === 'Nely'){
@@ -564,7 +581,6 @@ Cuidado! Si acusas y no estás en lo cierto habrás perdido la partida.
 Revisa bien tus cartas`)
         }
       }
-    console.log('assumption', assumption)
   } 
   const showOcurrences = () => {
     if (assumptionComputerCards.length > 0) {

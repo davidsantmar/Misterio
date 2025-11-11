@@ -233,14 +233,6 @@ export function DiceRoll() {
     }
     return { roomToGo: data.roomToGo, floor: data.floor };
   };
-
-  const storeTurn = async (turn) => {
-    try {
-      await AsyncStorage.setItem("turn", turn);
-    } catch (e) {
-      console.log("error saving data");
-    }
-  };
   const computerMovement = async (computerData) => {
     const { floor } = await computerRoomToGo(computerData); // Esperar los resultados
     router.push({

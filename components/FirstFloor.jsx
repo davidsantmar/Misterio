@@ -1029,17 +1029,6 @@ export function FirstFloor({ diceValue }) {
     loop.start();
     return () => loop.stop(); // Cleanup
   }, [activateLoop, bounceAnim]); // Depend on activateLoop to re-run when it changes
- /*useEffect(() => { //para desplazar la ficha de la computadora si coincide con la del jugador... No funciona pero queda bien
-  if (
-    stoneOccuped != null &&
-    stoneComputerOccuped != null &&
-    stoneOccuped === stoneComputerOccuped
-  ) {
-    setLeftDisplacement(-23); // ← Desplaza computadora a la izquierda
-  } else {
-    setLeftDisplacement(0);   // ← Vuelve a posición normal
-  }
-}, [stoneOccuped, stoneComputerOccuped]);*/
   const fetchPlayer = async (data) => {
     try {
       if (!data?.name) return;
@@ -1379,6 +1368,12 @@ export function FirstFloor({ diceValue }) {
     await AsyncStorage.setItem("playerData", JSON.stringify(updatedPlayerData));
     setPlayerData(updatedPlayerData);
   };
+  const editPositionComputer = async (index) => {
+    if (!computerData) return;
+    const updatedComputerData = { ...computerData, position: index };
+    await AsyncStorage.setItem("computerData", JSON.stringify(updatedComputerData));
+    setComputerData(updatedComputerData);
+  };
   const toComputerDiceRoll = () => {
     setComputerFloor(computerData.floor);
     playDiceSound();
@@ -1423,7 +1418,7 @@ export function FirstFloor({ diceValue }) {
       console.log("❌ Error updating data:", e);
     }
   };
-  const computerMovement = (data) => {
+  const computerMovement = (data) => { //no sabe ir hacia atrás para entrar a las habitaciones
     console.log("Iniciando movimiento de computadora con data:", data);    
     const currentPos = Number(data.position);
     const dice = Number(diceValue);
@@ -1488,7 +1483,7 @@ export function FirstFloor({ diceValue }) {
     } else {
       playFootSteps();
     }
-    storeComputerPosition(index);
+    storeComputerPosition(index.toString());
     setActivateLoop(true);
     setDisabledSquare(true);
     setDisabledDice(false); // Enable dice for player
@@ -1496,14 +1491,16 @@ export function FirstFloor({ diceValue }) {
     if (index === 6) {
       setTimeout(() => {
         setStoneComputerOccuped(26);
-        storeComputerPosition(26);
+        editPositionComputer(26);
+        storeComputerPosition("26");
         scrollToComputerPosition(26);
       }, 1200);
     }
     if (index === 26) {
       setTimeout(() => {
         setStoneComputerOccuped(6);
-        storeComputerPosition(6);
+        editPositionComputer(6);
+        storeComputerPosition("6");
         scrollToComputerPosition(6);
       }, 1200);
     }
@@ -1541,13 +1538,17 @@ export function FirstFloor({ diceValue }) {
     }
     if (index === 6) {
       storePlayerPosition("26");
+      editPositionPlayer(26);
       setPosition(26); //hay que cambiarlo por editar el objeto playerData
       setStoneOccuped(26);
+      scrollToComputerPosition(26);
     }
     if (index === 26) {
       storePlayerPosition("6"); //hay que cambiarlo por editar el objeto playerData
+      editPositionPlayer(6);
       setPosition(6);
       setStoneOccuped(6);
+      scrollToPlayerPosition(6);
     }
     setTimeout(() => {
       toComputerDiceRoll();
@@ -1565,7 +1566,15 @@ export function FirstFloor({ diceValue }) {
     setRoom4Color("white");
     setDisabledDice(true);
     setDisabledSquare(true); // Disable squares after selection
-
+    router.push({
+      pathname: "/room",
+      params: { room: room, floor: 'firstFloor', diceValue: diceValue  },
+    });
+  };
+  const roomClickedByComputer = (room) => {
+    playOpenDoor();
+    setDisabledDice(true);
+    setDisabledSquare(true); // Disable squares after selection
     router.push({
       pathname: "/room",
       params: { room: room, floor: 'firstFloor', diceValue: diceValue  },
