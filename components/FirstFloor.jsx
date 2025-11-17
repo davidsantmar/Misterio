@@ -64,7 +64,7 @@ export function FirstFloor({ diceValue }) {
   const [stoneComputerOccuped, setStoneComputerOccuped] = useState(null);
   const [computerData, setComputerData] = useState({});
   const [computerFloor, setComputerFloor] = useState(null);
-  const [isVisible, setIsVisible] = useState(false);
+  const [isVisible, setIsVisible] = useState(true);
   const scrollRef = useRef(null);
   const router = useRouter();
   const board = [
@@ -1483,7 +1483,7 @@ export function FirstFloor({ diceValue }) {
     } else {
       playFootSteps();
     }
-    storeComputerPosition(index.toString());
+    storeComputerPosition(index);
     setActivateLoop(true);
     setDisabledSquare(true);
     setDisabledDice(false); // Enable dice for player
@@ -1492,7 +1492,7 @@ export function FirstFloor({ diceValue }) {
       setTimeout(() => {
         setStoneComputerOccuped(26);
         editPositionComputer(26);
-        storeComputerPosition("26");
+        storeComputerPosition(26);
         scrollToComputerPosition(26);
       }, 1200);
     }
@@ -1500,7 +1500,7 @@ export function FirstFloor({ diceValue }) {
       setTimeout(() => {
         setStoneComputerOccuped(6);
         editPositionComputer(6);
-        storeComputerPosition("6");
+        storeComputerPosition(6);
         scrollToComputerPosition(6);
       }, 1200);
     }

@@ -52,12 +52,11 @@ export default function Room() {
   const [charactersOpacity, setCharactersOpacity] = useState(0);
   const [assumptionOpacity, setAssumptionOpacity] = useState(0);
   const [gifSource, setGifSource] = useState(null);
-  const [selectedSection, setSelectedSection] = useState(null); // New state to track selected section
+  const [selectedSection, setSelectedSection] = useState(null); 
   const [killer, setKiller] = useState(null); 
   const [victim, setVictim] = useState(null);
   const [instructionText, setInstructionText] = useState("Selecciona un sospechoso y una víctima con los botones MIS y TE (ten en cuenta tus cartas)");
   const [opacityBack, setOpacityBack] = useState(1);
-  const [player, setPlayer] = useState(null);
   const [computerCards, setComputerCards] = useState([]);
   const [playerCards, setPlayerCards] = useState([]);
   const [assumption, setAssumption] = useState([]);
@@ -82,32 +81,10 @@ export default function Room() {
   const [shine, setShine] = useState(null);
   const [playerData, setPlayerData] = useState(null);
   const [computerData, setComputerData] = useState(null);
-  const [turn, setTurn] = useState(null);
-  /*useEffect(() => {
-    const fetchTurn = async () => {
-      const currentTurn = await getTurn();
-      setTurn(currentTurn);
-      console.log("Current turn:", currentTurn);
-      if (currentTurn !== 'computer') return;
-      const handleComputerTurn = async () => {
-        let isMounted = true;
-        try {
-          const computerData = await getComputerData();
-          if (!isMounted) return;
-
-          computerKillerToAssumption(computerData);
-          
-        } catch (error) {
-          console.error("Error en turno del computador:", error);
-        }
-        
-      };
-      handleComputerTurn();
-    };
-    fetchTurn();
-    
-
-  }, []);*/
+  const [killerToAssumption, setKillerToAssumption] = useState(null);
+  const [victimToAssumption, setVictimToAssumption] = useState(null);
+  const [notCardsToShow, setNotCardsToShow] = useState(false);
+  const normalize = (str) => str?.trim().toLowerCase();
   useEffect(() => {
       Audio.setAudioModeAsync({
         allowsRecordingIOS: false,
@@ -161,10 +138,6 @@ export default function Room() {
     }
   }, [assumptionComputerCards, killers, victims, rooms]);
   useEffect(() => {
-   
-    getPlayer().then((player) => {
-      setPlayer(player); // Actualizar el estado con el valor obtenido
-    });
     if (room === 'Laboratorio'){
       setRoomPrefix('el'); 
       editPositionPlayer('4');
@@ -197,21 +170,38 @@ export default function Room() {
       setRoomPrefix('la');
        editPositionPlayer('21');
     }
-    getData('computerData').then((value) => {
+    getItem('computerData').then((value) => {
+      setComputerData(value);
+      console.log("computerData:", value);
       if (value && value.computerCards) {
         setComputerCards(value.computerCards);
-        setPlayerData(value);
-        computerKillerToAssumption(value);
-        computerVictimToAssumption(value);
       } else {
         console.warn("⚠️ computerData no encontrado o malformado:", value);
       }
+      computerKillerToAssumption(value);
+      computerVictimToAssumption(value);
     });
-    getData('playerData').then((value) => {
-      setPlayerCards(value.playerCards); 
-      setComputerData(value);
+    getItem('playerData').then((value1) => {
+      setPlayerData(value1);
+      setPlayerCards(value1.playerCards); 
+      console.log("playerData", value1);
+      if (value1 && value1.playerCards) {
+        setPlayerCards(value1.playerCards);
+      } else {
+        console.warn("⚠️ computerData no encontrado o malformado:", value1);
+      }
     });
   }, []);
+  useEffect(() => {
+    if (
+      playerData?.playerCards &&
+      killerToAssumption &&
+      victimToAssumption &&
+      computerData?.name
+    ) {
+      computerAssumption();
+    }
+  }, [playerData, killerToAssumption, victimToAssumption, computerData]);
   useEffect(() => {
       // Define la animación de flotación
       const animation = Animated.loop(
@@ -234,7 +224,6 @@ export default function Room() {
       return () => animation.stop();
     }, [floatAnim]);
   useEffect(() => {
-    
     if (gifMap[room] && roomsMap[room]) {
       setGifSource(gifMap[room]); // Establecer el GIF inicialmente
       // Cambiar al PNG después de 5500ms
@@ -250,21 +239,30 @@ export default function Room() {
       console.warn(`No se encontraron recursos para la sala: ${room}`);
     }
   }, [room]);
-  const getTurn = async () => {
-      try {
-        const turn = await AsyncStorage.getItem("turn");
-        if (turn === null) {
-          console.log("No turn found in AsyncStorage");
-          return null; // O un valor predeterminado, como 'player'
-        }
-        //setTurn(turn);
-        return turn;
-      } catch (e) {
-        console.log("❌ Error reading turn:", e);
-        return null; // O manejar el error de otra manera
-      }
+  const computerAssumption = () => { 
+    if (!playerData?.playerCards || !killerToAssumption || !victimToAssumption || !computerData?.name) {
+      console.warn("computerAssumption: faltan datos");
+      return;
+    }
+    const normalizedPlayerCards = playerData.playerCards.map(normalize);
+    const normalizedKiller = normalize(killerToAssumption);
+    const normalizedVictim = normalize(victimToAssumption);
+    const normalizedRoom = normalize(room);
+    const availablePlayerCards = playerData.playerCards.filter(card => 
+      normalize(card) === normalizedKiller || normalize(card) === normalizedVictim || normalize(card) === normalizedRoom
+    );
+    console.log("Cartas normalizadas del jugador:", normalizedPlayerCards);
+    console.log("Buscando:", normalizedKiller, "o", normalizedVictim , "o", normalizedRoom);
+    console.log("Cartas encontradas:", availablePlayerCards);
+    if (availablePlayerCards.length === 0) {
+      setNotCardsToShow(true);
+    } else {
+      setNotCardsToShow(false); 
+    }
+    setInstructionText(
+      `${computerData.name} supone que ${killerToAssumption} ha asesinado ${victimToAssumption} en ${room}. Presiona la carta que quieras mostrarle.`
+    );
   };
-  
   const computerKillerToAssumption = (data) => {
     if (!data || !data.computerCards) {
       console.warn("computerKillerToAssumption: datos inválidos:", data);
@@ -281,13 +279,13 @@ export default function Room() {
         ? availableKillers[Math.floor(Math.random() * availableKillers.length)]
         : null;
     console.log("Killer elegido por el computador:", killerToAssumption);
+    setKillerToAssumption(killerToAssumption);
   };
   const computerVictimToAssumption = (data) => {
     if (!data || !data.computerCards) {
       console.warn("computerKillerToAssumption: datos inválidos:", data);
       return;
     }
-
     const secondCards = data.computerCards.slice(3, 5);
     const discardedCards = data.discardedCards || [];
     const availableVictims = (victims || []).filter(
@@ -298,8 +296,8 @@ export default function Room() {
         ? availableVictims[Math.floor(Math.random() * availableVictims.length)]
         : null;
     console.log("Victim elegido por el computador:", victimToAssumption);
+    setVictimToAssumption(victimToAssumption);
   };
-
   const handleShowCardsPress = () => {
     !cardsDeployed ? playShowcards() : playHidecards();
     setOpacityBack(opacityBack === 1 ? 0.5 : 1);
@@ -374,37 +372,31 @@ export default function Room() {
       console.error("Error al reproducir shine:", error);
     }
   }
-  const getData = async (data) => {
+  const getItem = async (key) => {
     try {
-      const stringArray = await AsyncStorage.getItem(data); // Obtener la cadena
-      if (stringArray !== null) {
-        const array = JSON.parse(stringArray); // Convertir la cadena a array
-        return array;
-      } else {
-        console.log('No se encontró el array');
+      const jsonValue = await AsyncStorage.getItem(key);
+      if (jsonValue === null) {
+        console.log(`Clave no encontrada: ${key}`);
+        return null;
+      }
+      try {
+        return JSON.parse(jsonValue);
+      } catch (parseError) {
+        console.error(`JSON inválido en ${key}:`, parseError);
         return null;
       }
     } catch (error) {
-      console.error('Error al recuperar el array:', error);
-      return null;
-    }
-  };
-  const getPlayer = async () => {
-    try {
-      const currentPlayer = await AsyncStorage.getItem('player'); // Obtener la cadena
-      return currentPlayer;
-    } catch (error) {
-      console.error('Error al recuperar el player:', error);
+      console.error(`Error al leer ${key}:`, error);
       return null;
     }
   };
   const editPositionPlayer = async (index) => {
     if (!playerData) return;
+    console.log()
     const updatedPlayerData = { ...playerData, position: index };
     await AsyncStorage.setItem("playerData", JSON.stringify(updatedPlayerData));
     setPlayerData(updatedPlayerData);
   };
-  
   const rotacion = rotacionAnimada.interpolate({
     inputRange: [0, 180],
     outputRange: ['0deg', '180deg'],
@@ -571,7 +563,6 @@ export default function Room() {
     const ocurrences = assumption.filter(elemento => computerCards.includes(elemento));
       setAssumptionComputerCards(ocurrences);
       if (ocurrences.length > 0){
-        
         if (player === 'Nely'){
           setInstructionText('El inspector David te muestra la siguiente carta')
         }else if (player === 'David'){
@@ -719,6 +710,11 @@ Revisa bien tus cartas`)
                   </>
               </View> : null
             }
+            {notCardsToShow ? (
+              <Pressable style={styles.button} onPress={() => setNotCardsToShow(false)}>
+                <Text style={styles.buttonText}>No tengo cartas que mostrar</Text>
+              </Pressable>
+            ) : null }
           </View>
         </View>
         {!showComputerCard ? charactersSection() : showOcurrences()} 
