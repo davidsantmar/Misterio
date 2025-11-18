@@ -64,11 +64,11 @@ export function ChoosePlayer() {
     }
 
   const storeComputerData = async (name) => { //se crea el computer data
-    const computerData = { id: 1, name: name, position: 0, floor: '', computerCards: [], discardedCards: [], roomToGo: '' };
+    const computerData = { id: 1, name: name, position: 0, floor: '', computerCards: [], discardedCards: [], roomToGo: '', currentLocation: 'board' };
     await AsyncStorage.setItem("computerData", JSON.stringify(computerData));
   };
   const storePlayerData = async (name) => {
-    const playerData = { id: 0, name: name, position: 0, floor: '', playerCards: [], discardedCards: []  };
+    const playerData = { id: 0, name: name, position: 0, floor: '', playerCards: [], discardedCards: [], currentLocation: 'board' };
     await AsyncStorage.setItem("playerData", JSON.stringify(playerData));
   };
   const storeTurn = async (turn) => {

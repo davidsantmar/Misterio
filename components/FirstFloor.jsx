@@ -1103,62 +1103,6 @@ export function FirstFloor({ diceValue }) {
       console.error("Error fetching position:", error);
     }
   };
-  /*const fetchComputerPosition = async () => {
-    try {
-      const storedValue = await getComputerData();
-      if (storedValue !== null) {
-        const computerIndex = Number(storedValue.position);
-        setTimeout(() => {
-          scrollToComputerPosition(computerIndex);
-        }, 500);
-        //setPosition(computerIndex);
-        setComputerPosition(computerIndex);
-        setStoneComputerOccuped(computerIndex);
-        if (
-          (computerIndex <= 4 && computerIndex + Number(diceValue) > 4) ||
-          (computerIndex >= 4 && computerIndex - Number(diceValue) < 4)
-        ) {
-          setRoom1Color("yellow");
-          setDisabledRoom1(false);
-        } else {
-          setRoom1Color(null);
-          setDisabledRoom1(true);
-        }
-        if (
-          (computerIndex <= 21 && computerIndex + Number(diceValue) > 21) ||
-          (computerIndex >= 21 && computerIndex - Number(diceValue) < 21)
-        ) {
-          setRoom2Color("yellow");
-          setDisabledRoom2(false);
-        } else {
-          setRoom2Color(null);
-          setDisabledRoom2(true);
-        }
-        if (
-          (computerIndex <= 12 && computerIndex + Number(diceValue) > 12) ||
-          (computerIndex >= 12 && computerIndex - Number(diceValue) < 12)
-        ) {
-          setRoom3Color("yellow");
-          setDisabledRoom3(false);
-        } else {
-          setRoom3Color(null);
-          setDisabledRoom3(true);
-        }
-        if (
-          (computerIndex <= 27 && computerIndex + Number(diceValue) > 27) ||
-          (computerIndex >= 27 && computerIndex - Number(diceValue) < 27)
-        ) {
-          setRoom4Color("yellow");
-          setDisabledRoom4(false);
-        } else {
-          setRoom4Color(null);
-          setDisabledRoom4(true);
-        }
-      }
-    } catch (error) {
-      console.error("Error fetching computer position:", error);
-    }
-  };*/
   const getPlayerData = async () => {
     try {
       const value = await AsyncStorage.getItem("playerData");
@@ -1374,6 +1318,18 @@ export function FirstFloor({ diceValue }) {
     await AsyncStorage.setItem("computerData", JSON.stringify(updatedComputerData));
     setComputerData(updatedComputerData);
   };
+  const editLocationPlayer = async (item) => { //esto está mal
+    if (!playerData) return;
+    const updatedPlayerData = { ...playerData, currentLocation: item };
+    await AsyncStorage.setItem("playerData", JSON.stringify(updatedPlayerData));
+    setPlayerData(updatedPlayerData);
+  };
+  const editLocationComputer = async (item) => { //esto está mal, computerData está vacío
+    if (!computerData) return;
+    const updatedComputerData = { ...computerData, currentLocation: item };
+    await AsyncStorage.setItem("computerData", JSON.stringify(updatedComputerData));
+    setComputerData(updatedComputerData);
+  };
   const toComputerDiceRoll = () => {
     setComputerFloor(computerData.floor);
     playDiceSound();
@@ -1424,9 +1380,7 @@ export function FirstFloor({ diceValue }) {
     const dice = Number(diceValue);
     const forward = currentPos + dice;
     const backward = currentPos - dice;
-
-    let targetIndex = currentPos; // por defecto no se mueve
-
+    //let targetIndex = currentPos; // por defecto no se mueve, ésta es la clave para ir hacia atrás?
     console.log("Computadora en:", currentPos, "Dado:", dice);
 
     // === LÓGICA POR HABITACIÓN ===r
@@ -1435,11 +1389,11 @@ export function FirstFloor({ diceValue }) {
       currentPos <= 4 &&
       forward > 4
     ) {
-      setTimeout(() => roomClicked("Laboratorio"), 1500);
+      setTimeout(() => roomClickedByComputer("Laboratorio"), 1500);
       return;
     }
     if (data.roomToGo === "Salón" && currentPos <= 12 && forward > 12) {
-      setTimeout(() => roomClicked("Salón"), 1500);
+      setTimeout(() => roomClickedByComputer("Salón"), 1500);
       return;
     }
     if (
@@ -1447,7 +1401,7 @@ export function FirstFloor({ diceValue }) {
       currentPos <= 21 &&
       forward > 21
     ) {
-      setTimeout(() => roomClicked("Biblioteca"), 1500);
+      setTimeout(() => roomClickedByComputer("Biblioteca"), 1500);
       return;
     }
     if (
@@ -1455,7 +1409,7 @@ export function FirstFloor({ diceValue }) {
       currentPos <= 27 &&
       forward > 27
     ) {
-      setTimeout(() => roomClicked("Alcoba"), 1500);
+      setTimeout(() => roomClickedByComputer("Alcoba"), 1500);
       return;
     }
 
@@ -1476,7 +1430,6 @@ export function FirstFloor({ diceValue }) {
     setInstructionsText("Te toca tirar el dado!");
   };
   const stoneClickedByComputer = (index) => {
-    console.log("Computadora se mueve a:", index);
     setStoneComputerOccuped(index);
     if (index === 6 || index === 26) {
       setTimeout(() => playJump(), 100);
@@ -1487,25 +1440,20 @@ export function FirstFloor({ diceValue }) {
     setActivateLoop(true);
     setDisabledSquare(true);
     setDisabledDice(false); // Enable dice for player
-    // Teletransporte araña
     if (index === 6) {
-      setTimeout(() => {
-        setStoneComputerOccuped(26);
-        editPositionComputer(26);
-        storeComputerPosition(26);
-        scrollToComputerPosition(26);
-      }, 1200);
+      storeComputerPosition("26");
+      editPositionComputer(26);
+      setPosition(26); //hay que cambiarlo por editar el objeto ComputerData
+      setStoneComputerOccuped(26);
+      scrollToComputerPosition(26);
     }
     if (index === 26) {
-      setTimeout(() => {
-        setStoneComputerOccuped(6);
-        editPositionComputer(6);
-        storeComputerPosition(6);
-        scrollToComputerPosition(6);
-      }, 1200);
+      storeComputerPosition("6"); //hay que cambiarlo por editar el objeto ComputerData
+      editPositionComputer(6);
+      setPosition(6);
+      setStoneComputerOccuped(6);
+      scrollToComputerPosition(6);
     }
-
-    // Salir del tablero
     if (index === 0 || index === 29) {
     //setear cambio de planta y roomToGo en computerData...
     }
@@ -1541,7 +1489,7 @@ export function FirstFloor({ diceValue }) {
       editPositionPlayer(26);
       setPosition(26); //hay que cambiarlo por editar el objeto playerData
       setStoneOccuped(26);
-      scrollToComputerPosition(26);
+      scrollToPlayerPosition(26);
     }
     if (index === 26) {
       storePlayerPosition("6"); //hay que cambiarlo por editar el objeto playerData
@@ -1555,6 +1503,7 @@ export function FirstFloor({ diceValue }) {
     }, 1000);
   };
   const roomClicked = (room) => {
+    editLocationPlayer(room);
     playOpenDoor();
     setDisabledRoom1(true);
     setDisabledRoom2(true);
@@ -1572,6 +1521,7 @@ export function FirstFloor({ diceValue }) {
     });
   };
   const roomClickedByComputer = (room) => {
+    editLocationComputer(room);
     playOpenDoor();
     setDisabledDice(true);
     setDisabledSquare(true); // Disable squares after selection

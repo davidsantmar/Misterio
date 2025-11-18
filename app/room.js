@@ -3,6 +3,7 @@ import { ImageBackground, StyleSheet, Text, View, Image, Pressable, Animated } f
 import { useEffect, useState, useRef } from "react";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ShowCardsButton } from "../components/ShowCardsButton";
+import { ShowCardsToComputer } from "../components/ShowCardsToComputer";
 import { TouchIcon } from "../components/Icons";
 import { Audio } from "expo-av";
 
@@ -45,7 +46,6 @@ const gifMap = {
 
 export default function Room() {
   const { room } = useLocalSearchParams();
-  const { floor } = useLocalSearchParams();
   const { diceValue } = useLocalSearchParams();
   const router = useRouter();
   const [killersOpacity, setKillersOpacity] = useState(0);
@@ -84,6 +84,8 @@ export default function Room() {
   const [killerToAssumption, setKillerToAssumption] = useState(null);
   const [victimToAssumption, setVictimToAssumption] = useState(null);
   const [notCardsToShow, setNotCardsToShow] = useState(false);
+  const [computerAssumptionTurn, setComputerAssumptionTurn] = useState(false);
+  const [playerCardsToShow, setPlayerCardsToShow] = useState([]);
   const normalize = (str) => str?.trim().toLowerCase();
   useEffect(() => {
       Audio.setAudioModeAsync({
@@ -170,27 +172,8 @@ export default function Room() {
       setRoomPrefix('la');
        editPositionPlayer('21');
     }
-    getItem('computerData').then((value) => {
-      setComputerData(value);
-      console.log("computerData:", value);
-      if (value && value.computerCards) {
-        setComputerCards(value.computerCards);
-      } else {
-        console.warn("⚠️ computerData no encontrado o malformado:", value);
-      }
-      computerKillerToAssumption(value);
-      computerVictimToAssumption(value);
-    });
-    getItem('playerData').then((value1) => {
-      setPlayerData(value1);
-      setPlayerCards(value1.playerCards); 
-      console.log("playerData", value1);
-      if (value1 && value1.playerCards) {
-        setPlayerCards(value1.playerCards);
-      } else {
-        console.warn("⚠️ computerData no encontrado o malformado:", value1);
-      }
-    });
+    loadComputerData();
+    loadPlayerData();
   }, []);
   useEffect(() => {
     if (
@@ -199,6 +182,7 @@ export default function Room() {
       victimToAssumption &&
       computerData?.name
     ) {
+      setComputerAssumptionTurn(true);
       computerAssumption();
     }
   }, [playerData, killerToAssumption, victimToAssumption, computerData]);
@@ -239,7 +223,14 @@ export default function Room() {
       console.warn(`No se encontraron recursos para la sala: ${room}`);
     }
   }, [room]);
+  useEffect(() => {
+  if (computerData && computerData.computerCards) {
+    computerKillerToAssumption(computerData);
+    computerVictimToAssumption(computerData);
+  }
+}, [computerData]);
   const computerAssumption = () => { 
+    console.log("turno computadora", computerAssumptionTurn)
     if (!playerData?.playerCards || !killerToAssumption || !victimToAssumption || !computerData?.name) {
       console.warn("computerAssumption: faltan datos");
       return;
@@ -251,6 +242,7 @@ export default function Room() {
     const availablePlayerCards = playerData.playerCards.filter(card => 
       normalize(card) === normalizedKiller || normalize(card) === normalizedVictim || normalize(card) === normalizedRoom
     );
+    setPlayerCardsToShow(availablePlayerCards);
     console.log("Cartas normalizadas del jugador:", normalizedPlayerCards);
     console.log("Buscando:", normalizedKiller, "o", normalizedVictim , "o", normalizedRoom);
     console.log("Cartas encontradas:", availablePlayerCards);
@@ -268,7 +260,6 @@ export default function Room() {
       console.warn("computerKillerToAssumption: datos inválidos:", data);
       return;
     }
-
     const firstThreeCards = data.computerCards.slice(0, 3);
     const discardedCards = data.discardedCards || [];
     const availableKillers = (killers || []).filter(
@@ -283,7 +274,7 @@ export default function Room() {
   };
   const computerVictimToAssumption = (data) => {
     if (!data || !data.computerCards) {
-      console.warn("computerKillerToAssumption: datos inválidos:", data);
+      console.warn("computerVictimToAssumption: datos inválidos:", data);
       return;
     }
     const secondCards = data.computerCards.slice(3, 5);
@@ -372,27 +363,41 @@ export default function Room() {
       console.error("Error al reproducir shine:", error);
     }
   }
-  const getItem = async (key) => {
+   const loadComputerData = async () => {
     try {
-      const jsonValue = await AsyncStorage.getItem(key);
-      if (jsonValue === null) {
-        console.log(`Clave no encontrada: ${key}`);
-        return null;
+      const value = await AsyncStorage.getItem('computerData'); 
+      if (!value) {
+        console.warn("No hay computerData guardado");
+        return;
       }
-      try {
-        return JSON.parse(jsonValue);
-      } catch (parseError) {
-        console.error(`JSON inválido en ${key}:`, parseError);
-        return null;
+      const parsedData = JSON.parse(value);
+      console.log('parseado', parsedData)
+      setComputerData(parsedData);
+      if (parsedData.computerCards) {
+        setComputerCards(parsedData.computerCards);
       }
     } catch (error) {
-      console.error(`Error al leer ${key}:`, error);
-      return null;
+      console.error("Error cargando computerData:", error);
+    }
+  };
+  const loadPlayerData = async () => {
+    try {
+      const value = await AsyncStorage.getItem('playerData');
+      if (!value) {
+        console.warn("No hay playerData guardado");
+        return;
+      }
+      const parsedData = JSON.parse(value);
+      setPlayerData(parsedData);
+      if (parsedData.playerCards) {
+        setPlayerCards(parsedData.playerCards);
+      }
+    } catch (error) {
+      console.error("Error cargando playerData:", error);
     }
   };
   const editPositionPlayer = async (index) => {
     if (!playerData) return;
-    console.log()
     const updatedPlayerData = { ...playerData, position: index };
     await AsyncStorage.setItem("playerData", JSON.stringify(updatedPlayerData));
     setPlayerData(updatedPlayerData);
@@ -674,7 +679,12 @@ Revisa bien tus cartas`)
         </>
       ) : (
         <>
-      <ShowCardsButton onPress={handleShowCardsPress} />
+        {computerAssumptionTurn ? (
+          <ShowCardsToComputer cards={playerCardsToShow}  room={room} diceValue={diceValue} />
+        ) : (
+          <ShowCardsButton onPress={handleShowCardsPress} />
+        )}
+           
       <ImageBackground style={[styles.container, { opacity: opacityBack }]} source={gifSource} resizeMode="cover">
         <View style={styles.boardButtonContainer}>
           <Pressable style={styles.boardButton} onPress={toBoard}>
@@ -721,7 +731,6 @@ Revisa bien tus cartas`)
         {assumptionSection()}
       </ImageBackground>
       </>
-    
     )}
     </>
   );
