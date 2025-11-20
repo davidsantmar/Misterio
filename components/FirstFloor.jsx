@@ -935,8 +935,6 @@ export function FirstFloor({ diceValue }) {
         if (!turnValue) return;
 
         setTurn(turnValue);
-
-        // Cargar datos del jugador y computadora en paralelo
         const [playerValue, computerValue] = await Promise.all([
           getPlayerData(),
           getComputerData(),
@@ -1319,16 +1317,34 @@ export function FirstFloor({ diceValue }) {
     setComputerData(updatedComputerData);
   };
   const editLocationPlayer = async (item) => { //esto está mal
-    if (!playerData) return;
-    const updatedPlayerData = { ...playerData, currentLocation: item };
-    await AsyncStorage.setItem("playerData", JSON.stringify(updatedPlayerData));
-    setPlayerData(updatedPlayerData);
+    setPlayerData(prev => {
+      const updated = {
+        ...(prev || {}),                
+        currentLocation: newLocation,
+      };
+
+      // Guardamos en AsyncStorage de forma asíncrona (no bloquea el setState)
+      AsyncStorage.setItem("playerData", JSON.stringify(updated)).catch(err =>
+        console.error("Error guardando playerData:", err)
+      );
+
+      return updated;
+    });
   };
-  const editLocationComputer = async (item) => { //esto está mal, computerData está vacío
-    if (!computerData) return;
-    const updatedComputerData = { ...computerData, currentLocation: item };
-    await AsyncStorage.setItem("computerData", JSON.stringify(updatedComputerData));
-    setComputerData(updatedComputerData);
+  const editLocationComputer = async (newLocation) => {
+    setComputerData(prev => {
+      const updated = {
+        ...(prev || {}),                
+        currentLocation: newLocation,
+      };
+
+      // Guardamos en AsyncStorage de forma asíncrona (no bloquea el setState)
+      AsyncStorage.setItem("computerData", JSON.stringify(updated)).catch(err =>
+        console.error("Error guardando computerData:", err)
+      );
+
+      return updated;
+    });
   };
   const toComputerDiceRoll = () => {
     setComputerFloor(computerData.floor);
@@ -1380,7 +1396,7 @@ export function FirstFloor({ diceValue }) {
     const dice = Number(diceValue);
     const forward = currentPos + dice;
     const backward = currentPos - dice;
-    //let targetIndex = currentPos; // por defecto no se mueve, ésta es la clave para ir hacia atrás?
+    let targetIndex = currentPos; // por defecto no se mueve, ésta es la clave para ir hacia atrás?
     console.log("Computadora en:", currentPos, "Dado:", dice);
 
     // === LÓGICA POR HABITACIÓN ===r

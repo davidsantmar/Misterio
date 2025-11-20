@@ -46,6 +46,7 @@ export function ShowCardsToComputer({ cards, room, diceValue }) {
   const [card2, setCard2] = useState("");
   const [shine, setShine] = useState(null);
   const [computerData, setComputerData] = useState(null);
+  const [playerData, setPlayerData] = useState(null);
   const router = useRouter();
 
   const normalize = (str) =>
@@ -71,8 +72,10 @@ export function ShowCardsToComputer({ cards, room, diceValue }) {
     };
   }, [shine]);
   useEffect(() => {
+    
     const init = async () => {
       try {
+        
         const value = await AsyncStorage.getItem("computerData");
         if (value !== null) {
           const parsedData = JSON.parse(value);
@@ -80,6 +83,15 @@ export function ShowCardsToComputer({ cards, room, diceValue }) {
           console.log('computerData parseado y guardado:', parsedData);
         } else {
           console.log('No hay datos guardados en computerData');
+        }
+        const value1 = await AsyncStorage.getItem("playerData");
+        console.log("value1", value1)
+        if (value1 !== null) {
+          const parsedData1 = JSON.parse(value1);
+          setPlayerData(parsedData1);
+          console.log('playerData parseado y guardado:', parsedData1);
+        } else {
+          console.log('No hay datos guardados en playerData');
         }
       } catch (error) {
         console.error("Error leyendo computerData:", error);
@@ -162,11 +174,26 @@ export function ShowCardsToComputer({ cards, room, diceValue }) {
       console.error("Error al guardar computerData:", error);
     }
   };
+  const playerMovement = () => {
+    console.log('playData', playerData)
+    if (playerData.currentLocation === room){
+      router.push({
+        pathname: "/room",
+        params: { room: room, floor: playerData.floor, diceValue: diceValue  },
+      });
+    }else if (playerData.currentLocation === 'board'){
+      router.push({
+        pathname: "/dice",
+      });
+    }
+  } 
   const showOcurrences = (item) => { //si item = room cambiar RoomToGo e ir a board
     playShine();
     updateComputerData(item);
     storeTurn("player");
-
+    setTimeout(() => {
+      playerMovement();
+    }, 1200)
     /*if (item === room) {
       router.push({
         pathname: "/board",
