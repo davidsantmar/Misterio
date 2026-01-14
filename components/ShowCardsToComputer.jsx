@@ -47,17 +47,16 @@ export function ShowCardsToComputer({ cards, room, diceValue }) {
   const [shine, setShine] = useState(null);
   const [computerData, setComputerData] = useState(null);
   const [playerData, setPlayerData] = useState(null);
+  const [text, setText] = useState("");
   const router = useRouter();
-
-  const normalize = (str) =>
-    String(str || "")
-      .trim()
-      .toLowerCase();
   useEffect(() => {
     console.log("cards To Show", cards);
     console.log("habir", room);
     showCards();
   }, [cards, room]);
+  useEffect (() => {
+    setText("Tus cartas para mostrar")
+  }, [text])
   useEffect(() => {
     Audio.setAudioModeAsync({
       allowsRecordingIOS: false,
@@ -72,10 +71,8 @@ export function ShowCardsToComputer({ cards, room, diceValue }) {
     };
   }, [shine]);
   useEffect(() => {
-    
     const init = async () => {
       try {
-        
         const value = await AsyncStorage.getItem("computerData");
         if (value !== null) {
           const parsedData = JSON.parse(value);
@@ -129,6 +126,16 @@ export function ShowCardsToComputer({ cards, room, diceValue }) {
       setCard8ToShow("Salon");
     }
   }, [card1ToShow, card2ToShow ]);*/
+  const normalize = (str) => {
+    if (!str) return "";
+    return String(str)
+      .trim()
+      .toLowerCase()
+      .normalize("NFD")                   // Separa tildes (á → a + ◌́)
+      .replace(/[\u0300-\u036f]/g, "")    // Elimina tildes y diacríticos
+      .replace(/\s+/g, "")                // Elimina TODOS los espacios
+      .replace(/[^a-z0-9]/g, "");         // Opcional: elimina caracteres raros (mejor NO, por "áma")
+  };
   const showCards = () => {
     setPosition("relative");
     const normalizedCards = cards.map((cardName) => normalize(clues[cardName]));
@@ -174,12 +181,12 @@ export function ShowCardsToComputer({ cards, room, diceValue }) {
       console.error("Error al guardar computerData:", error);
     }
   };
-  const playerMovement = () => {
+  const playerMovement = (item) => {
     console.log('playData', playerData)
-    if (playerData.currentLocation === room){
+    if (playerData.currentLocation === room){ //mal
       router.push({
         pathname: "/room",
-        params: { room: room, floor: playerData.floor, diceValue: diceValue  },
+        params: { room: room, diceValue: diceValue  },
       });
     }else if (playerData.currentLocation === 'board'){
       router.push({
@@ -187,13 +194,14 @@ export function ShowCardsToComputer({ cards, room, diceValue }) {
       });
     }
   } 
-  const showOcurrences = (item) => { //si item = room cambiar RoomToGo e ir a board
+  const showOcurrences = (item) => { //si item = room computerData RoomToGo debe cambiarse e ir a board
     playShine();
     updateComputerData(item);
     storeTurn("player");
+    setText(`Has mostrado la carta ${item}`)
     setTimeout(() => {
-      playerMovement();
-    }, 1200)
+      playerMovement(item);
+    }, 2000)
     /*if (item === room) {
       router.push({
         pathname: "/board",
@@ -212,7 +220,7 @@ export function ShowCardsToComputer({ cards, room, diceValue }) {
           left: 300,
         }}
       >
-        <Text style={styles.yourCardsText}>Tus cartas para mostrar</Text>
+        <Text style={styles.yourCardsText}>{text}</Text>
 
         {cards.map((cardName, index) => {
           const cardConfig = [

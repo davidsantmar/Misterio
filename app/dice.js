@@ -8,10 +8,17 @@ export default function Dice() {
   const [currentPlayer, setCurrentPlayer] = useState(null);
   const [currentTurn, setCurrentTurn] = useState(null);
   useEffect(() => {
-    getTurn().then(() => {
-      fetchPlayerAndSetTurn();
-    });
+    const init = async () => {
+      const turn = await getTurn();
+      if (turn) {
+        fetchPlayerAndSetTurn(turn);
+      }
+    };
+
+    init();
   }, []);
+
+
   const getTurn = async () => {
     try {
       const turn = await AsyncStorage.getItem('turn');
@@ -27,23 +34,24 @@ export default function Dice() {
     }
   };
   
-  const fetchPlayerAndSetTurn = async () => {
+  const fetchPlayerAndSetTurn = async (turn) => {
     try {
-      if (currentTurn === null) return;
-      if (currentTurn === 'playerData') {
+      if (turn === 'playerData') {
         const value = await AsyncStorage.getItem("playerData");
         const playerData = value ? JSON.parse(value) : null;
         setCurrentPlayer(playerData);
-      } else if (currentTurn === 'computerData') {
+      } 
+      else if (turn === 'computerData') {
         const value = await AsyncStorage.getItem("computerData");
         const computerData = value ? JSON.parse(value) : null;
         setCurrentPlayer(computerData);
       }
-      
     } catch (e) {
       console.log("❌ Error in fetchPlayerAndSetTurn:", e);
     }
   };
+
+
   return (
     <View style={{ flex: 1 }}>
       <DiceRoll />

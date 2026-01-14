@@ -371,7 +371,6 @@ export default function Room() {
         return;
       }
       const parsedData = JSON.parse(value);
-      console.log('parseado', parsedData)
       setComputerData(parsedData);
       if (parsedData.computerCards) {
         setComputerCards(parsedData.computerCards);

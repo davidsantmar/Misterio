@@ -25,7 +25,7 @@ export function DiceRoll() {
     "Panteón",
     "Bodega",
   ]);
-  const [computerData, setComputerData] = useState({});
+  const [computerData, setComputerData] = useState(null);
   const [playerData, setPlayerData] = useState({});
   const [floorToGo, setFloorToGo] = useState(null);
   const [turn, setTurn] = useState(null);
@@ -172,7 +172,11 @@ export function DiceRoll() {
       const currentData = storedData ? JSON.parse(storedData) : null;
       if (!currentData) return;
 
-      const updatedComputerData = { ...currentData, floor: floor };
+      const updatedComputerData = {
+        ...currentData,
+        position: currentData.position ?? 0, // protege position
+        floor: floor,
+      };
       await AsyncStorage.setItem(
         "computerData",
         JSON.stringify(updatedComputerData)
@@ -187,7 +191,11 @@ export function DiceRoll() {
       const storedData = await AsyncStorage.getItem("computerData");
       const currentData = storedData ? JSON.parse(storedData) : null;
       if (!currentData) return;
-      const updatedComputerData = { ...currentData, roomToGo: roomToGo };
+      const updatedComputerData = {
+        ...currentData,
+        position: currentData.position ?? 0, // protege position
+        roomToGo: roomToGo,
+      };
       await AsyncStorage.setItem(
         "computerData",
         JSON.stringify(updatedComputerData)
@@ -198,6 +206,7 @@ export function DiceRoll() {
     }
   };
   const computerRoomToGo = async (data) => {
+    if (!data) return {};  
     if (data.roomToGo === "") {
       const compare = (rooms || []).filter(
         (elemento) => !(data.computerCards || []).includes(elemento)
@@ -234,13 +243,13 @@ export function DiceRoll() {
     return { roomToGo: data.roomToGo, floor: data.floor };
   };
   const computerMovement = async (computerData) => {
+     if (!computerData) return;  
     const { floor } = await computerRoomToGo(computerData); // Esperar los resultados
     router.push({
       pathname: "/board",
       params: { diceValue: diceValue.toString(), floor: floor }, // Usar floor calculado
     });
   };
-
   const renderDiceFace = (value) => {
     switch (value) {
       case 1:
