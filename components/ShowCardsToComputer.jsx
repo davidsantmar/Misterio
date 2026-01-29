@@ -214,14 +214,13 @@ export function ShowCardsToComputer({ cards, room, diceValue }) {
       <View
         style={{
           position: "absolute",
-          bottom: 680,
+          bottom: 410,
           alignSelf: "center",
           zIndex: 1,
-          left: 300,
+          left: 340,
         }}
       >
         <Text style={styles.yourCardsText}>{text}</Text>
-
         {cards.map((cardName, index) => {
           const cardConfig = [
             {
@@ -279,12 +278,16 @@ const styles = StyleSheet.create({
     height: 120,
     flexDirection: "column",
     alignItems: "center",
-    zIndex: 5,
+    zIndex: 5
   },
   yourCardsText: {
     color: "white",
     padding: 2,
     fontSize: 10,
+    backgroundColor: "#6200ee",
+    borderRadius: 5,
+    width: 70,
+
   },
   card: {
     width: 60,

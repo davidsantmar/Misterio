@@ -125,9 +125,9 @@ export function FirstFloor({ diceValue }) {
       // ========= COMPUTER =========
       let computerIndex = null;
 
-      if (computerValue) {
+      if (computerValue?.position !== undefined) {
         setComputerData(computerValue);
-        if (computerValue.floor === "firstFloor") {
+        if (computerValue.floor === "firstFloor") { 
           computerIndex = Number(computerValue.position);
           setIsVisible(true);
           setStoneComputerOccuped(computerIndex);
@@ -552,36 +552,34 @@ export function FirstFloor({ diceValue }) {
     }
   };
 
-  const editLocationPlayer = async (newLocation) => { 
-    setPlayerData(prev => {
-      const updated = {
-        ...(prev || {}),                
-        currentLocation: newLocation,
-      };
+  const editLocationPlayer = async (newLocation) => {
+  try {
+    const current = await getPlayerData() || {};   // siempre fresco
+    const updated = {
+      ...current,
+      currentLocation: newLocation,
+    };
 
-      // Guardamos en AsyncStorage de forma asíncrona (no bloquea el setState)
-      AsyncStorage.setItem("playerData", JSON.stringify(updated)).catch(err =>
-        console.error("Error guardando playerData:", err)
-      );
-
-      return updated;
-    });
-  };
+    await AsyncStorage.setItem("playerData", JSON.stringify(updated));
+    setPlayerData(updated);   // actualiza estado
+  } catch (err) {
+    console.error("Error editLocationPlayer:", err);
+  }
+};
   const editLocationComputer = async (newLocation) => {
-    setComputerData(prev => {
-      const updated = {
-        ...(prev || {}),                
-        currentLocation: newLocation,
-      };
+  try {
+    const current = await getComputerData() || {};   // siempre fresco
+    const updated = {
+      ...current,
+      currentLocation: newLocation,
+    };
 
-      // Guardamos en AsyncStorage de forma asíncrona (no bloquea el setState)
-      AsyncStorage.setItem("computerData", JSON.stringify(updated)).catch(err =>
-        console.error("Error guardando computerData:", err)
-      );
-
-      return updated;
-    });
-  };
+    await AsyncStorage.setItem("computerData", JSON.stringify(updated));
+    setComputerData(updated);   // actualiza estado
+  } catch (err) {
+    console.error("Error editLocationComputer:", err);
+  }
+};
   const toComputerDiceRoll = () => {
     setComputerFloor(computerData.floor);
     playDiceSound();

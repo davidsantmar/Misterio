@@ -44,6 +44,7 @@ export default function Dice() {
       else if (turn === 'computerData') {
         const value = await AsyncStorage.getItem("computerData");
         const computerData = value ? JSON.parse(value) : null;
+        console.log("Computer Data:", computerData);
         setCurrentPlayer(computerData);
       }
     } catch (e) {
