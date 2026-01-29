@@ -51,7 +51,6 @@ export function ShowCardsToComputer({ cards, room, diceValue }) {
   const router = useRouter();
   useEffect(() => {
     console.log("cards To Show", cards);
-    console.log("habir", room);
     showCards();
   }, [cards, room]);
   useEffect (() => {
@@ -182,7 +181,6 @@ export function ShowCardsToComputer({ cards, room, diceValue }) {
     }
   };
   const playerMovement = (item) => {
-    console.log('playData', playerData)
     if (playerData.currentLocation === room){ //mal
       router.push({
         pathname: "/room",
@@ -214,10 +212,10 @@ export function ShowCardsToComputer({ cards, room, diceValue }) {
       <View
         style={{
           position: "absolute",
-          bottom: 410,
+          bottom: 350,
           alignSelf: "center",
           zIndex: 1,
-          left: 340,
+          left: 300,
         }}
       >
         <Text style={styles.yourCardsText}>{text}</Text>
@@ -278,7 +276,7 @@ const styles = StyleSheet.create({
     height: 120,
     flexDirection: "column",
     alignItems: "center",
-    zIndex: 5
+    zIndex: 5,
   },
   yourCardsText: {
     color: "white",

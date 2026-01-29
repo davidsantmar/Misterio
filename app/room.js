@@ -86,6 +86,8 @@ export default function Room() {
   const [notCardsToShow, setNotCardsToShow] = useState(false);
   const [computerAssumptionTurn, setComputerAssumptionTurn] = useState(false);
   const [playerCardsToShow, setPlayerCardsToShow] = useState([]);
+  const [investigatorPrefix, setInvestigatorPrefix] = useState(null);
+  
   const normalize = (str) => str?.trim().toLowerCase();
   useEffect(() => {
       Audio.setAudioModeAsync({
@@ -224,13 +226,21 @@ export default function Room() {
     }
   }, [room]);
   useEffect(() => {
-  if (computerData && computerData.computerCards) {
-    computerKillerToAssumption(computerData);
-    computerVictimToAssumption(computerData);
+    if (computerData && computerData.computerCards) {
+      computerKillerToAssumption(computerData);
+      computerVictimToAssumption(computerData);
+    }
+  }, [computerData]);
+  const showPrefixes = () => {
+    if (computerData?.name === 'Inspector David' ){
+      setInvestigatorPrefix('El')
+    }else if(computerData?.name === 'Detective Nely' ){
+      setInvestigatorPrefix('La');
+    }
   }
-}, [computerData]);
   const computerAssumption = () => { 
-    console.log("turno computadora", computerAssumptionTurn)
+    console.log("turno computadora", computerAssumptionTurn);
+  
     if (!playerData?.playerCards || !killerToAssumption || !victimToAssumption || !computerData?.name) {
       console.warn("computerAssumption: faltan datos");
       return;
@@ -252,7 +262,7 @@ export default function Room() {
       setNotCardsToShow(false); 
     }
     setInstructionText(
-      `${computerData.name} supone que ${killerToAssumption} ha asesinado ${victimToAssumption} en ${room}. Presiona la carta que quieras mostrarle.`
+      `${investigatorPrefix} ${computerData.name} supone que ${killerPrefix} ${killerToAssumption} ha asesinado ${victimPrefix} ${victimToAssumption} en ${roomPrefix} ${room}. Presiona la carta que quieras mostrarle.`
     );
   };
   const computerKillerToAssumption = (data) => {
@@ -271,6 +281,25 @@ export default function Room() {
         : null;
     console.log("Killer elegido por el computador:", killerToAssumption);
     setKillerToAssumption(killerToAssumption);
+   if (killerToAssumption === 'Mr Hyde'){
+      setKillerPrefix('')
+    }
+    if (killerToAssumption === 'Drácula'){
+      setKillerPrefix('')
+    }
+    if (killerToAssumption === 'Frankenstein'){
+      setKillerPrefix('')
+    }
+    if (killerToAssumption === 'Hombre lobo'){
+      setKillerPrefix('el')
+    }
+    if (killerToAssumption === 'Fantasma'){
+      setKillerPrefix('el')
+    }
+    if (killerToAssumption === 'Momia'){
+      setKillerPrefix('la')
+    }
+    showPrefixes();
   };
   const computerVictimToAssumption = (data) => {
     if (!data || !data.computerCards) {
@@ -288,6 +317,25 @@ export default function Room() {
         : null;
     console.log("Victim elegido por el computador:", victimToAssumption);
     setVictimToAssumption(victimToAssumption);
+     //victim
+    if (victimToAssumption === 'Conde'){
+      setVictimPrefix('al')
+    }
+    if (victimToAssumption === 'Condesa'){
+      setVictimPrefix('a la')
+    }
+    if (victimToAssumption === 'Jardinero'){
+      setVictimPrefix('al')
+    }
+    if (victimToAssumption === 'Ama de llaves'){
+      setVictimPrefix('al')
+    }
+    if (victimToAssumption === 'Mayordomo'){
+      setVictimPrefix('al')
+    }
+    if (victimToAssumption === 'Doncella'){
+      setVictimPrefix('a la')
+    }
   };
   const handleShowCardsPress = () => {
     !cardsDeployed ? playShowcards() : playHidecards();
@@ -435,13 +483,13 @@ export default function Room() {
     showSection("characters")
     setKiller(killer);
     if (killer === 'Mr Hyde'){
-      setKillerPrefix(null)
+      setKillerPrefix('')
     }
     if (killer === 'Drácula'){
-      setKillerPrefix(null)
+      setKillerPrefix('')
     }
     if (killer === 'Frankenstein'){
-      setKillerPrefix(null)
+      setKillerPrefix('')
     }
     if (killer === 'Hombre lobo'){
       setKillerPrefix('el')
@@ -536,7 +584,7 @@ export default function Room() {
         </View>
       )
     }else if (selectedSection === room) {
-      return null;
+      return '';
     }
     return null; // Return nothing if no section is selected
   };
@@ -685,11 +733,13 @@ Revisa bien tus cartas`)
         )}
            
       <ImageBackground style={[styles.container, { opacity: opacityBack }]} source={gifSource} resizeMode="cover">
+        { computerAssumptionTurn ? null : (
         <View style={styles.boardButtonContainer}>
           <Pressable style={styles.boardButton} onPress={toBoard}>
             <Text style={styles.boardButtonText}>Al pasillo</Text>
           </Pressable>
-        </View>
+        </View>)} 
+        { computerAssumptionTurn ? null : (
         <View style={styles.envelopeContainer}>
           <Pressable style={styles.envelope} onPress={() => showSection("killers")}>
             <Text style={styles.textEnvelope}>MIS</Text>
@@ -703,7 +753,7 @@ Revisa bien tus cartas`)
             <Text style={styles.textEnvelope}>RIO</Text>
             <Text style={styles.roomEnvelope}>{room}</Text>
           </Pressable>
-        </View>
+        </View> )}
         <View style={styles.instructionsContainer}>
           <View style={styles.instructionsCloud}>
             <Text style={styles.text}>{instructionText}</Text>
@@ -871,6 +921,7 @@ const styles = StyleSheet.create({
   },
   instructionsContainer: {
     padding: 15,
+    marginTop: 75,
   },
   instructionsCloud: {
     backgroundColor: "rgba(255, 255, 255, 0.8)",

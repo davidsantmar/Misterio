@@ -322,7 +322,7 @@ export function DiceRoll() {
 const styles = StyleSheet.create({
   container: { flex: 1, alignItems: "center" },
   header: {
-    height: 80,
+    height: 55,
     width: 250,
     opacity: 0.9,
     alignItems: "center",
@@ -330,7 +330,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     marginTop: 300,
   },
-  header_text: { fontFamily: "Creepster-Regular", fontSize: 40 },
+  header_text: { fontFamily: "Creepster-Regular", fontSize: 28 },
   dice: {
     width: 100,
     height: 100,
