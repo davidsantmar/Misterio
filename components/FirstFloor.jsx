@@ -90,14 +90,7 @@ export function FirstFloor({ diceValue }) {
   const [computerPosition, setComputerPosition] = useState(null);
   const [turn, setTurn] = useState(null);
   const [leftDisplacement, setLeftDisplacement] = useState(0);
-  const [playerInRoom1, setPlayerInRoom1] = useState(false);
-  const [playerInRoom2, setPlayerInRoom2] = useState(false);
-  const [playerInRoom3, setPlayerInRoom3] = useState(false);
-  const [playerInRoom4, setPlayerInRoom4] = useState(false);
-  const [computerInRoom1, setComputerInRoom1] = useState(false);
-  const [computerInRoom2, setComputerInRoom2] = useState(false);
-  const [computerInRoom3, setComputerInRoom3] = useState(false);
-  const [computerInRoom4, setComputerInRoom4] = useState(false);
+
   useEffect(() => {
     console.log("computerData", computerData)
     console.log("playerData", playerData)
@@ -224,30 +217,8 @@ export function FirstFloor({ diceValue }) {
     loop.start();
     return () => loop.stop(); // Cleanup
   }, [activateLoop, bounceAnim]); // Depend on activateLoop to re-run when it changes
-  useEffect(() => {
-      if (computerData.currentLocation === "Laboratorio"){
-        setPlayerInRoom1(true);
-      }else if (computerData.currentLocation === "Salón"){
-        setPlayerInRoom3(true);
-      }else if (computerData.currentLocation === "Biblioteca"){
-        setPlayerInRoom2(true);
-      }else if (computerData.currentLocation === "Alcoba"){
-        setPlayerInRoom4(true);
-      }
-  }, [computerData.currentLocation])
-  useEffect(() => {
-      if (playerData.currentLocation === "Laboratorio"){
-        setPlayerInRoom1(true);
-      }else if (playerData.currentLocation === "Salón"){
-        setPlayerInRoom3(true);
-        
-      }else if (playerData.currentLocation === "Biblioteca"){
-        setPlayerInRoom2(true);
-        
-      }else if (playerData.currentLocation === "Alcoba"){
-        setPlayerInRoom4(true);
-      }
-  }, [playerData.currentLocation])
+
+
   const fetchPlayer = async (data) => {
     try {
       if (!data?.name) return;
@@ -535,7 +506,7 @@ export function FirstFloor({ diceValue }) {
     }
   };
 
-  const editPositionComputer = async (index) => { //no se actualiza el dato con el dado lanzado
+  const editPositionComputer = async (index) => { 
     try {
       const existing = await getComputerData(); // siempre cargamos desde AsyncStorage
 
@@ -566,20 +537,24 @@ export function FirstFloor({ diceValue }) {
     console.error("Error editLocationPlayer:", err);
   }
 };
-  const editLocationComputer = async (newLocation) => {
-  try {
-    const current = await getComputerData() || {};   // siempre fresco
-    const updated = {
-      ...current,
-      currentLocation: newLocation,
-    };
+ const editLocationComputer = async (newLocation) => {
+    try {
+      console.log('editLocationComputer →', newLocation);
+      const current = await getComputerData() || {};
+      const updated = {
+        ...current,
+        currentLocation: newLocation,
+        // Opcional: también puedes limpiar position si sales del tablero
+        ...(newLocation !== "board" ? { position: null } : {}),
+        ...(newLocation === "board" ? { roomToGo: null } : {}), // si ya no aplica
+      };
 
-    await AsyncStorage.setItem("computerData", JSON.stringify(updated));
-    setComputerData(updated);   // actualiza estado
-  } catch (err) {
-    console.error("Error editLocationComputer:", err);
-  }
-};
+      await AsyncStorage.setItem("computerData", JSON.stringify(updated));
+      setComputerData(updated);
+    } catch (err) {
+      console.error("Error editLocationComputer:", err);
+    }
+  };
   const toComputerDiceRoll = () => {
     setComputerFloor(computerData.floor);
     playDiceSound();
@@ -606,6 +581,52 @@ export function FirstFloor({ diceValue }) {
       console.log("❌ Error reading turn:", e);
       return null; // O manejar el error de otra manera
     }
+  };
+   const stoneClickedByComputer = (index) => {
+    setStoneComputerOccuped(index);
+    //editLocationComputer("board");
+    editPositionComputer(index);
+    if (index === 6 || index === 26) {
+      setTimeout(() => playJump(), 100);
+    } else {
+      playFootSteps();
+    }
+    setActivateLoop(true);
+    setDisabledSquare(true);
+    setDisabledDice(false); // Enable dice for player
+    if (index === 6) {
+      editPositionComputer(26);
+      setStoneComputerOccuped(26);
+      scrollToComputerPosition(26);
+    }
+    if (index === 26) {
+      editPositionComputer(6);
+      setStoneComputerOccuped(6);
+      scrollToComputerPosition(6);
+    }
+    if (index === 0 || index === 29) {
+    //setear cambio de planta y roomToGo en computerData...
+    }
+    storeTurn("player");
+  };
+  const roomClickedByComputer = async (room) => {
+    await editLocationComputer(room);
+    playOpenDoor();
+    setDisabledDice(true);
+    setDisabledSquare(true); // Disable squares after selection
+    if (room === "Laboratorio") {
+      editPositionComputer(4);
+    } else if (room === "Biblioteca") {
+      editPositionComputer(21);
+    } else if (room === "Salón") {
+      editPositionComputer(12);
+    } else if (room === "Alcoba") {
+      editPositionComputer(27);
+    }
+    router.push({
+      pathname: "/room",
+      params: { room: room, floor: 'firstFloor', diceValue: diceValue  },
+    });
   };
   const computerMovement = (data) => {
     console.log('data', data)
@@ -656,10 +677,14 @@ export function FirstFloor({ diceValue }) {
 
     // Si pasa o llega exactamente a la casilla de la habitación → entra
     if (positionsToCheck.includes(targetPos) || chosenPos === targetPos) {
-      console.log(`¡Computadora entra a ${roomToGo}!`);
-      setTimeout(() => roomClickedByComputer(roomToGo), 1200);
-      return;
-    }
+        console.log(`Computadora entra a ${roomToGo}!`);
+        setTimeout(() => {
+          console.log("Ahora debería llamar a roomClickedByComputer con:", roomToGo);
+          roomClickedByComputer(roomToGo);
+        }, 1200);
+        return;
+      }
+
     // Movimiento normal por el tablero
     console.log(`Computadora se mueve a casilla ${chosenPos}`);
     stoneClickedByComputer(chosenPos);
@@ -669,33 +694,7 @@ export function FirstFloor({ diceValue }) {
       setInstructionsText("Te toca tirar el dado!");
     }, 800);
   };
-  const stoneClickedByComputer = (index) => {
-    setStoneComputerOccuped(index);
-    editLocationComputer("board");
-    editPositionComputer(index);
-    if (index === 6 || index === 26) {
-      setTimeout(() => playJump(), 100);
-    } else {
-      playFootSteps();
-    }
-    setActivateLoop(true);
-    setDisabledSquare(true);
-    setDisabledDice(false); // Enable dice for player
-    if (index === 6) {
-      editPositionComputer(26);
-      setStoneComputerOccuped(26);
-      scrollToComputerPosition(26);
-    }
-    if (index === 26) {
-      editPositionComputer(6);
-      setStoneComputerOccuped(6);
-      scrollToComputerPosition(6);
-    }
-    if (index === 0 || index === 29) {
-    //setear cambio de planta y roomToGo en computerData...
-    }
-    storeTurn("player");
-  };
+ 
   const stoneClicked = (index) => {
     storeTurn("computer");
     setStoneOccuped(index);
@@ -733,8 +732,8 @@ export function FirstFloor({ diceValue }) {
       toComputerDiceRoll();
     }, 1000);
   };
-  const roomClicked = (room) => {
-    editLocationPlayer(room);
+  const roomClicked = async (room) => {
+    await editLocationPlayer(room);
     playOpenDoor();
     setDisabledRoom1(true);
     setDisabledRoom2(true);
@@ -752,16 +751,8 @@ export function FirstFloor({ diceValue }) {
     });
     
   };
-  const roomClickedByComputer = (room) => {
-    editLocationComputer(room);
-    playOpenDoor();
-    setDisabledDice(true);
-    setDisabledSquare(true); // Disable squares after selection
-    router.push({
-      pathname: "/room",
-      params: { room: room, floor: 'firstFloor', diceValue: diceValue  },
-    });
-  };
+  
+
   return (
     <>
       {turn === "player" ? (
@@ -808,8 +799,6 @@ export function FirstFloor({ diceValue }) {
           ref={scrollRef}
           scrollEventThrottle={16}
           showsVerticalScrollIndicator={true}
-          // Opcional: vincular con scrollAnim para más control
-          // contentOffset={{ x: 0, y: scrollAnim }}
         >
           <View style={styles.container}>
             <View style={styles.leftRoomsContainer}>
@@ -818,22 +807,33 @@ export function FirstFloor({ diceValue }) {
                 onPress={() => roomClicked("Laboratorio")}
                 style={[styles.room1Container, { borderColor: room1Color }]}
               >
-                  
-                <ImageBackground
+               <ImageBackground
                   style={styles.room}
                   source={require("../assets/images/boardImages/Labo.png")}
+                  resizeMode="cover"         
                 >
-                  {playerInRoom1 ? <Image
-                    style={[styles.playerContainer, {marginTop: 60, marginLeft: 10}]}
-                    source={playerImage}
-                    resizeMode="cover"
-                  /> : null }
-                  {computerInRoom1 ? <Image
-                    style={[styles.computerContainer, {marginTop: 80, marginLeft: 40}]}
-                    source={playerImage}
-                    resizeMode="cover"
-                  /> : null }
-              </ImageBackground>
+                  
+                {playerData.currentLocation === 'Laboratorio' && (
+                    <Image
+                      style={[
+                        styles.playerContainer,
+                        { position: 'absolute', top: 140, left: 20 } 
+                      ]}
+                      source={playerImage}
+                      resizeMode="contain"    
+                    />
+                    )}
+                  {computerData.currentLocation === 'Laboratorio' && (
+                    <Image
+                      style={[
+                        styles.computerContainer,
+                        { position: 'absolute', bottom: 150, zIndex: 2, left: 70 } 
+                      ]}
+                      source={computerImage}     
+                      resizeMode="contain"
+                    />
+                    )}
+                </ImageBackground>
               </Pressable>
               <Pressable
                 disabled={disabledRoom2}
@@ -843,17 +843,29 @@ export function FirstFloor({ diceValue }) {
                 <ImageBackground
                   style={styles.room}
                   source={require("../assets/images/boardImages/Library.png")}
+                  resizeMode="cover"         
                 >
-                  {playerInRoom2 ? <Image
-                    style={[styles.playerContainer, {marginTop: 60, marginLeft: 10}]}
-                    source={playerImage}
-                    resizeMode="cover"
-                  /> : null }
-                  {computerInRoom2 ? <Image
-                    style={[styles.computerContainer, {marginTop: 80, marginLeft: 40}]}
-                    source={playerImage}
-                    resizeMode="cover"
-                  /> : null }
+                  {playerData.currentLocation === 'Biblioteca' && (
+                    <Image
+                      style={[
+                        styles.playerContainer,
+                        { position: 'absolute', top: 140, left: 20 } 
+                      ]}
+                      source={playerImage}
+                      resizeMode="contain"    
+                    />
+                  )}
+
+                  {computerData.currentLocation === 'Biblioteca' && (
+                    <Image
+                      style={[
+                        styles.computerContainer,
+                        { position: 'absolute', top: 150, left: 70 } 
+                      ]}
+                      source={computerImage}     
+                      resizeMode="contain"
+                    />
+                  )}
                 </ImageBackground>
               </Pressable>
             </View>
@@ -943,17 +955,29 @@ export function FirstFloor({ diceValue }) {
                 <ImageBackground
                   style={styles.room}
                   source={require("../assets/images/boardImages/Lounge.png")}
+                  resizeMode="cover"         
                 >
-                  {playerInRoom3 ? <Image
-                    style={[styles.playerContainer, {marginTop: 60, marginLeft: 10}]}
-                    source={playerImage}
-                    resizeMode="cover"
-                  /> : null}
-                  {computerInRoom3 ? <Image
-                    style={[styles.computerContainer, {marginTop: 80, marginLeft: 40}]}
-                    source={playerImage}
-                    resizeMode="cover"
-                  /> : null }
+                  {playerData.currentLocation === 'Salón' && (
+                    <Image
+                      style={[
+                        styles.playerContainer,
+                        { position: 'absolute', top: 140, left: 20 } 
+                      ]}
+                      source={playerImage}
+                      resizeMode="contain"    
+                    />
+                  )}
+
+                  {computerData.currentLocation === 'Salón' && (
+                    <Image
+                      style={[
+                        styles.computerContainer,
+                        { position: 'absolute', top: 150, left: 70 } 
+                      ]}
+                      source={computerImage}     
+                      resizeMode="contain"
+                    />
+                  )}
                 </ImageBackground>
               </Pressable>
               <Pressable
@@ -964,17 +988,29 @@ export function FirstFloor({ diceValue }) {
                 <ImageBackground
                   style={styles.room}
                   source={require("../assets/images/boardImages/Bedroom.png")}
+                  resizeMode="cover"           // ← casi siempre lo necesitas
                 >
-                  {playerInRoom4 ? <Image
-                    style={[styles.playerContainer, {marginTop: 60, marginLeft: 10}]}
-                    source={playerImage}
-                    resizeMode="cover"
-                  /> : null}
-                  {computerInRoom4 ? <Image
-                    style={[styles.computerContainer, {marginTop: 80, marginLeft: 40}]}
-                    source={playerImage}
-                    resizeMode="cover"
-                  /> : null }
+                  {playerData.currentLocation === 'Alcoba' && (
+                    <Image
+                      style={[
+                        styles.playerContainer,
+                        { position: 'absolute', top: 140, left: 20 } 
+                      ]}
+                      source={playerImage}
+                      resizeMode="contain"      
+                    />
+                  )}
+
+                  {computerData.currentLocation === 'Alcoba' && (
+                    <Image
+                      style={[
+                        styles.computerContainer,
+                        { position: 'absolute', top: 150, left: 70 }
+                      ]}
+                      source={computerImage}     
+                      resizeMode="contain"
+                    />
+                  )}
                 </ImageBackground>
               </Pressable>
             </View>

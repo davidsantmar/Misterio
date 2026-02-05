@@ -81,7 +81,6 @@ export function ShowCardsToComputer({ cards, room, diceValue }) {
           console.log('No hay datos guardados en computerData');
         }
         const value1 = await AsyncStorage.getItem("playerData");
-        console.log("value1", value1)
         if (value1 !== null) {
           const parsedData1 = JSON.parse(value1);
           setPlayerData(parsedData1);
