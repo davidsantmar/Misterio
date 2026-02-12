@@ -68,7 +68,7 @@ export default function Room() {
   const [showComputerCard, setShowComputerCard] = useState(false);
   const [assumptionComputerCards, setAssumptionComputerCards] = useState([]);
   const [bigCardText, setBigCardText] = useState(null);
-  const [killers, setKillers] = useState(['Mr Hyde', 'Drácula', 'Frankenstein', 'Hombre lobo', ' Fantasma' , 'Momia']);
+  const [killers, setKillers] = useState(['Mr Hyde', 'Drácula', 'Frankenstein', 'Hombre lobo', 'Fantasma' , 'Momia']);
   const [victims, setVictims] = useState(['Conde', 'Condesa', 'Jardinero', 'Ama de llaves', 'Mayordomo', 'Doncella']);
   const [rooms, setRooms] = useState(['Laboratorio', 'Salón', 'Biblioteca', 'Alcoba', 'Cocheras', 'Vestíbulo', 'Panteón', 'Bodega']);
   const [computerCardCharacter, setComputerCardCharacter] = useState(null);
@@ -174,6 +174,7 @@ export default function Room() {
       setRoomPrefix('la');
        editPositionPlayer('21');
     }
+    
     loadComputerData();
     loadPlayerData();
   }, []);
@@ -281,7 +282,7 @@ export default function Room() {
         : null;
     console.log("Killer elegido por el computador:", killerToAssumption);
     setKillerToAssumption(killerToAssumption);
-   if (killerToAssumption === 'Mr Hyde'){
+    if (killerToAssumption === 'Mr Hyde'){
       setKillerPrefix('')
     }
     if (killerToAssumption === 'Drácula'){
@@ -482,24 +483,6 @@ export default function Room() {
     setAssumptionOpacity(1);
     showSection("characters")
     setKiller(killer);
-    if (killer === 'Mr Hyde'){
-      setKillerPrefix('')
-    }
-    if (killer === 'Drácula'){
-      setKillerPrefix('')
-    }
-    if (killer === 'Frankenstein'){
-      setKillerPrefix('')
-    }
-    if (killer === 'Hombre lobo'){
-      setKillerPrefix('el')
-    }
-    if (killer === 'Fantasma'){
-      setKillerPrefix('el')
-    }
-    if (killer === 'Momia'){
-      setKillerPrefix('la')
-    }
   }
   const showVictim = (victim) => {    
     setAssumptionOpacity(1);

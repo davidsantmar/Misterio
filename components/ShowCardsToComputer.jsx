@@ -48,6 +48,16 @@ export function ShowCardsToComputer({ cards, room, diceValue }) {
   const [computerData, setComputerData] = useState(null);
   const [playerData, setPlayerData] = useState(null);
   const [text, setText] = useState("");
+  const [rooms, setRooms] = useState([
+      "Laboratorio",
+      "Salón",
+      "Biblioteca",
+      "Alcoba",
+      "Cocheras",
+      "Vestíbulo",
+      "Panteón",
+      "Bodega",
+    ]);
   const router = useRouter();
   useEffect(() => {
     console.log("cards To Show", cards);
@@ -94,36 +104,104 @@ export function ShowCardsToComputer({ cards, room, diceValue }) {
     };
     init();
   }, [diceValue]);
+  const editPositionComputer = async (index) => { 
+      try {
+        const existing = await getComputerData(); // siempre cargamos desde AsyncStorage
   
-  /*  useEffect(() => {
-    
-    if (card1 === "Drácula") {
+        const updatedComputerData = {
+          ...(existing || computerData || {}),    // usa lo que exista
+          position: index,
+        };
+  
+        await AsyncStorage.setItem("computerData", JSON.stringify(updatedComputerData));
+        setComputerData(updatedComputerData);
+  
+      } catch (e) {
+        console.log("error updating computer position", e);
+      }
+    };
+    const editRoomToGo = async (roomToGo) => {
+        try {
+          const storedData = await AsyncStorage.getItem("computerData");
+          const currentData = storedData ? JSON.parse(storedData) : null;
+          if (!currentData) return;
+          const updatedComputerData = {
+            ...currentData,
+            position: currentData.position ?? 0, // protege position
+            roomToGo: roomToGo,
+          };
+          await AsyncStorage.setItem(
+            "computerData",
+            JSON.stringify(updatedComputerData)
+          );
+          setComputerData(updatedComputerData);
+        } catch (e) {
+          console.log("❌ Error updating data:", e);
+        }
+      };
+ const computerRoomToGo = async (data) => {
+    if (!data) return {};  
+    if (data.roomToGo === "") {
+      const compare = (rooms || []).filter(
+        (elemento) => !(data.computerCards || data.discardedCards || []).includes(elemento)
+      );
+      const randomRoomToGo =
+        compare.length > 0
+          ? compare[Math.floor(Math.random() * compare.length)]
+          : null;
+
+      if (randomRoomToGo) {
+        await editRoomToGo(randomRoomToGo);
+      }
+
+      let floor = null;
+      if (data.floor === "") {
+        if (
+          randomRoomToGo === "Laboratorio" ||
+          randomRoomToGo === "Salón" ||
+          randomRoomToGo === "Biblioteca" ||
+          randomRoomToGo === "Alcoba"
+        ) {
+          await editFloor("firstFloor");
+          floor = "firstFloor";
+          setFloorToGo("firstFloor");
+        } else {
+          await editFloor("ground");
+          floor = "ground";
+          setFloorToGo("ground");
+        }
+      }
+
+      return { roomToGo: randomRoomToGo, floor };
     }
-    if (card2 === "Drácula") {
-      setCard2ToShow("Dracula");
-    }
-    if (card6 === "Panteón") {
-      setCard6ToShow("Panteon");
-    } else if (card6 === " Vestíbulo") {
-      setCard6ToShow("Vestibulo");
-    } else if (card6 === "Salón") {
-      setCard6ToShow("Salon");
-    }
-    if (card7 === "Panteón") {
-      setCard7ToShow("Panteon");
-    } else if (card7 === " Vestíbulo") {
-      setCard7ToShow("Vestibulo");
-    } else if (card7 === "Salón") {
-      setCard7ToShow("Salon");
-    }
-    if (card8 === "Panteón") {
-      setCard8ToShow("Panteon");
-    } else if (card8 === " Vestíbulo") {
-      setCard8ToShow("Vestibulo");
-    } else if (card8 === "Salón") {
-      setCard8ToShow("Salon");
-    }
-  }, [card1ToShow, card2ToShow ]);*/
+    return { roomToGo: data.roomToGo, floor: data.floor };
+  };
+  const getComputerData = async () => {
+      try {
+        const value = await AsyncStorage.getItem("computerData");
+        return value ? JSON.parse(value) : null;
+      } catch (e) {
+        console.log("error reading computer data");
+        return null;
+      }
+    };
+  const editLocationComputer = async (newLocation) => {
+    console.log("editLocationComputer llamado con:", newLocation);
+      try {
+        const current = await getComputerData() || {};
+        const updated = {
+          ...current,
+          currentLocation: newLocation,
+          ...(newLocation !== "board" ? { position: null } : {}),
+          ...(newLocation === "board" ? { roomToGo: null } : {}), 
+        };
+  
+        await AsyncStorage.setItem("computerData", JSON.stringify(updated));
+        setComputerData(updated);
+      } catch (err) {
+        console.error("Error editLocationComputer:", err);
+      }
+    };
   const normalize = (str) => {
     if (!str) return "";
     return String(str)
@@ -180,10 +258,10 @@ export function ShowCardsToComputer({ cards, room, diceValue }) {
     }
   };
   const playerMovement = (item) => {
-    if (playerData.currentLocation === room){ //mal
+    if (playerData.currentLocation === item){ 
       router.push({
         pathname: "/room",
-        params: { room: room, diceValue: diceValue  },
+        params: { room: item, diceValue: diceValue  },
       });
     }else if (playerData.currentLocation === 'board'){
       router.push({
@@ -191,20 +269,43 @@ export function ShowCardsToComputer({ cards, room, diceValue }) {
       });
     }
   } 
-  const showOcurrences = (item) => { //si item = room computerData RoomToGo debe cambiarse e ir a board
+  const showOcurrences = async (item, data) => { 
+    //poner otra roomToGo
+    await editRoomToGo("");
+    await computerRoomToGo(data);
+    console.log('showOcurrences llamado con item:', item, 'y data:', data); //REVISAR ESTO
     playShine();
     updateComputerData(item);
+    if (item === room) {
+      editLocationComputer("board");
+      if (data.board === "firstFloor") {
+        if (item === 'Laboratorio'){
+          editPositionComputer(4);
+        }else if (item === 'Salón'){
+          editPositionComputer(12);
+        }else if (item === 'Biblioteca'){
+          editPositionComputer(21);
+        }else if (item === 'Alcoba'){
+          editPositionComputer(27);
+        }
+      }else if (data.board === "ground") {
+        if (item === 'Cocheras'){
+          editPositionComputer(4);
+        }else if (item === 'Vestíbulo'){
+          editPositionComputer(12);
+        }else if (item === 'Panteón'){
+          editPositionComputer(27);
+        }else if (item === 'Bodega'){
+          editPositionComputer(21);
+        }
+      }
+      
+    }
     storeTurn("player");
     setText(`Has mostrado la carta ${item}`)
     setTimeout(() => {
       playerMovement(item);
-    }, 2000)
-    /*if (item === room) {
-      router.push({
-        pathname: "/board",
-        params: { diceValue: diceValue, floor: computerData.floor },
-      });
-    }*/
+    }, 2000);
   };
   return (
     <>
@@ -243,7 +344,7 @@ export function ShowCardsToComputer({ cards, room, diceValue }) {
             <Pressable
               style={styles.yourCardsContainer}
               key={index}
-              onPress={() => showOcurrences(cardName)}
+              onPress={() => showOcurrences(cardName, computerData)}
             >
               <ImageBackground
                 style={[

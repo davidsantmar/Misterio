@@ -150,7 +150,23 @@ export function FirstFloor({ diceValue }) {
           computerMovement(computerValue);
         }, 800);
       }
-
+      if (computerValue.position === null && computerValue.currentLocation === "Salón") {
+        setTimeout(() => {
+            roomClickedByComputer("Salón");
+        }, 800);
+      }else if (computerValue.position === null && computerValue.currentLocation === "Alcoba") {
+        setTimeout(() => {
+            roomClickedByComputer("Alcoba");
+        }, 800);
+      }else if (computerValue.position === null && computerValue.currentLocation === "Biblioteca") {
+        setTimeout(() => {
+            roomClickedByComputer("Biblioteca");
+        }, 800);
+      }else if (computerValue.position === null && computerValue.currentLocation === "Laboratorio") {
+        setTimeout(() => {
+              roomClickedByComputer("Laboratorio"); 
+        }, 800);
+      }
       playRainSound();
       fetchPlayer(playerValue);
 
@@ -343,7 +359,7 @@ export function FirstFloor({ diceValue }) {
 
     // Obtener las medidas del ScrollView para centrar
     scrollRef.current.getScrollResponder()?.scrollTo({
-      y: Math.max(0, targetOffset - 300), // 300px de "padding" superior para centrar
+      y: Math.max(0, targetOffset - 300), 
       animated: true,
     });
   };
@@ -539,14 +555,12 @@ export function FirstFloor({ diceValue }) {
 };
  const editLocationComputer = async (newLocation) => {
     try {
-      console.log('editLocationComputer →', newLocation);
       const current = await getComputerData() || {};
       const updated = {
         ...current,
         currentLocation: newLocation,
-        // Opcional: también puedes limpiar position si sales del tablero
         ...(newLocation !== "board" ? { position: null } : {}),
-        ...(newLocation === "board" ? { roomToGo: null } : {}), // si ya no aplica
+        ...(newLocation === "board" ? { roomToGo: null } : {}), 
       };
 
       await AsyncStorage.setItem("computerData", JSON.stringify(updated));
@@ -583,8 +597,8 @@ export function FirstFloor({ diceValue }) {
     }
   };
    const stoneClickedByComputer = (index) => {
+    editLocationComputer("board");
     setStoneComputerOccuped(index);
-    //editLocationComputer("board");
     editPositionComputer(index);
     if (index === 6 || index === 26) {
       setTimeout(() => playJump(), 100);
@@ -619,7 +633,7 @@ export function FirstFloor({ diceValue }) {
     } else if (room === "Biblioteca") {
       editPositionComputer(21);
     } else if (room === "Salón") {
-      editPositionComputer(12);
+      editPositionComputer(null);
     } else if (room === "Alcoba") {
       editPositionComputer(27);
     }
@@ -629,7 +643,6 @@ export function FirstFloor({ diceValue }) {
     });
   };
   const computerMovement = (data) => {
-    console.log('data', data)
     const currentPos = Number(data.position);
     const dice = Number(diceValue);
     const targetRoomPos = {
@@ -679,7 +692,6 @@ export function FirstFloor({ diceValue }) {
     if (positionsToCheck.includes(targetPos) || chosenPos === targetPos) {
         console.log(`Computadora entra a ${roomToGo}!`);
         setTimeout(() => {
-          console.log("Ahora debería llamar a roomClickedByComputer con:", roomToGo);
           roomClickedByComputer(roomToGo);
         }, 1200);
         return;
@@ -687,7 +699,7 @@ export function FirstFloor({ diceValue }) {
 
     // Movimiento normal por el tablero
     console.log(`Computadora se mueve a casilla ${chosenPos}`);
-    stoneClickedByComputer(chosenPos);
+     stoneClickedByComputer(chosenPos);
 
     setTimeout(() => {
       scrollToComputerPosition(chosenPos);
@@ -696,6 +708,7 @@ export function FirstFloor({ diceValue }) {
   };
  
   const stoneClicked = (index) => {
+    setDisabledSquare(true); // Disable squares after selection
     storeTurn("computer");
     setStoneOccuped(index);
     editLocationPlayer("board");
@@ -708,7 +721,6 @@ export function FirstFloor({ diceValue }) {
     }
     setInstructionsText("Turno para otro investigador");
     editPositionPlayer(index);
-    setDisabledSquare(true); // Disable squares after selection
     if (index === 0 || index === 29) {
       setGroundNorthColor(null);
       setGroundSouthColor(null);
@@ -860,7 +872,7 @@ export function FirstFloor({ diceValue }) {
                     <Image
                       style={[
                         styles.computerContainer,
-                        { position: 'absolute', top: 150, left: 70 } 
+                        { position: 'absolute', top: 150, left: 70, zIndex: 2 } 
                       ]}
                       source={computerImage}     
                       resizeMode="contain"
@@ -972,7 +984,7 @@ export function FirstFloor({ diceValue }) {
                     <Image
                       style={[
                         styles.computerContainer,
-                        { position: 'absolute', top: 150, left: 70 } 
+                        { position: 'absolute', top: 150, left: 70, zIndex: 2 } 
                       ]}
                       source={computerImage}     
                       resizeMode="contain"
@@ -1005,7 +1017,7 @@ export function FirstFloor({ diceValue }) {
                     <Image
                       style={[
                         styles.computerContainer,
-                        { position: 'absolute', top: 150, left: 70 }
+                        { position: 'absolute', top: 150, left: 70, zIndex: 2 }
                       ]}
                       source={computerImage}     
                       resizeMode="contain"
