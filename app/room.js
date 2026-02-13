@@ -113,6 +113,7 @@ export default function Room() {
         }
       };
     },[buttonPress, hidecards, showcards, shine]);
+ 
   useEffect(()=> {
     const misComputerCards = assumptionComputerCards.filter(elemento => killers.includes(elemento));
     const teComputerCards = assumptionComputerCards.filter(elemento => victims.includes(elemento));

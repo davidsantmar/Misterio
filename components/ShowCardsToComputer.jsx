@@ -47,7 +47,7 @@ export function ShowCardsToComputer({ cards, room, diceValue }) {
   const [shine, setShine] = useState(null);
   const [computerData, setComputerData] = useState(null);
   const [playerData, setPlayerData] = useState(null);
-  const [text, setText] = useState("");
+  const [text, setText] = useState("Tus cartas para mostrar");
   const [floorToGo, setFloorToGo] = useState(null);
   const [rooms, setRooms] = useState([
       "Laboratorio",
@@ -64,9 +64,9 @@ export function ShowCardsToComputer({ cards, room, diceValue }) {
     console.log("cards To Show", cards);
     showCards();
   }, [cards, room]);
-  useEffect (() => {
+  /*useEffect (() => {
     setText("Tus cartas para mostrar")
-  }, [text])
+  }, [text])*/
   useEffect(() => {
     Audio.setAudioModeAsync({
       allowsRecordingIOS: false,
@@ -121,27 +121,7 @@ export function ShowCardsToComputer({ cards, room, diceValue }) {
         console.log("error updating computer position", e);
       }
     };
-  const editRoomToGo = async (roomToGo) => {
-      console.log("editRoomToGo llamado con roomToGo:", roomToGo);
-
-      try {
-        const storedData = await AsyncStorage.getItem("computerData");
-        const currentData = storedData ? JSON.parse(storedData) : null;
-        if (!currentData) return;
-        const updatedComputerData = {
-          ...currentData,
-          position: currentData.position ?? 0, // protege position
-          roomToGo: roomToGo,
-        };
-        await AsyncStorage.setItem(
-          "computerData",
-          JSON.stringify(updatedComputerData)
-        );
-        setComputerData(updatedComputerData);
-      } catch (e) {
-        console.log("❌ Error updating data:", e);
-      }
-    };
+  
   
 
   const getComputerData = async () => {
@@ -227,10 +207,10 @@ export function ShowCardsToComputer({ cards, room, diceValue }) {
     }
   };
   const playerMovement = (item) => {
-    if (playerData.currentLocation === item){ 
+    if (playerData.currentLocation !== 'board') { 
       router.push({
         pathname: "/room",
-        params: { room: item, diceValue: diceValue  },
+        params: { room: item, diceValue: diceValue, text: instructionText },
       });
     }else if (playerData.currentLocation === 'board'){
       router.push({
@@ -267,7 +247,7 @@ export function ShowCardsToComputer({ cards, room, diceValue }) {
     }
 
     storeTurn("player");
-    setText(`Has mostrado la carta ${item}`);
+    setText(`Has mostrado ${item}`);
 
     setTimeout(() => {
       playerMovement(item);
