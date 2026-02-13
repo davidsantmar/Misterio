@@ -239,7 +239,20 @@ export function DiceRoll() {
       }
 
       return { roomToGo: randomRoomToGo, floor };
-    }
+    }else if (data.roomToGo === null) {
+      const compare = (rooms || []).filter(
+        (elemento) => !(data.computerCards || data.discardedCards || []).includes(elemento)
+      );
+      const randomRoomToGo =
+        compare.length > 0
+          ? compare[Math.floor(Math.random() * compare.length)]
+          : null;
+
+      if (randomRoomToGo) {
+        await editRoomToGo(randomRoomToGo);
+      }
+
+    } 
     return { roomToGo: data.roomToGo, floor: data.floor };
   };
   const computerMovement = async (computerData) => {

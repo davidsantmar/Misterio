@@ -48,6 +48,7 @@ export function ShowCardsToComputer({ cards, room, diceValue }) {
   const [computerData, setComputerData] = useState(null);
   const [playerData, setPlayerData] = useState(null);
   const [text, setText] = useState("");
+  const [floorToGo, setFloorToGo] = useState(null);
   const [rooms, setRooms] = useState([
       "Laboratorio",
       "Salón",
@@ -120,62 +121,29 @@ export function ShowCardsToComputer({ cards, room, diceValue }) {
         console.log("error updating computer position", e);
       }
     };
-    const editRoomToGo = async (roomToGo) => {
-        try {
-          const storedData = await AsyncStorage.getItem("computerData");
-          const currentData = storedData ? JSON.parse(storedData) : null;
-          if (!currentData) return;
-          const updatedComputerData = {
-            ...currentData,
-            position: currentData.position ?? 0, // protege position
-            roomToGo: roomToGo,
-          };
-          await AsyncStorage.setItem(
-            "computerData",
-            JSON.stringify(updatedComputerData)
-          );
-          setComputerData(updatedComputerData);
-        } catch (e) {
-          console.log("❌ Error updating data:", e);
-        }
-      };
- const computerRoomToGo = async (data) => {
-    if (!data) return {};  
-    if (data.roomToGo === "") {
-      const compare = (rooms || []).filter(
-        (elemento) => !(data.computerCards || data.discardedCards || []).includes(elemento)
-      );
-      const randomRoomToGo =
-        compare.length > 0
-          ? compare[Math.floor(Math.random() * compare.length)]
-          : null;
+  const editRoomToGo = async (roomToGo) => {
+      console.log("editRoomToGo llamado con roomToGo:", roomToGo);
 
-      if (randomRoomToGo) {
-        await editRoomToGo(randomRoomToGo);
+      try {
+        const storedData = await AsyncStorage.getItem("computerData");
+        const currentData = storedData ? JSON.parse(storedData) : null;
+        if (!currentData) return;
+        const updatedComputerData = {
+          ...currentData,
+          position: currentData.position ?? 0, // protege position
+          roomToGo: roomToGo,
+        };
+        await AsyncStorage.setItem(
+          "computerData",
+          JSON.stringify(updatedComputerData)
+        );
+        setComputerData(updatedComputerData);
+      } catch (e) {
+        console.log("❌ Error updating data:", e);
       }
+    };
+  
 
-      let floor = null;
-      if (data.floor === "") {
-        if (
-          randomRoomToGo === "Laboratorio" ||
-          randomRoomToGo === "Salón" ||
-          randomRoomToGo === "Biblioteca" ||
-          randomRoomToGo === "Alcoba"
-        ) {
-          await editFloor("firstFloor");
-          floor = "firstFloor";
-          setFloorToGo("firstFloor");
-        } else {
-          await editFloor("ground");
-          floor = "ground";
-          setFloorToGo("ground");
-        }
-      }
-
-      return { roomToGo: randomRoomToGo, floor };
-    }
-    return { roomToGo: data.roomToGo, floor: data.floor };
-  };
   const getComputerData = async () => {
       try {
         const value = await AsyncStorage.getItem("computerData");
@@ -253,6 +221,7 @@ export function ShowCardsToComputer({ cards, room, diceValue }) {
     try {
       await AsyncStorage.setItem("computerData", JSON.stringify(updatedComputerData));
       setComputerData(updatedComputerData);
+      console.log("computerData actualizado con carta descartada:", updatedComputerData);
     } catch (error) {
       console.error("Error al guardar computerData:", error);
     }
@@ -269,44 +238,46 @@ export function ShowCardsToComputer({ cards, room, diceValue }) {
       });
     }
   } 
-  const showOcurrences = async (item, data) => { 
-    //poner otra roomToGo
-    await editRoomToGo("");
-    await computerRoomToGo(data);
-    console.log('showOcurrences llamado con item:', item, 'y data:', data); //REVISAR ESTO
+  const showOcurrences = async (item, data) => {
+  try {
+    updateComputerData(item); 
     playShine();
-    updateComputerData(item);
-    if (item === room) {
+    if (item === room) {   
       editLocationComputer("board");
-      if (data.board === "firstFloor") {
-        if (item === 'Laboratorio'){
-          editPositionComputer(4);
-        }else if (item === 'Salón'){
-          editPositionComputer(12);
-        }else if (item === 'Biblioteca'){
-          editPositionComputer(21);
-        }else if (item === 'Alcoba'){
-          editPositionComputer(27);
-        }
-      }else if (data.board === "ground") {
-        if (item === 'Cocheras'){
-          editPositionComputer(4);
-        }else if (item === 'Vestíbulo'){
-          editPositionComputer(12);
-        }else if (item === 'Panteón'){
-          editPositionComputer(27);
-        }else if (item === 'Bodega'){
-          editPositionComputer(21);
-        }
+      const positionsFirstFloor = {
+        Laboratorio: 4,
+        Salón: 12,
+        Biblioteca: 21,
+        Alcoba: 27,
+      };
+
+      const positionsGround = {
+        Cocheras: 4,
+        Vestíbulo: 12,
+        Panteón: 27,
+        Bodega: 21,
+      };
+
+      const posMap = data.board === "firstFloor" ? positionsFirstFloor : positionsGround;
+      const newPosition = posMap[item];
+
+      if (newPosition !== undefined) {
+        editPositionComputer(newPosition);
       }
-      
     }
+
     storeTurn("player");
-    setText(`Has mostrado la carta ${item}`)
+    setText(`Has mostrado la carta ${item}`);
+
     setTimeout(() => {
       playerMovement(item);
     }, 2000);
-  };
+
+  } catch (err) {
+    console.error("Error en showOcurrences:", err);
+    setText("Error al procesar la jugada");
+  }
+};
   return (
     <>
       <View
